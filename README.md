@@ -18,7 +18,7 @@ The current version of Demo Scripter is for Godot 4.2
 
 ## Notice
 
-The resolution for the VisualNovelScene_hud is 720x540 (you can change the size if you like)
+The resolution of VisualNovelScene_hud is 720x540 (you can change the size if you like)
 
 ## Disclaimer
 
