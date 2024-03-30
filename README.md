@@ -1,7 +1,7 @@
 # Demo Scripter
 ![demoscripter logo](./docs/DemoScripter_logo.png "DemoScripter Logo")
 
-**Demo Scripter** is a visual novel framework in inspired by NScripter made in Godot.
+**Demo Scripter** is a visual novel framework inspired by NScripter made in Godot.
 
 The current version of Demo Scripter is for Godot 4.2
 
