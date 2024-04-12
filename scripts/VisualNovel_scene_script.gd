@@ -55,6 +55,7 @@ var allowed_fast_skip = true ## Checks if it's allowed to use fast skip
 var can_fast_skip = true ## If true, player can use fast skip [for rate of fire delay]
 @export var fast_skip_delay = 0.15 ## The delay of fast skip
 @export var ignore_text_full_display_fast_skip = true ## If true, text will not be display at full if text wasn't fully displayed.
+@onready var ignore_text = ignore_text_full_display_fast_skip
 
 var forced_paused = false ## Checks if its paused caused by pause_dialogue
 var about_to_pause = false ## Checks if its going to be pause at the of dialogue (used for fast skip not go to next dialouge)
@@ -169,26 +170,35 @@ func delay_text(time):
 func set_add_dialogue_id(id):
 	add_dialogue_id = id
 
+func fastskip_pause():
+	if ignore_text_full_display_fast_skip:
+		ignore_text = false
+
+func fastskip_unpause():
+	if ignore_text_full_display_fast_skip:
+		ignore_text = true
+
 func fast_skip_button():
 	if Input.is_action_pressed("fast_skip"):
 		if !allowed_fast_skip:
 			return
+		
 		if can_fast_skip and !dialogue_ended:
-			if tweenthing and ignore_text_full_display_fast_skip:
+			if tweenthing and ignore_text:
 				if tweenthing.is_running():
 					tweenthing.stop()
 					tweenthing.custom_step(10)
 				tweenthing.kill()
 			can_fast_skip = false
 			
-			if ignore_text_full_display_fast_skip:
+			if ignore_text:
 				dialogue_index += 1
 			else:
 				if finished:
 					dialogue_index += 1
 			
 			#print_rich("[color=red]Current dialogue index from fast skip button: [/color]" + str(dialogue_index) + "\n")
-			play_dialogue(ignore_text_full_display_fast_skip)
+			play_dialogue(ignore_text)
 			await get_tree().create_timer(fast_skip_delay).timeout
 			can_fast_skip = true
 
