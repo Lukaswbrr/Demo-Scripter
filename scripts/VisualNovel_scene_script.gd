@@ -109,19 +109,11 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 			else:
 				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(" " + text), len(notags_text) + 1, id, set]
 
-func add_dialogue_special(funcname, arg1 = null, arg2 = null, arg3 = null, arg4 = null, arg5 = null): # First argument: function, Second argument: argument 1 of the function, Third argument: argument 2 of the function.
+func add_dialogue_special(funcname: Callable, args = null): # Arguments for function must be a array
 	var arguments_array = []
 	
-	if !arg1 == null:
-		arguments_array.append(arg1)
-	if !arg2 == null:
-		arguments_array.append(arg2)
-	if !arg3 == null:
-		arguments_array.append(arg3)
-	if !arg4 == null:
-		arguments_array.append(arg4)
-	if !arg5 == null:
-		arguments_array.append(arg5)
+	if !args == null:
+		arguments_array = args
 	
 	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, arguments_array]
 	
@@ -286,7 +278,10 @@ func check_dialogue_function():
 	if function_array_numbers.has(dialogue_index):
 		for i in function_dialogue_dictionary.size():
 			if dialogue_index == function_dialogue_dictionary[i + 1][0]:
-				callv(function_dialogue_dictionary[i + 1][1], function_dialogue_dictionary[i + 1][2])
+				var function = function_dialogue_dictionary[i + 1][1]
+				var arguments = function_dialogue_dictionary[i + 1][2]
+				
+				function.callv(arguments)
 
 func dialogue_system(): # Checks if space button is pressed, right click and etc! [Runs every frame]
 	if !dialogue_started:
