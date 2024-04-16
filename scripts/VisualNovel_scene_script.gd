@@ -1,4 +1,4 @@
-class_name VisualNovelScene
+class_name DemoScripter_VisualNovelScene
 extends CanvasLayer
 
 ## This is the base that handles the current scene (dialogue, set characters, play music, etc)

@@ -1,5 +1,5 @@
 extends Control
-class_name ButtonHandler
+class_name DemoScripter_ButtonHandler
 
 @export var main_scene: Node
 

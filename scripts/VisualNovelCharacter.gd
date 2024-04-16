@@ -1,4 +1,4 @@
-class_name VisualNovel_Character
+class_name DemoScripter_VisualNovelCharacter
 extends Node
 
 @onready var anim_player = $AnimationPlayer
