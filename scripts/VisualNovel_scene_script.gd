@@ -91,7 +91,7 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 #		5: Speed of the dialogue (probably)
 	
 	if !first_text:
-#		print(str(text.begins_with("\"")) + ": " + str(text))
+#		#print(str(text.begins_with("\"")) + ": " + str(text))
 		if !auto_space: # checks if auto space is enabled
 			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len(str("\n") + notags_text), id, set]
 		else:
@@ -121,6 +121,9 @@ func add_dialogue_special(funcname: Callable, args = null): # Arguments for func
 
 func add_dialogue_start(text, id = add_dialogue_id, set = add_dialogue_set): # same as add_dialogue_continue (just named it to make it more easier to read)
 	add_dialogue(text, id, true, set)
+
+func add_dialogue_start_quote(text, id = add_dialogue_id, set = add_dialogue_set, speed = 1): 
+	add_dialogue("\"" + text + "\"", id, true, set, speed)
 
 func add_dialogue_continue(text, id = add_dialogue_id, set = add_dialogue_set ): # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
 	add_dialogue(text, id, true, set)
@@ -224,7 +227,6 @@ func load_dialogue_set(set_id, load_instant = true):
 			dialogue_index = (check + 1)
 			#print("Current dialogue index: " + str(dialogue_index))
 			break
-	
 	finished = false
 	load_dialogue(1, load_instant, set_id)
 	maxvisible = dialogue_dictionary[dialogue_index][1]
@@ -366,6 +368,7 @@ func play_dialogue(ignore_textanimation = false): # This will start the dialogue
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
 		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(maxvisible - dialogue_dictionary[dialogue_index][1])
+	
 	if !dialogue_dictionary[dialogue_index][2] == dialogue_current_id:
 		dialogue_current_id += 1
 		load_dialogue(dialogue_current_id, false)
@@ -393,7 +396,7 @@ func set_character_emotion(character, emotion):
 	
 	await _animation_player.animation_finished
 	
-	#print("the set character has been called")
+	#print("the set character function has been called")
 	set_character_emotion_instant(character, emotion)
 	
 	await get_tree().create_timer(0.35).timeout
