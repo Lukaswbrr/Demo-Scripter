@@ -141,9 +141,9 @@ func next_dialogue(): # Go into the next dialogue after a dialogue's text is fin
 
 func delay_dialogue(timer, clear_dialogue = false): # Delays a dialogue text
 	add_dialogue("", add_dialogue_id, true, 0, add_dialogue_set)
-	add_dialogue_special("delay_text", timer)
+	add_dialogue_special(delay_text, [timer])
 	if clear_dialogue:
-		add_dialogue_special("reset_dialogue")
+		add_dialogue_special(reset_dialogue)
 
 func dialogue_fade_in():
 	pause_dialogue(false)
