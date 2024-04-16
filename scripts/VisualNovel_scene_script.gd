@@ -43,7 +43,6 @@ var regex = RegEx.new()
 var tweenthing
 var maxvisible = 0
 
-
 var dialogue_current_set = 1 # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
 var add_dialogue_set = 1
 
@@ -175,6 +174,9 @@ func fast_skip_button():
 		if !allowed_fast_skip:
 			return
 		
+		if paused:
+			return
+		
 		if can_fast_skip and !dialogue_ended:
 			if tweenthing and ignore_text:
 				if tweenthing.is_running():
@@ -193,6 +195,7 @@ func fast_skip_button():
 			play_dialogue(ignore_text)
 			await get_tree().create_timer(fast_skip_delay).timeout
 			can_fast_skip = true
+
 
 func load_dialogue(id, loadinstant = true, set_id = dialogue_current_set): # This loads all the dialogue into the text
 	dialogue_current_id = id
@@ -221,6 +224,7 @@ func load_dialogue_set(set_id, load_instant = true):
 			dialogue_index = (check + 1)
 			#print("Current dialogue index: " + str(dialogue_index))
 			break
+	
 	finished = false
 	load_dialogue(1, load_instant, set_id)
 	maxvisible = dialogue_dictionary[dialogue_index][1]
@@ -245,7 +249,7 @@ func load_dialogue_start(id = 1, set_id = 1, loadinstant = true, load_func = tru
 			if set_id == dialogue_dictionary[k + 1][3]:
 				if id == dialogue_dictionary[k + 1][2]:
 					dialogue_index = k + 1
-#					print(dialogue_dictionary[k + 1][0])
+					#print(dialogue_dictionary[k + 1][0])
 					load_dialogue(id, loadinstant, set_id)
 					break
 	if load_func:
@@ -361,7 +365,7 @@ func play_dialogue(ignore_textanimation = false): # This will start the dialogue
 		paused = false
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(maxvisible - dialogue_dictionary[dialogue_index][1]) # old method of speed:  / 50 + 1
+		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(maxvisible - dialogue_dictionary[dialogue_index][1])
 	if !dialogue_dictionary[dialogue_index][2] == dialogue_current_id:
 		dialogue_current_id += 1
 		load_dialogue(dialogue_current_id, false)
@@ -389,7 +393,7 @@ func set_character_emotion(character, emotion):
 	
 	await _animation_player.animation_finished
 	
-#	print("the set character function has been called")
+	#print("the set character has been called")
 	set_character_emotion_instant(character, emotion)
 	
 	await get_tree().create_timer(0.35).timeout
@@ -460,6 +464,8 @@ func play_music(music):
 
 func stop_music(music):
 	music.stop()
+
+# ---------------------
 
 func dialogue_state(state):
 	match state:
