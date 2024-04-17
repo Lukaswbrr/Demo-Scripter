@@ -142,7 +142,7 @@ func next_dialogue(): # Go into the next dialogue after a dialogue's text is fin
 	pause_dialogue(false)
 
 func delay_dialogue(timer, clear_dialogue = false): # Delays a dialogue text
-	add_dialogue("", add_dialogue_id, true, 0, add_dialogue_set)
+	add_dialogue("", add_dialogue_id, true, add_dialogue_set)
 	add_dialogue_special(delay_text, [timer])
 	if clear_dialogue:
 		add_dialogue_special(reset_dialogue)
@@ -156,6 +156,7 @@ func dialogue_fade_out():
 	dialogue_state("fade_out")
 
 func delay_text(time):
+	pause_dialogue(true)
 	await get_tree().create_timer(time).timeout
 	dialogue_index += 1
 	play_dialogue()
