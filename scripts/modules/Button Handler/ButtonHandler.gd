@@ -145,7 +145,7 @@ func create_button_goto_id(buttonname, id: int = 1, set_id: int = 1, theme: Them
 	current_set.add_child(button)
 	
 	button.pressed.connect(func():
-		goto_id
+		goto_id(id, set_id)
 		)
 
 func create_button_goto_id_condition(buttonname, condition: Callable, id: int = 1, set_id: int = 1, theme: Theme = buttons_skin ):
