@@ -76,7 +76,8 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 	
 	if auto_space:
 		if text.begins_with("\n"):
-			text = text.insert(text.count("\n"), " ")
+			if !text[text.count("\n")] == '"': # do not add space if its a quote that uses multiple new lines
+				text = text.insert(text.count("\n"), " ")
 	
 	var notags_text = regex.sub(text, "", true)
 	
