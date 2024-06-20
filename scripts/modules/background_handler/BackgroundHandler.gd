@@ -23,6 +23,8 @@ func change_background(index: int, group = null, hold: float = 0):
 	if hold > 0:
 		await get_tree().create_timer(hold).timeout
 		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
 
@@ -47,7 +49,6 @@ func change_background_transition(index: int, duration: float, hold: float = 0):
 	new_background.position = old_background.position
 	new_background.scale = old_background.scale
 	new_background.set_modulate(Color(old_background.modulate.r, old_background.modulate.g, old_background.modulate.b, 0))
-
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
@@ -86,8 +87,10 @@ func set_background_modulate_transition(newColor: Color, duration: float, hold: 
 	await tween.finished
 	
 	if hold > 0:
-		await get_tree().create_timer(0.15).timeout
+		await get_tree().create_timer(hold).timeout
 		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
 
@@ -110,6 +113,8 @@ func set_background_modulate_transition_all(newColor: Color, duration: float, ho
 	if hold > 0:
 		await get_tree().create_timer(0.15).timeout
 		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
 
@@ -120,6 +125,8 @@ func set_background_modulate(newColor: Color, hold: float = 0):
 	if hold > 0:
 		await get_tree().create_timer(hold).timeout
 		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
 
@@ -132,7 +139,6 @@ func background_fadein(duration: float, hold: float = 0):
 
 func background_fadein_all(duration: float, hold: float = 0):
 	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
-	
 
 func background_fadeout_instant(duration: float):
 	var tween = get_tree().create_tween()
@@ -143,8 +149,6 @@ func background_fadeout(duration: float, hold: float = 0):
 
 func background_fadeout_all(duration: float, hold: float = 0):
 	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
-	
-
 
 func rect_blink(fadein: float, hold_in: float, fadeout: float, hold_out: float):
 	main_scene.dialogue_fade_out()
@@ -156,6 +160,8 @@ func rect_blink(fadein: float, hold_in: float, fadeout: float, hold_out: float):
 	if hold_out > 0:
 		await get_tree().create_timer(hold_out).timeout
 		main_scene.dialogue_fade_in()
+	elif hold_out < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
 
@@ -172,6 +178,7 @@ func set_rect_color_transition(newColor: Color, duration: float, hold: float = 0
 	if hold > 0:
 		await get_tree().create_timer(hold).timeout
 		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
 	else:
 		main_scene.dialogue_fade_in()
-	
