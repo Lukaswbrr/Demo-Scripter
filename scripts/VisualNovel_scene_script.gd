@@ -470,6 +470,28 @@ func play_music(music):
 func stop_music(music):
 	music.stop()
 
+func play_audio_wait_signal(music):
+	await _animation_player.animation_started
+	play_audio(music)
+
+func fadein_music(music, duration):
+	var musictween = get_tree().create_tween()
+	var music_oldvalue = music.volume_db
+	music.volume_db = -55
+	
+	if music_oldvalue == -55:
+		music_oldvalue = 0
+	
+	musictween.tween_property(music, "volume_db", music_oldvalue, duration)
+	print(music_oldvalue)
+
+func fadeout_music(music, duration):
+	var musictween = get_tree().create_tween()
+	var music_oldvalue = music.volume_db
+	musictween.tween_property(music, "volume_db", -55, duration)
+	await musictween.finished
+	music.stop()
+
 # ---------------------
 
 func dialogue_state(state):
