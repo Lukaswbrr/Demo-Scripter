@@ -140,11 +140,22 @@ func next_add_dialogue_id() -> void:
 	add_dialogue_id = add_dialogue_id + 1
 	
 func next_dialogue() -> void: # Go into the next dialogue after a dialogue's text is finished displaying
+	var icon_enabled = enable_icon_text
+	if icon_enabled:
+		enable_icon_text = false
+	
+	#print(enable_icon_text)
 	pause_dialogue(true)
 	await self.text_animation_finished
+	
 	dialogue_index += 1
 	play_dialogue()
+	#print(enable_icon_text)
 	pause_dialogue(false)
+	
+	if icon_enabled:
+		await get_tree().create_timer(0.01).timeout # i don't really like this solution. Maybe theres some other way to deal with this problem.
+		enable_icon_text = true
 
 func delay_dialogue(timer, clear_dialogue = false) -> void: # Delays a dialogue text
 	add_dialogue("", add_dialogue_id, true, add_dialogue_set)
