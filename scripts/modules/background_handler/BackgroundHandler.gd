@@ -14,9 +14,14 @@ func _ready():
 func change_background_instant(index: int, group = null):
 	if group is String:
 		background_sprites.animation = group
+	
 	background_sprites.frame = index
 
-func change_background(index: int, group = null, hold: float = 0):
+func change_background(index: int, group = null, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		change_background_instant(index, group)
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	change_background_instant(index, group)
@@ -28,23 +33,33 @@ func change_background(index: int, group = null, hold: float = 0):
 	else:
 		main_scene.dialogue_fade_in()
 
-func change_background_fade(index: int, fadeout: float, hold_out: float, fadein: float, hold_in: float):
+func change_background_fade(index: int, group, fadeout: float, hold_out: float, fadein: float, hold_in: float, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		change_background_instant(index, group)
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	background_fadeout_instant(fadeout)
 	await get_tree().create_timer(fadeout + hold_out).timeout
-	change_background_instant(index)
+	change_background_instant(index, group)
 	background_fadein_instant(fadein)
 	await get_tree().create_timer(fadein + hold_in).timeout
 	main_scene.dialogue_fade_in()
 
-func change_background_transition(index: int, duration: float, hold: float = 0):
+func change_background_transition(index: int, group, duration: float, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		change_background_instant(index, group)
+		return
+	
 	var old_background = background_sprites
 	var new_background = AnimatedSprite2D.new()
 	old_background.set_name("OldSprites")
 	new_background.set_name("Sprites")
 	new_background.sprite_frames = old_background.sprite_frames
-	new_background.animation = old_background.animation
+	if group is String:
+		new_background.animation = group
+	
 	new_background.frame = index
 	new_background.position = old_background.position
 	new_background.scale = old_background.scale
@@ -77,7 +92,11 @@ func set_background_modulate_instant_all(newColor: Color):
 	for k in characters:
 		k.set_modulate(newColor)
 
-func set_background_modulate_transition(newColor: Color, duration: float, hold: float = 0):
+func set_background_modulate_transition(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_background_modulate_instant(newColor)
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
@@ -94,7 +113,11 @@ func set_background_modulate_transition(newColor: Color, duration: float, hold: 
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_background_modulate_transition_all(newColor: Color, duration: float, hold: float = 0):
+func set_background_modulate_transition_all(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_background_modulate_instant_all(newColor)
+		return
+	
 	var characters = []
 	for k in main_scene.get_child_count():
 		if main_scene.get_child(k) is DemoScripter_VisualNovelCharacter:
@@ -118,7 +141,11 @@ func set_background_modulate_transition_all(newColor: Color, duration: float, ho
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_background_modulate(newColor: Color, hold: float = 0):
+func set_background_modulate(newColor: Color, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_background_modulate_instant(newColor)
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	set_background_modulate_instant(newColor)
@@ -168,7 +195,11 @@ func rect_blink(fadein: float, hold_in: float, fadeout: float, hold_out: float):
 func set_rect_color(newColor: Color):
 	background_color.color = newColor
 
-func set_rect_color_transition(newColor: Color, duration: float, hold: float = 0):
+func set_rect_color_transition(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_rect_color(newColor)
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	var tween = get_tree().create_tween()
@@ -182,3 +213,41 @@ func set_rect_color_transition(newColor: Color, duration: float, hold: float = 0
 		return
 	else:
 		main_scene.dialogue_fade_in()
+
+func set_overlay_modulate(newColor: Color, hold: float, overlay: ColorRect, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_overlay_modulate_instant(newColor, overlay)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	set_overlay_modulate_instant(newColor, overlay)
+	if hold > 0:
+		await get_tree().create_timer(hold).timeout
+		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
+	else:
+		main_scene.dialogue_fade_in()
+
+func set_overlay_modulate_transition(newColor: Color, hold: float, duration: float, overlay: ColorRect, fast_skipable: bool = true):
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		set_overlay_modulate_instant(newColor, overlay)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	var tween = get_tree().create_tween()
+	tween.tween_property(overlay, "color", newColor, duration)
+	await tween.finished
+	
+	if hold > 0:
+		await get_tree().create_timer(hold).timeout
+		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
+	else:
+		main_scene.dialogue_fade_in()
+
+func set_overlay_modulate_instant(newColor: Color, overlay: ColorRect):
+	overlay.set_modulate(newColor)
