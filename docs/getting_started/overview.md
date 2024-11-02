@@ -8,7 +8,7 @@
 
 In step 2, the tree should look like this:
 
-![tree screenshot](./images/tree_screenshot.png? "Tree Screenshot")
+![tree screenshot](./images/tree_screenshot.png "Tree Screenshot")
 
 ## Example code
 ```gdscript
