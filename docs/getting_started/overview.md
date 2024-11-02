@@ -8,7 +8,7 @@
 
 In step 2, the tree should look like this:
 
-![tree screenshot](./images/tree_screenshot.png "Tree Screenshot")
+![tree screenshot](./images/tree_screenshot.png? "Tree Screenshot")
 
 ## Example code
 ```gdscript
@@ -34,7 +34,7 @@ func _on_end_dialogue_signal() -> void:
 ### In game screenshot
 Note: The resolution of the project in this screenshot is set to 720x540 (the same of VisualNovelScene_hud.tscn)
 
-![in game example 1](./images/in_game_example_1.png "In game screenshot")
+![in game example 1](./images/in_game_example_1.png? "In game screenshot")
 
 # Adding dialogue
 W.I.P
