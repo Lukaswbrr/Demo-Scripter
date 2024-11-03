@@ -36,6 +36,9 @@ Note: The resolution of the project in this screenshot is set to 720x540 (the sa
 
 ![in game example 1](./images/in_game_example_1.png? "In game screenshot")
 
+## Other examples
+I made a [repository](https://github.com/Lukaswbrr/Demo-Scripter-Examples) which shows more examples using the framework.
+
 # Adding dialogue
 W.I.P
 
