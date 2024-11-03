@@ -5,6 +5,7 @@
 
 - Background Handler
 - Button Handler
+- Character class
 
 ## Functions
 
