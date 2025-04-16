@@ -1,6 +1,9 @@
 class_name DemoScripter_VisualNovelCharacter
 extends Node2D
 
+signal hide_finished
+signal show_finished
+
 @onready var emotion_player: AnimationPlayer = $EmotionPlayer
 @onready var anim_player: AnimationPlayer = $AnimationPlayer
 

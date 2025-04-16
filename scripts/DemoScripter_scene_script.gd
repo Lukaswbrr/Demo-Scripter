@@ -3,7 +3,10 @@ extends CanvasLayer
 
 ## This is the base that handles the current scene (dialogue, set characters, play music, etc)
 
+signal load_dialogue_finished()
+signal load_dialogue_special_signal
 signal text_animation_finished
+signal dialogue_next_page(id: int)
 signal animation_text_fading_in
 signal end_dialogue_signal
 
@@ -41,7 +44,7 @@ var regex = RegEx.new()
 
 # Variables for tween
 var tweenthing
-var maxvisible = 0
+var maxvisible: int = 0
 
 var dialogue_current_set: int = 1 # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
 var add_dialogue_set: int = 1
@@ -62,10 +65,16 @@ var can_fast_skip: bool = true ## If true, player can use fast skip [for rate of
 @export var default_emotion_delay_end: float = 0.35
 
 @onready var ignore_text: bool = ignore_text_full_display_fast_skip
-var forced_paused = false ## Checks if its paused caused by pause_dialogue
-var about_to_pause = false ## Checks if its going to be pause at the of dialogue (used for fast skip not go to next dialouge)
+var forced_paused: bool ## Checks if its paused caused by pause_dialogue
+var about_to_pause: bool ## Checks if its going to be pause at the of dialogue (used for fast skip not go to next dialouge)
 
 var regex_compiled = false
+
+# Modular stuff
+@export_group("Modulars")
+var _use_default_icon_behavior: bool = true
+@export var icon_modular: Array[Node]
+@export var extra_modular: Array[Node]
 
 func start_regex_compile() -> void:
 	regex.compile("\\[.*?\\]")
@@ -74,11 +83,11 @@ func start_regex_compile() -> void:
 func _ready() -> void:
 	pass
 
-func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dialogue_set, _speed = 1) -> void:
+func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
 	if !regex_compiled:
 		start_regex_compile() 
 	
-	if auto_space:
+	if should_auto_space:
 		if text.begins_with("\n"):
 			if !text[text.count("\n")] == '"': # do not add space if its a quote that uses multiple new lines
 				text = text.insert(text.count("\n"), " ")
@@ -97,7 +106,7 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 	
 	if !first_text:
 #		print(str(text.begins_with("\"")) + ": " + str(text))
-		if !auto_space: # checks if auto space is enabled
+		if !should_auto_space: # checks if auto space is enabled
 			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len(str("\n") + notags_text), id, set]
 		else:
 			if text.begins_with("\""):
@@ -105,7 +114,7 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 			else:
 				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + " " + text), len("\n" + notags_text) + 1, id, set]
 	else:
-		if !auto_space: # checks if auto space is enabled
+		if !should_auto_space: # checks if auto space is enabled
 			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(text), len(notags_text), id, set]
 		else:
 			if text.begins_with("\""):
@@ -133,6 +142,9 @@ func add_dialogue_start_quote(text, id = add_dialogue_id, set = add_dialogue_set
 func add_dialogue_continue(text, id = add_dialogue_id, set = add_dialogue_set ) -> void: # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
 	add_dialogue(text, id, true, set)
 
+func add_dialogue_continue_no_space(text, id = add_dialogue_id, set = add_dialogue_set) -> void: # Same as add_dialogue_continue, expect if auto_space is enabled, it will not add a auto space to the same line
+	add_dialogue(text, id, true, set, 1, false)
+
 func add_dialogue_quote(text, id = add_dialogue_id, first_text = false, set = add_dialogue_set, speed = 1) -> void:
 	add_dialogue("\"" + text + "\"", id, first_text, set, speed)
 
@@ -140,22 +152,11 @@ func next_add_dialogue_id() -> void:
 	add_dialogue_id = add_dialogue_id + 1
 	
 func next_dialogue() -> void: # Go into the next dialogue after a dialogue's text is finished displaying
-	var icon_enabled = enable_icon_text
-	if icon_enabled:
-		enable_icon_text = false
-	
-	#print(enable_icon_text)
 	pause_dialogue(true)
 	await self.text_animation_finished
-	
 	dialogue_index += 1
 	play_dialogue()
-	#print(enable_icon_text)
 	pause_dialogue(false)
-	
-	if icon_enabled:
-		await get_tree().create_timer(0.01).timeout # i don't really like this solution. Maybe theres some other way to deal with this problem.
-		enable_icon_text = true
 
 func delay_dialogue(timer, clear_dialogue = false) -> void: # Delays a dialogue text
 	add_dialogue("", add_dialogue_id, true, add_dialogue_set)
@@ -225,17 +226,22 @@ func load_dialogue(id, loadinstant = true, set_id = dialogue_current_set) -> voi
 		finished = true
 		
 		if enable_icon_text:
-			icon_text.set_visible(true)
+			if _use_default_icon_behavior:
+				icon_text.set_visible(true)
+			else:
+				show_icon_modular()
 		
 		dialogue_node.visible_characters = dialogue_dictionary[dialogue_index][1]
 	else:
-		dialogue_node.visible_characters = 0
+		dialogue_node.visible_characters = 0 
 		#print_rich("[color=goldenrod]Max Visible from load dialogue: [/color]" + str(maxvisible))
 	reset_dialogue()
 	for test in dialogue_dictionary.size():
 		if set_id == dialogue_dictionary[test + 1][3]:
 			if id == dialogue_dictionary[test + 1][2]:
 				dialogue_node.text += dialogue_dictionary[test + 1][0]
+	
+	emit_signal("load_dialogue_finished")
 
 func load_dialogue_set(set_id, load_instant = true) -> void:
 	dialogue_current_set = set_id
@@ -273,10 +279,15 @@ func load_dialogue_start(id = 1, set_id = 1, loadinstant = true, load_func = tru
 					break
 	if load_func:
 		load_function_dialogue()
+	
 	check_dialogue_function()
 	maxvisible = dialogue_dictionary[dialogue_index][1]
 	if play_tween:
-		icon_text.set_visible(false)
+		if _use_default_icon_behavior:
+			icon_text.set_visible(false)
+		else:
+			hide_icon_modular()
+		
 		finished = false
 		if tweenthing:
 			if tweenthing.is_running():
@@ -331,7 +342,10 @@ func hide_darkbackground() -> void:
 
 func play_dialogue(ignore_textanimation: bool = false) -> void: # This will start the dialogue [Making the dialogue appear]
 	if enable_icon_text:
-		icon_text.set_visible(false)
+		if _use_default_icon_behavior:
+			icon_text.set_visible(false)
+		else:
+			hide_icon_modular()
 	
 	if !dialogue_dictionary.has(dialogue_index) or !dialogue_dictionary[dialogue_index][3] == dialogue_current_set:
 		emit_signal("end_dialogue_signal")
@@ -388,6 +402,7 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 	
 	if !dialogue_dictionary[dialogue_index][2] == dialogue_current_id:
 		dialogue_current_id += 1
+		emit_signal("dialogue_next_page", dialogue_current_id)
 		load_dialogue(dialogue_current_id, false)
 
 func reset_dialogue() -> void:
@@ -407,37 +422,58 @@ func load_function_dialogue() -> void: # Checks for functions on dialogue dictio
 	#print(function_array_numbers)
 
 
-func set_character_emotion(character, emotion) -> void:
-	disabled = true
-	dialogue_state("fade_out")
-	
-	await _animation_player.animation_finished
-	
-	#print("the set character function has been called")
-	set_character_emotion_instant(character, emotion)
-	
-	await get_tree().create_timer(0.35).timeout
-	
-	dialogue_state("fade_in")
-	disabled = false
+func set_character_emotion(character, emotion: String, delay: float = default_emotion_delay_end) -> void:
+	if Input.is_action_pressed("fast_skip"):
+		set_character_emotion_instant(character, emotion)
+	else:
+		disabled = true
+		dialogue_state("fade_out")
+		
+		await _animation_player.animation_finished
+		
+		#print("the set character function has been called")
+		set_character_emotion_instant(character, emotion, true)
+		
+		await get_tree().create_timer(delay).timeout
+		
+		dialogue_state("fade_in")
+		disabled = false
 
-func set_character_emotion_instant(character, emotion) -> void:
+func set_character_emotion_instant(character, emotion: String, playShow: bool = false) -> void:
 	emotion = emotion.to_upper()
-	character.current_emotion = character.emotions[emotion]
+	
+	if not emotion in character.emotions:
+		return
+	
+	if !Input.is_action_pressed("fast_skip"):
+		#print_debug("fast skip is not pressed")
+		#print(character.visible)
+		#print(character.is_hidden())
+		if character.visible and not character.is_hidden() and playShow:
+			#print_debug("conditions passed")
+			var tween = get_tree().create_tween()
+			character.set_modulate(Color(character.modulate.r, character.modulate.g, character.modulate.b, 0))
+			tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 1), 0.35)
+			#playanim_character_instant(character, "show")
+	
+	character.current_emotion = emotion
 
-func setpos_character(character, pos) -> void: # Set position of a character with delay
-	disabled = true
-	dialogue_state("fade_out")
+func setpos_character(character, pos: String, fast_skipable: bool = true) -> void: # Set position of a character with delay
+	if Input.is_action_pressed("fast_skip") and fast_skipable:
+		setpos_character_instant(character, pos)
+		print("true aaaa!!!")
+		return
+	
+	dialogue_fade_out()
 	
 	await _animation_player.animation_finished
 	setpos_character_instant(character, pos)
 	await get_tree().create_timer(0.35).timeout
 	
-	dialogue_state("fade_in")
-	disabled = false
+	dialogue_fade_in()
 
 
-func setpos_character_instant(character, pos) -> void: # Set position of a character
+func setpos_character_instant(character, pos: String) -> void: # Set position of a character
 	match pos:
 		"right":
 			character.position = character.pos_right
@@ -465,6 +501,75 @@ func playanim_character_instant(character, anim: String, speed = 1) -> void:
 
 func playanim_object(object, animation) -> void:
 	object.play(animation)
+
+func show_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
+	if Input.is_action_pressed("fast_skip") and fast_skipable:
+		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 1)
+		character.set_visible(true)
+		return
+	
+	dialogue_fade_out()
+	await _animation_player.animation_finished
+	
+	character.set_modulate(Color(character.modulate.r, character.modulate.g, character.modulate.b, 0))
+	character.set_visible(true)
+	
+	var tween = get_tree().create_tween()
+	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 1), duration)
+	await tween.finished
+	
+	character.emit_signal("show_finished")
+	
+	if hold > 0:
+		await get_tree().create_timer(hold).timeout
+		dialogue_fade_in()
+	else:
+		dialogue_fade_in()
+
+func show_character_instant(character, duration: float = 0.35) -> void:
+	character.set_modulate(Color(character.modulate.r, character.modulate.g, character.modulate.b, 0))
+	character.set_visible(true)
+	
+	var tween = get_tree().create_tween()
+	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 1), duration)
+	await tween.finished
+	character.emit_signal("show_finished")
+	
+
+func hide_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
+	if Input.is_action_pressed("fast_skip") and fast_skipable:
+		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 0)
+		character.set_visible(false)
+		return
+
+	dialogue_fade_out()
+	await _animation_player.animation_finished
+	
+	var tween = get_tree().create_tween()
+	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
+	await tween.finished
+	
+	character.emit_signal("hide_finished")
+	
+	
+	character.set_visible(false)
+	
+	if hold > 0:
+		await get_tree().create_timer(hold).timeout
+		dialogue_fade_in()
+	elif hold < 0:
+		return
+	else:
+		dialogue_fade_in()
+
+func hide_character_instant(character, duration: float = 0.35) -> void:
+	var tween = get_tree().create_tween()
+	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
+	await tween.finished
+	
+	character.set_visible(false)
+	character.emit_signal("hide_finished")
+	
 
 func pause_dialogue(value: bool) -> void:
 	forced_paused = value
@@ -517,7 +622,40 @@ func fadeout_music(music, duration: float) -> void:
 	await musictween.finished
 	music.stop()
 
+func set_music_pitch(music, pitch):
+	music.set_pitch_scale(pitch)
+
+func pause_music(music, wait_for_anim = false):
+	# maybe make the wait_for_anim emits a signal when the animation is fading in?
+	if wait_for_anim: # this is used in cases first dialogue of set contains a special function that makes the hud transparent
+		wait_for_anim_func()
+		await self.animation_text_fading_in
+		music.stream_paused = !music.stream_paused
+		music.playing = !music.stream_paused
+		print("Music stream paused: " + str(music.stream_paused))
+	else:
+		music.stream_paused = !music.stream_paused
+		music.playing = !music.stream_paused # apparently if another music is playing when the stream is paused, playing gets set to false
+		print("Music stream paused: " + str(music.stream_paused))
+
 # ---------------------
+# MODULAR RELATED THINGS
+
+
+func load_icon_modules() -> void:
+	_use_default_icon_behavior = false
+	for k in icon_modular:
+		k.connect_module(self)
+
+func show_icon_modular() -> void:
+	for k in icon_modular:
+		k.show_icon()
+
+func hide_icon_modular() -> void:
+	for k in icon_modular:
+		k.hide_icon()
+
+# ----
 
 func dialogue_state(state: String) -> void:
 	match state:
@@ -554,4 +692,8 @@ func _on_text_tween_completed() -> void:
 		return
 	
 	if !paused and !forced_paused:
-		icon_text.set_visible(true)
+		if _use_default_icon_behavior:
+			icon_text.set_visible(true)
+			return
+		
+		show_icon_modular()
