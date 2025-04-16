@@ -1,0 +1,53 @@
+[gd_scene load_steps=8 format=3 uid="uid://cijf8scx0y1y8"]
+
+[ext_resource type="Script" uid="uid://bmjewdkjsbu6g" path="res://scripts/modules/background_handler/BackgroundHandler.gd" id="1_rmun0"]
+
+[sub_resource type="Animation" id="10"]
+length = 0.001
+
+[sub_resource type="Animation" id="7"]
+resource_name = "fade_in"
+
+[sub_resource type="Animation" id="8"]
+resource_name = "fade_in_transparent"
+
+[sub_resource type="Animation" id="9"]
+resource_name = "fade_out"
+
+[sub_resource type="Animation" id="11"]
+resource_name = "fade_out_transparent"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_i6756"]
+_data = {
+&"RESET": SubResource("10"),
+&"fade_in": SubResource("7"),
+&"fade_in_transparent": SubResource("8"),
+&"fade_out": SubResource("9"),
+&"fade_out_transparent": SubResource("11")
+}
+
+[node name="BackgroundHandler" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rmun0")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Sprites" type="AnimatedSprite2D" parent="."]
+position = Vector2(360, 270)
+animation = &""
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_i6756")
+}
