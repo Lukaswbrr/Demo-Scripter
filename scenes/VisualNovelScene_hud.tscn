@@ -113,10 +113,10 @@ tracks/1/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_qxh3s"]
 _data = {
-"RESET": SubResource("6"),
-"fade_in": SubResource("Animation_otoj2"),
-"fade_out": SubResource("3"),
-"intro": SubResource("4")
+&"RESET": SubResource("6"),
+&"fade_in": SubResource("Animation_otoj2"),
+&"fade_out": SubResource("3"),
+&"intro": SubResource("4")
 }
 
 [node name="Text" type="Control"]
@@ -135,7 +135,7 @@ color = Color(0, 0, 0, 0.258824)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="DarkBackground"]
 libraries = {
-"": SubResource("AnimationLibrary_qxh3s")
+&"": SubResource("AnimationLibrary_qxh3s")
 }
 
 [node name="Dialogue" type="RichTextLabel" parent="."]

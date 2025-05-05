@@ -1,0 +1,29 @@
+[gd_resource type="Theme" load_steps=8 format=3 uid="uid://bs6uqv7sxrl1c"]
+
+[ext_resource type="FontFile" uid="uid://d18tkgg1nxyvk" path="res://dev/fonts/default.ttf" id="1_cudh7"]
+[ext_resource type="FontFile" uid="uid://bq7lkaxqm1wn3" path="res://scenes/hud styles/nscripter/fonts/default.ttf" id="2_vqa30"]
+
+[sub_resource type="FontVariation" id="FontVariation_pri5o"]
+base_font = ExtResource("1_cudh7")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_obks7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b7gv5"]
+bg_color = Color(0.290196, 0.290196, 0.290196, 0.6)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_x4tdm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_vqkmb"]
+
+[resource]
+default_font = ExtResource("2_vqa30")
+Button/colors/font_color = Color(1, 1, 1, 1)
+Button/colors/font_focus_color = Color(0.972549, 0.972549, 0.972549, 1)
+Button/colors/font_outline_color = Color(0.176471, 0.176471, 0.176471, 1)
+Button/constants/outline_size = 1
+Button/font_sizes/font_size = 18
+Button/fonts/font = SubResource("FontVariation_pri5o")
+Button/styles/focus = SubResource("StyleBoxEmpty_obks7")
+Button/styles/hover = SubResource("StyleBoxFlat_b7gv5")
+Button/styles/normal = SubResource("StyleBoxEmpty_x4tdm")
+Button/styles/pressed = SubResource("StyleBoxEmpty_vqkmb")
