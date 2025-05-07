@@ -10,10 +10,13 @@ signal dialogue_next_page(id: int)
 signal animation_text_fading_in
 signal end_dialogue_signal
 
-@onready var dialogue_node = $Text/Dialogue
-@onready var darkbackground_node = $Text/DarkBackground
-@onready var _animation_player = $Text/DarkBackground/AnimationPlayer
-@onready var icon_text = $Text/IconText
+# Variables related to HUD node
+@export var hud_node_path: NodePath = "Text" ## The main node which is going to be used for dialogue text, etc.
+@onready var hud_node = get_node(hud_node_path)
+@onready var dialogue_node = hud_node.get_node("Dialogue")
+@onready var darkbackground_node = hud_node.get_node("DarkBackground")
+@onready var _animation_player = darkbackground_node.get_node("AnimationPlayer")
+@onready var icon_text = hud_node.get_node("IconText")
 
 var dialogue_dictionary: Dictionary = {}
 var function_dialogue_dictionary: Dictionary = {}
@@ -21,16 +24,13 @@ var function_dialogue_dictionary: Dictionary = {}
 var function_array_numbers: Array = []
 
 # Current dialogue IDs
-
 var dialogue_index: int = 1 # The current dialogue displaying
 var dialogue_current_id: int = 1 # The current group of dialogue [example, list of dialogues with ID 1]
 
 # Add dialogue id
-
 var add_dialogue_id: int = 1
 
 # Dialogue states and system variables
-
 var finished: bool
 var paused: bool
 var disabled: bool
@@ -122,16 +122,11 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dial
 			else:
 				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(" " + text), len(notags_text) + 1, id, set]
 
-func add_dialogue_special(funcname: Callable, args = null) -> void: # Arguments for function must be a array
-	var arguments_array = []
-	
-	if !args == null:
-		arguments_array = args
-	
-	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, arguments_array]
-	
+func add_dialogue_special(funcname: Callable, args: Array = []) -> void:
 	# This function adds a dialogue to a array with a function as a extra value, making it possible to
 	# run code if the id is the same as the special dialogue. (Example: changing character emotion, etc)
+	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, args]
+	
 
 func add_dialogue_start(text, id = add_dialogue_id, set = add_dialogue_set) -> void: # same as add_dialogue_continue (just named it to make it more easier to read)
 	add_dialogue(text, id, true, set)
@@ -545,13 +540,14 @@ func hide_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 	dialogue_fade_out()
 	await _animation_player.animation_finished
 	
-	var tween = get_tree().create_tween()
-	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
-	await tween.finished
+	if duration > 0:
+		var tween = get_tree().create_tween()
+		tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
+		await tween.finished
+	else:
+		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 0)
 	
 	character.emit_signal("hide_finished")
-	
-	
 	character.set_visible(false)
 	
 	if hold > 0:
@@ -563,9 +559,12 @@ func hide_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 		dialogue_fade_in()
 
 func hide_character_instant(character, duration: float = 0.35) -> void:
-	var tween = get_tree().create_tween()
-	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
-	await tween.finished
+	if duration > 0:
+		var tween = get_tree().create_tween()
+		tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 0), duration)
+		await tween.finished
+	else:
+		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 0)
 	
 	character.set_visible(false)
 	character.emit_signal("hide_finished")
@@ -575,6 +574,7 @@ func pause_dialogue(value: bool) -> void:
 	forced_paused = value
 	allowed_fast_skip = !value
 
+#region MUSIC_AUDIO
 
 # MUSIC/AUDIO FUNCTIONS
 
@@ -638,9 +638,9 @@ func pause_music(music, wait_for_anim = false):
 		music.playing = !music.stream_paused # apparently if another music is playing when the stream is paused, playing gets set to false
 		print("Music stream paused: " + str(music.stream_paused))
 
-# ---------------------
-# MODULAR RELATED THINGS
+#endregion
 
+#region MODULAR
 
 func load_icon_modules() -> void:
 	_use_default_icon_behavior = false
@@ -655,7 +655,7 @@ func hide_icon_modular() -> void:
 	for k in icon_modular:
 		k.hide_icon()
 
-# ----
+#endregion
 
 func dialogue_state(state: String) -> void:
 	match state:
@@ -678,6 +678,14 @@ func wait_for_anim_func() -> void:
 		emit_signal("animation_text_fading_in")
 	else:
 		check_wait_for_anim = false
+
+func wait_signal_func(signalName, funcname: Callable, args: Array = [], fast_skipable: bool = true) -> void:
+	if Input.is_action_pressed("fast_skip") and fast_skipable:
+		funcname.callv(args)
+		return
+	
+	await signalName
+	funcname.callv(args)
 
 func _on_text_tween_completed() -> void:
 	if dialogue_ended:

@@ -40,3 +40,9 @@ func set_modulate_transition(newColor: Color, duration: float) -> void:
 
 func is_hidden() -> bool:
 	return anim_player.current_animation == "hide"
+
+func hide_character():
+	set_visible(false)
+
+func show_character():
+	set_visible(true)
