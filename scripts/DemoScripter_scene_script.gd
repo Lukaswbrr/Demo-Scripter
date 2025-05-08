@@ -46,13 +46,13 @@ var regex = RegEx.new()
 var tweenthing
 var maxvisible: int = 0
 
-var dialogue_current_set: int = 1 # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
-var add_dialogue_set: int = 1
+var dialogue_current_set: String = "start" # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
+var add_dialogue_set: String = "start"
 
 @export_group("Text")
 @export var auto_space: bool = true ## Adds a space on texts that doesn't start with "
 @export var enable_icon_text: bool = true ## A icon appears after a text is finished displaying.
-@export var default_text_speed: bool = 0.030 ## Duration of text_speed (this value gets multipled) [if i add the feature of every text having different speed, use the speed argument from add_dialogue]
+@export var default_text_speed: float = 0.030 ## Duration of text_speed (this value gets multipled) [if i add the feature of every text having different speed, use the speed argument from add_dialogue. This feature doesn't seem stable from outside default value!]
 
 var allowed_fast_skip: bool = true ## Checks if it's allowed to use fast skip
 var can_fast_skip: bool = true ## If true, player can use fast skip [for rate of fire delay]
@@ -83,7 +83,7 @@ func start_regex_compile() -> void:
 func _ready() -> void:
 	pass
 
-func add_dialogue(text, id = add_dialogue_id, first_text = false, set = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
+func add_dialogue(text, id = add_dialogue_id, first_text = false, set: String = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
 	if !regex_compiled:
 		start_regex_compile() 
 	
@@ -126,13 +126,15 @@ func add_dialogue_special(funcname: Callable, args: Array = []) -> void:
 	# This function adds a dialogue to a array with a function as a extra value, making it possible to
 	# run code if the id is the same as the special dialogue. (Example: changing character emotion, etc)
 	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, args]
-	
 
-func add_dialogue_start(text, id = add_dialogue_id, set = add_dialogue_set) -> void: # same as add_dialogue_continue (just named it to make it more easier to read)
+func add_dialogue_next(text, id = add_dialogue_id + 1, set = add_dialogue_set) -> void:
 	add_dialogue(text, id, true, set)
 
-func add_dialogue_start_quote(text, id = add_dialogue_id, set = add_dialogue_set, speed = 1) -> void: 
-	add_dialogue("\"" + text + "\"", id, true, set, speed)
+func add_dialogue_start(text, set = add_dialogue_set) -> void: ## The id is automatically 1 instead of manual
+	add_dialogue(text, 1, true, set)
+
+func add_dialogue_start_quote(text, set = add_dialogue_set) -> void: 
+	add_dialogue_start("\"" + text + "\"", set)
 
 func add_dialogue_continue(text, id = add_dialogue_id, set = add_dialogue_set ) -> void: # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
 	add_dialogue(text, id, true, set)
@@ -213,7 +215,7 @@ func fast_skip_button() -> void:
 			can_fast_skip = true
 
 
-func load_dialogue(id, loadinstant = true, set_id = dialogue_current_set) -> void: # This loads all the dialogue into the text
+func load_dialogue(id, loadinstant = true, set_id: String = dialogue_current_set) -> void: # This loads all the dialogue into the text
 	dialogue_current_id = id
 	dialogue_current_set = set_id
 	
@@ -238,7 +240,7 @@ func load_dialogue(id, loadinstant = true, set_id = dialogue_current_set) -> voi
 	
 	emit_signal("load_dialogue_finished")
 
-func load_dialogue_set(set_id, load_instant = true) -> void:
+func load_dialogue_set(set_id: String, load_instant = true) -> void:
 	dialogue_current_set = set_id
 	for check in dialogue_dictionary.size():
 		if set_id == dialogue_dictionary[check + 1][3]:
@@ -254,14 +256,14 @@ func load_dialogue_set(set_id, load_instant = true) -> void:
 			tweenthing.kill()
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(0)
+		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(0)
 		
 	check_dialogue_function()
 
-func load_dialogue_start(id = 1, set_id = 1, loadinstant = true, load_func = true, play_tween = false) -> void: # Sets the max visible when loading dialogue by start
+func load_dialogue_start(id: int = 1, set_id: String = "start", loadinstant = true, load_func = true, play_tween = false) -> void: # Sets the max visible when loading dialogue by start
 	dialogue_started = true
 	
-	if id == 1 and set_id == 1:
+	if id == 1 and set_id == "start":
 		dialogue_index = 1
 		load_dialogue(id, loadinstant, set_id)
 	else:
@@ -296,11 +298,11 @@ func load_dialogue_start(id = 1, set_id = 1, loadinstant = true, load_func = tru
 			await self.animation_text_fading_in
 			tweenthing = get_tree().create_tween()
 			tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(0)
+			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(0)
 		else:
 			tweenthing = get_tree().create_tween()
 			tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(0)
+			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(0)
 
 
 func check_dialogue_function() -> void:
@@ -383,7 +385,7 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 		
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(maxvisible - dialogue_dictionary[dialogue_index][1])
+		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(maxvisible - dialogue_dictionary[dialogue_index][1])
 	else:
 		if !dialogue_dictionary[dialogue_index][2] == dialogue_current_id:
 			maxvisible = dialogue_dictionary[dialogue_index][1]
@@ -393,7 +395,7 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 		paused = false
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
-		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * 0.030).from(maxvisible - dialogue_dictionary[dialogue_index][1]) # old method of speed:  / 50 + 1
+		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(maxvisible - dialogue_dictionary[dialogue_index][1]) # old method of speed:  / 50 + 1
 	
 	if !dialogue_dictionary[dialogue_index][2] == dialogue_current_id:
 		dialogue_current_id += 1

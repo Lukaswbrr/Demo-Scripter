@@ -11,19 +11,21 @@ signal button_set_appeared(set:int)
 @export var button_container_position_x_offset: int = 10
 @export var button_container_position_y_offset: int = 25
 
+var current_create_set_id: String
+
 func _ready() -> void:
 	assert(type_string(typeof(main_scene)) == "Object", "The main scene variable hasn't been defined!")
 
-func button_container_create(set_id: int, custom_position = null) -> void:
+func button_container_create(set_id: String, custom_position = null) -> void:
 	var container = VBoxContainer.new()
 	var dialogue_text_node = get_node("../Dialogue")
-	container.name = str(set_id)
+	container.name = set_id
 	container.set_position(Vector2(dialogue_text_node.position.x + button_container_position_x_offset, dialogue_text_node.position.y + dialogue_text_node.size.y + button_container_position_y_offset))
 	container.visible = false
 	add_child(container)
 	#print("created set")
 
-func button_set_appear(set_id: int, wait_signal = true) -> void:
+func button_set_appear(set_id: String = current_create_set_id, wait_signal = true) -> void:
 	emit_signal("button_set_appeared", set_id)
 	main_scene.fastskip_pause()
 	update_container_pos(set_id)
@@ -48,9 +50,10 @@ func button_set_appear(set_id: int, wait_signal = true) -> void:
 		main_scene.pause_dialogue(true)
 		container.set_visible(true)
 
-func create_button(buttonname, function = null, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button(buttonname, function = null, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
 	
 	var current_set = get_container(set_id)
 	
@@ -68,9 +71,11 @@ func create_button(buttonname, function = null, set_id: int = 1, theme: Theme = 
 	#print(current_set)
 	#print(buttonname)
 
-func create_button_condition(buttonname, condition: Callable, function = null, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_condition(buttonname, condition: Callable, function = null, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
+		
 	
 	var current_set = get_container(set_id)
 	
@@ -91,9 +96,11 @@ func create_button_condition(buttonname, condition: Callable, function = null, s
 	#print(current_set)
 	#print(buttonname)
 
-func create_button_goto_set(buttonname, set: int = 1, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_set(buttonname: String, set: String, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
+		
 	
 	var current_set = get_container(set_id)
 	
@@ -109,7 +116,7 @@ func create_button_goto_set(buttonname, set: int = 1, set_id: int = 1, theme: Th
 		goto_set(set, set_id)
 		)
 
-func create_button_goto_set_condition(buttonname, condition: Callable, set: int = 1, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_set_condition(buttonname: String, condition: Callable, set: String, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 	
@@ -130,9 +137,11 @@ func create_button_goto_set_condition(buttonname, condition: Callable, set: int 
 		goto_set(set, set_id)
 		)
 
-func create_button_goto_id(buttonname, id: int = 1, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_id(buttonname: String, id: int = 1, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
+		
 	
 	var current_set = get_node(str(set_id))
 	
@@ -148,9 +157,11 @@ func create_button_goto_id(buttonname, id: int = 1, set_id: int = 1, theme: Them
 		goto_id(id, set_id)
 		)
 
-func create_button_goto_id_condition(buttonname, condition: Callable, id: int = 1, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_id_condition(buttonname: String, condition: Callable, id: int = 1, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
+		
 	
 	var current_set = get_node(str(set_id))
 	
@@ -169,9 +180,11 @@ func create_button_goto_id_condition(buttonname, condition: Callable, id: int = 
 		goto_id(id, set_id)
 		)
 
-func create_button_goto_scene_condition(buttonname, condition: Callable, scene, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_scene_condition(buttonname: String, condition: Callable, scene, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
+		
 	
 	var current_set = get_container(set_id)
 	
@@ -190,9 +203,10 @@ func create_button_goto_scene_condition(buttonname, condition: Callable, scene, 
 		get_tree().change_scene_to_file(scene)
 		)
 
-func create_button_goto_scene(buttonname, scene, set_id: int = 1, theme: Theme = buttons_skin) -> void:
+func create_button_goto_scene(buttonname: String, scene, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
+		_set_current_set_id(set_id)
 	
 	var current_set = get_container(set_id)
 	
@@ -208,34 +222,37 @@ func create_button_goto_scene(buttonname, scene, set_id: int = 1, theme: Theme =
 		get_tree().change_scene_to_file(scene)
 		)
 
-func goto_set(set: int, set_button: int) -> void:
+func goto_set(set: String, set_button: String) -> void:
 	var set_button_found = get_container(set_button)
 	main_scene.fastskip_unpause()
 	main_scene.load_dialogue_set(set, false)
 	main_scene.pause_dialogue(!main_scene.forced_paused)
 	set_button_found.visible = !set_button_found.visible
 
-func goto_id(id: int, set_button: int) -> void:
+func goto_id(id: int, set_button: String) -> void:
 	var set_button_found = get_container(set_button)
 	main_scene.fastskip_unpause()
 	main_scene.load_dialogue_start(id, 1, false, false, true)
 	main_scene.pause_dialogue(!main_scene.forced_paused)
 	set_button_found.visible = !set_button_found.visible
 
-func set_button_visible(value: bool, name: String, id: int) -> void:
+func set_button_visible(value: bool, name: String, id: String) -> void:
 	get_button(name, id).set_visible(value)
 
-func remove_button(name: String, id: int) -> void:
+func remove_button(name: String, id: String) -> void:
 	get_button(name, id).queue_free()
 
-func get_container(id: int):
-	return get_node_or_null(str(id))
+func get_container(id: String):
+	return get_node_or_null(id)
 
-func get_button(name: String, id: int):
-	return get_node_or_null(str(id) + "/" + name)
+func get_button(name: String, id: String):
+	return get_node_or_null(id + "/" + name)
 
-func update_container_pos(container: int) -> void:
+func update_container_pos(container: String) -> void:
 	var dialogue_text_node = get_node("../Dialogue")
 	var found_container = get_container(container)
 	
 	found_container.set_position(Vector2(dialogue_text_node.position.x + button_container_position_x_offset, dialogue_text_node.position.y + dialogue_text_node.size.y + button_container_position_y_offset))
+
+func _set_current_set_id(id: String) -> void:
+	current_create_set_id = id
