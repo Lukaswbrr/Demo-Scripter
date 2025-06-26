@@ -17,7 +17,7 @@ signal end_dialogue_signal
 @onready var hud_node = get_node(hud_node_path)
 @onready var dialogue_node = hud_node.get_node("Dialogue")
 @onready var darkbackground_node = hud_node.get_node("DarkBackground")
-@onready var _animation_player = darkbackground_node.get_node("AnimationPlayer")
+@onready var _animation_player: AnimationPlayer = darkbackground_node.get_node("AnimationPlayer")
 @onready var icon_text = hud_node.get_node("IconText")
 
 var dialogue_dictionary: Dictionary = {}
