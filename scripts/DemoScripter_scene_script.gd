@@ -3,6 +3,8 @@ extends CanvasLayer
 
 ## This is the base that handles the current scene (dialogue, set characters, play music, etc)
 
+signal add_dialogue_finished(text: String, id: int, setname: String)
+signal add_dialogue_special_finished(funcname: Callable, args)
 signal load_dialogue_finished()
 signal load_dialogue_special_signal
 signal text_animation_finished
@@ -83,7 +85,7 @@ func start_regex_compile() -> void:
 func _ready() -> void:
 	pass
 
-func add_dialogue(text, id = add_dialogue_id, first_text = false, set: String = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
+func add_dialogue(text, id = add_dialogue_id, first_text = false, setname: String = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
 	if !regex_compiled:
 		start_regex_compile() 
 	
@@ -95,7 +97,7 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set: String = 
 	var notags_text = regex.sub(text, "", true)
 	
 	add_dialogue_id = id
-	add_dialogue_set = set
+	add_dialogue_set = setname
 	
 	#	Some information about the values in the dictionary:
 #		1: Text of the dialogue
@@ -107,43 +109,46 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, set: String = 
 	if !first_text:
 #		print(str(text.begins_with("\"")) + ": " + str(text))
 		if !should_auto_space: # checks if auto space is enabled
-			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len(str("\n") + notags_text), id, set]
+			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len(str("\n") + notags_text), id, setname]
 		else:
 			if text.begins_with("\""):
-				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len("\n" + notags_text), id, set]
+				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + text), len("\n" + notags_text), id, setname]
 			else:
-				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + " " + text), len("\n" + notags_text) + 1, id, set]
+				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str("\n" + " " + text), len("\n" + notags_text) + 1, id, setname]
 	else:
 		if !should_auto_space: # checks if auto space is enabled
-			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(text), len(notags_text), id, set]
+			dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(text), len(notags_text), id, setname]
 		else:
 			if text.begins_with("\""):
-				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(text), len(notags_text), id, set]
+				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(text), len(notags_text), id, setname]
 			else:
-				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(" " + text), len(notags_text) + 1, id, set]
+				dialogue_dictionary[dialogue_dictionary.size() + 1] = [str(" " + text), len(notags_text) + 1, id, setname]
+		
+	add_dialogue_finished.emit(text, id, first_text, setname)
 
 func add_dialogue_special(funcname: Callable, args: Array = []) -> void:
 	# This function adds a dialogue to a array with a function as a extra value, making it possible to
 	# run code if the id is the same as the special dialogue. (Example: changing character emotion, etc)
 	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, args]
+	add_dialogue_special_finished.emit(funcname, args)
 
-func add_dialogue_next(text, id = add_dialogue_id + 1, set = add_dialogue_set) -> void:
-	add_dialogue(text, id, true, set)
+func add_dialogue_next(text, id = add_dialogue_id + 1, setname = add_dialogue_set) -> void:
+	add_dialogue(text, id, true, setname)
 
-func add_dialogue_start(text, set = add_dialogue_set) -> void: ## The id is automatically 1 instead of manual
-	add_dialogue(text, 1, true, set)
+func add_dialogue_start(text, setname = add_dialogue_set) -> void: ## The id is automatically 1 instead of manual
+	add_dialogue(text, 1, true, setname)
 
-func add_dialogue_start_quote(text, set = add_dialogue_set) -> void: 
-	add_dialogue_start("\"" + text + "\"", set)
+func add_dialogue_start_quote(text, setname = add_dialogue_set) -> void: 
+	add_dialogue_start("\"" + text + "\"", setname)
 
-func add_dialogue_continue(text, id = add_dialogue_id, set = add_dialogue_set ) -> void: # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
-	add_dialogue(text, id, true, set)
+func add_dialogue_continue(text, id = add_dialogue_id, setname = add_dialogue_set ) -> void: # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
+	add_dialogue(text, id, true, setname)
 
-func add_dialogue_continue_no_space(text, id = add_dialogue_id, set = add_dialogue_set) -> void: # Same as add_dialogue_continue, expect if auto_space is enabled, it will not add a auto space to the same line
-	add_dialogue(text, id, true, set, 1, false)
+func add_dialogue_continue_no_space(text, id = add_dialogue_id, setname = add_dialogue_set) -> void: # Same as add_dialogue_continue, expect if auto_space is enabled, it will not add a auto space to the same line
+	add_dialogue(text, id, true, setname, 1, false)
 
-func add_dialogue_quote(text, id = add_dialogue_id, first_text = false, set = add_dialogue_set, speed = 1) -> void:
-	add_dialogue("\"" + text + "\"", id, first_text, set, speed)
+func add_dialogue_quote(text, id = add_dialogue_id, first_text = false, setname = add_dialogue_set, speed = 1) -> void:
+	add_dialogue("\"" + text + "\"", id, first_text, setname, speed)
 
 func next_add_dialogue_id() -> void:
 	add_dialogue_id = add_dialogue_id + 1
@@ -455,10 +460,9 @@ func set_character_emotion_instant(character, emotion: String, playShow: bool = 
 	
 	character.current_emotion = emotion
 
-func setpos_character(character, pos: String, fast_skipable: bool = true) -> void: # Set position of a character with delay
+func setpos_character(character: DemoScripter_VisualNovelCharacter, pos, fast_skipable: bool = true) -> void: # Set position of a character with delay
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
 		setpos_character_instant(character, pos)
-		print("true aaaa!!!")
 		return
 	
 	dialogue_fade_out()
@@ -470,7 +474,7 @@ func setpos_character(character, pos: String, fast_skipable: bool = true) -> voi
 	dialogue_fade_in()
 
 
-func setpos_character_instant(character, pos: String) -> void: # Set position of a character
+func setpos_character_instant(character: DemoScripter_VisualNovelCharacter, pos) -> void: # Set position of a character
 	match pos:
 		"right":
 			character.position = character.pos_right
@@ -478,6 +482,8 @@ func setpos_character_instant(character, pos: String) -> void: # Set position of
 			character.position = character.pos_middle
 		"left":
 			character.position = character.pos_left
+		_:
+			character.position = pos
 
 func playanim_character(character, anim, speed = 1) -> void:
 	disabled = true
@@ -656,6 +662,10 @@ func show_icon_modular() -> void:
 func hide_icon_modular() -> void:
 	for k in icon_modular:
 		k.hide_icon()
+
+func load_extra_modules() -> void:
+	for k in extra_modular:
+		k.connect_module(self)
 
 #endregion
 
