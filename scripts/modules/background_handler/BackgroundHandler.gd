@@ -12,7 +12,7 @@ var _active_overlays: Array[Node]
 
 # Makes it so instead of using Characters node, it uses a seperate node for overlay effects
 @export var use_overlay_exclusive_node: bool 
-@export var main_scene: Node
+@export var main_scene: DemoScripter_VisualNovelScene
 @export var characters_node: Node
 @export var overlay_node: Node # only use this if use_overlay_exclusive_node is enabled!
 
@@ -500,11 +500,14 @@ func change_background_fade_new(index: int, group, fadeout: float, hold_out: flo
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		change_background_instant(index, group)
 		return
+	
 	var persistant_overlays = _check_persistant_amount_overlays()
 	
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
 	color_overlay.color = background_color.color
+	color_overlay.modulate = background_color.modulate
+	color_overlay.modulate.a = 0
 	
 	characters_node.add_child(color_overlay)
 	if persistant_overlays > 0:
@@ -515,12 +518,11 @@ func change_background_fade_new(index: int, group, fadeout: float, hold_out: flo
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
-	background_fadeout_instant(fadeout)
-	await get_tree().create_timer(fadeout + hold_out).timeout
-	change_background_instant(index, group)
-	background_fadein_instant(fadein)
-	await get_tree().create_timer(fadein + hold_in).timeout
-	main_scene.dialogue_fade_in()
+	var tween = get_tree().create_tween()
+	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate.r, color_overlay.modulate.g, color_overlay.modulate.b, 1), fadeout)
+	tween.tween_callback(change_background_instant.bind(index, group)).set_delay(hold_out)
+	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate.r, color_overlay.modulate.g, color_overlay.modulate.b, 0), fadein)
+	tween.tween_callback(main_scene.dialogue_fade_in).set_delay(hold_in)
 
 func rect_blink(fadein: float, fadeout: float, fast_skipable: bool = true, hold_in: float = 0, hold_1: float = 0, hold_2: float = 0, hold_out: float = 0, hide_background_in: bool = true, hide_character_in: bool = false) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
@@ -823,3 +825,4 @@ func set_overlay_modulate_instant(newColor: Color, overlay: ColorRect) -> void:
 	overlay.set_modulate(newColor)
 
 #endregion
+
