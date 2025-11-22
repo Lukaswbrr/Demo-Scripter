@@ -1,0 +1,116 @@
+[gd_scene load_steps=6 format=3 uid="uid://ciosrfkurswqh"]
+
+[ext_resource type="Texture2D" uid="uid://c0v7rwv1du6h3" path="res://assets/writing icon.png" id="1_d3fd6"]
+
+[sub_resource type="Animation" id="Animation_d3fd6"]
+resource_name = "line_icon"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(32, 32), Vector2(42, 42), Vector2(32, 32)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TextureRect:pivot_offset")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(4.47035e-08, 0.5, 1),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Vector2(32, 32), Vector2(42, 42), Vector2(32, 32)]
+}
+
+[sub_resource type="Animation" id="Animation_xibmk"]
+resource_name = "page_icon"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:position")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(7.45058e-08, 0.2, 0.4, 0.6, 0.8, 1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(-4, 6), Vector2(1, 1), Vector2(10, 5), Vector2(12, 0), Vector2(19, 5)]
+}
+
+[sub_resource type="Animation" id="Animation_42pua"]
+resource_name = "reset_manual"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TextureRect:size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(52, 52)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TextureRect:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TextureRect:pivot_offset")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_xibmk"]
+_data = {
+&"line_icon": SubResource("Animation_d3fd6"),
+&"page_icon": SubResource("Animation_xibmk"),
+&"reset_manual": SubResource("Animation_42pua")
+}
+
+[node name="IconText" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 629.0
+offset_top = 457.0
+offset_right = 681.0
+offset_bottom = 509.0
+pivot_offset = Vector2(20.6, 20.6)
+size_flags_horizontal = 4
+
+[node name="TextureRect" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 52.0
+offset_bottom = 52.0
+texture = ExtResource("1_d3fd6")
+expand_mode = 1
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_xibmk")
+}
