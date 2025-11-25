@@ -45,11 +45,46 @@ In the example above shows a very basic way of adding dialogue to a visual novel
 However, there are more functions related to dialogue, for example, creating dialogue on a different page, a different set, running functions, etc.
 
 >[!NOTE] 
->Set explanation
 >Sets are like different groups of dialogue.
 >By default, "start" is the main set of the dialogue.
 >Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
 >Like "start" > "choice1" or "start" > "choice2".
+
+## Dialogue Next function
+Using the example above as reference, instead of setting manually the id using add_dialogue_start, you can use add_dialogue_next to create a new dialogue on a next page automatically!
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+
+func _ready() -> void:
+	add_dialogue_start("Hello World again!")
+	add_dialogue("testing dialogue again")
+	add_dialogue("test again moment -again-")
+	
+	add_dialogue_next("This one is the next page, which automatically incremented to the next page without needing to set it manually!")
+	add_dialogue("very cool")
+	add_dialogue("moment")
+	add_dialogue("amogus")
+	
+	load_dialogue_start()
+
+
+func _on_end_dialogue_signal() -> void:
+	end_dialogue()
+```
+
+## Dialogue Special
+Dialogue specials is a type of dialogue that runs the function the moment the dialogue index is on the above dialogue line.
+
+You can use this alongside Background Handler to change backgrounds, change characters emotions, positions, etc!
+
+### Test function example
+### Test function with arguments example
+### Characters example
+### Background handler example
+### Playing music example
+
 
 # Creating characters using the framework
 W.I.P
