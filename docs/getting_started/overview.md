@@ -44,7 +44,8 @@ In the example above shows a very basic way of adding dialogue to a visual novel
 
 However, there are more functions related to dialogue, for example, creating dialogue on a different page, a different set, running functions, etc.
 
->[!NOTE] Set explanation
+>[!NOTE] 
+>Set explanation
 >Sets are like different groups of dialogue.
 >By default, "start" is the main set of the dialogue.
 >Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
