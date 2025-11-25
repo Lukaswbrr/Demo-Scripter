@@ -1,3 +1,7 @@
+>[!WARNING]
+>In the future when DemoScripter is available as a Godot Addon, it's planned for DemoScripter to have a unique addon menu where you can create dialogue scenes and save them as Resources files! (which you can make translations on the addon menu too, making it easier to translate and save as .csv file)
+>This page MAY be obsolute in the future and only be used for legacy purposes. (but for now, it inst.)
+
 # Creating a basic dialogue scene
 1. Create a new CanvasLayer scene
 2. Duplicate the VisualNovelScene_hud.tscn scene into the new CanvasLayer scene (make the HUD scene local)
@@ -82,12 +86,20 @@ You can use this alongside Background Handler to change backgrounds, change char
 ### Test function example
 ### Test function with arguments example
 ### Characters example
+
 ### Background handler example
 ### Playing music example
 
 
 # Creating characters using the framework
-W.I.P
+>[!NOTE]
+>The following characters are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
+
+>[!NOTE]
+>I extracted the Tsukihime's sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
+>After making the extractions, I used my [NScripter Sprite Extractor](https://github.com/Lukaswbrr/nscripter-sprite-extractor-script) script made for Krita to make the sprites transparent.
+>If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
+>You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
 
 # Playing audio using the framework
 W.I.P
