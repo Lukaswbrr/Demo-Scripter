@@ -40,7 +40,15 @@ Note: The resolution of the project in this screenshot is set to 720x540 (the sa
 I made a [repository](https://github.com/Lukaswbrr/Demo-Scripter-Examples) which shows more examples using the framework.
 
 # Adding dialogue
-W.I.P
+In the example above shows a very basic way of adding dialogue to a visual novel scene.
+
+However, there are more functions related to dialogue, for example, creating dialogue on a different page, a different set, running functions, etc.
+
+>[!NOTE] Set explanation
+>Sets are like different groups of dialogue.
+>By default, "start" is the main set of the dialogue.
+>Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
+>Like "start" > "choice1" or "start" > "choice2".
 
 # Creating characters using the framework
 W.I.P
