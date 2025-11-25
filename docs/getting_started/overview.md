@@ -96,7 +96,7 @@ You can use this alongside Background Handler to change backgrounds, change char
 >The following characters are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 
 >[!NOTE]
->I extracted the Tsukihime's sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
+>I extracted the Tsukihime's sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
 >After making the extractions, I used my [NScripter Sprite Extractor](https://github.com/Lukaswbrr/nscripter-sprite-extractor-script) script made for Krita to make the sprites transparent.
 >If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
 >You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
