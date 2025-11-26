@@ -54,6 +54,10 @@ However, there are more functions related to dialogue, for example, creating dia
 >Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
 >Like "start" > "choice1" or "start" > "choice2".
 
+>[!NOTE]
+>Always remember to connect the end dialogue signal scene to the script!
+>Otherwise, the dialogue wouldn't end!
+
 ## Dialogue Next function
 Using the example above as reference, instead of setting manually the id using add_dialogue_start, you can use add_dialogue_next to create a new dialogue on a next page automatically!
 
@@ -84,19 +88,92 @@ Dialogue specials is a type of dialogue that runs the function the moment the di
 You can use this alongside Background Handler to change backgrounds, change characters emotions, positions, etc!
 
 ### Test function example
+Here is a example with a custom defined function on the same scene, running add_dialogue_special.
+
+The moment the index reaches 3, which is test dialogue special 2, it will run the function print_no_args, outputting !Hello World!" on the console.
+
+![no args example 1](./images/print_no_args_example_1.png)
+![no args example 2](./images/print_no_args_example_2.png)
+
+```
+extends DemoScripter_VisualNovelScene
+
+func _ready() -> void:
+	add_dialogue_start("Start of dialogue!")
+	add_dialogue("test dialogue 1")
+	add_dialogue("test dialogue special 2")
+	add_dialogue("test dialogue 3")
+	add_dialogue("test dialogue 4")
+	
+	load_dialogue_start()
+
+func print_no_args() -> void:
+	print("Hello World!")
+
+func _on_end_dialogue_signal() -> void:
+	end_dialogue()
+```
+
 ### Test function with arguments example
+Here is a example using a custom function that has two arguments.
+
+You can execute the arguments in the second argument of add_dialogue_special, which is a array argument (accepts multiples arguments of the function you're calling.)
+
+This example also includes the previous no arguments function!
+
+![print args example 1](./images/print_args_example_1.png)
+![print args example 2](./images/print_args_example_2.png)
+
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+func _ready() -> void:
+	add_dialogue_start("Start of dialogue!")
+	add_dialogue("test dialogue 1")
+	add_dialogue("test dialogue special 2")
+	add_dialogue_special(print_args, ["Hello World!", "How are you?"])
+	add_dialogue("test dialogue 3")
+	add_dialogue("test dialogue special 4")
+	add_dialogue_special(print_no_args)
+	
+	load_dialogue_start()
+
+func print_args(arg1: String, arg2: String) -> void:
+	print("Arg1: " + arg1)
+	print("Arg2: " + arg2)
+
+func print_no_args() -> void:
+	print("Hello World!")
+
+func _on_end_dialogue_signal() -> void:
+	end_dialogue()
+
+```
 ### Characters example
 
 ### Background handler example
-### Playing music example
+>[!NOTE]
+>The following background images are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
+>I extracted the Tsukihime's character sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
+>If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
+>You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
 
+
+#### Transition shader example
+
+### Playing music example
+>[!NOTE]
+>The following musics are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
+>I got the music files from accessing the CD folder from [ReadTsukihime's Tsukihime download page](https://www.readtsukihi.me/downloads).
+>The musics is from Tsuki-Bako version of Tsukihime.
 
 # Creating characters using the framework
 >[!NOTE]
 >The following characters are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 
 >[!NOTE]
->I extracted the Tsukihime's sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
+>I extracted the Tsukihime's character sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
 >After making the extractions, I used my [NScripter Sprite Extractor](https://github.com/Lukaswbrr/nscripter-sprite-extractor-script) script made for Krita to make the sprites transparent.
 >If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
 >You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
