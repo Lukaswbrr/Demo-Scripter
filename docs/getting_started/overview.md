@@ -197,12 +197,12 @@ in examples/characters folder.
 In your godot project, create a folder that will be used to store your characters.
 It can be any folder name. In this example, it's just called characters.
 
-![arcueid step 1](./images/arcueid_step_1.png.png)
+![arcueid step 1](./images/arcueid_step_1.png)
 
 ### Create arcueid folder
 Create the folder to store arcueid's sprites, files, etc.
 
-![alt text](./images/arcueid_step_2.png.png)
+![alt text](./images/arcueid_step_2.png)
 
 ### Duplicate character base to arcueid folder
 On character_base folder from DemoScripter, duplicate CharacterBase.tscn file and name it arcueid.tscn
