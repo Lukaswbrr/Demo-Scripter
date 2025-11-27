@@ -178,5 +178,53 @@ func _on_end_dialogue_signal() -> void:
 >If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
 >You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
 
+To create characters to be used with the framework, you use the DemoScripter_VisualNovelCharacter class.
+
+The character must have the following nodes:
+- AnimatedSprites for the characters sprites
+- AnimationPlayer for show and hide animations (can also be custom animations)
+- AnimationPlayer named EmotionPlayer for the characters's emotions
+
+There is a base character scene in scenes/cgaracter_base/CharacterBase.tscn.
+
+![character base image](./images/character_base_image.png)
+
+## Arcueid Example
+This a step-by-step example on making a character using the CharacterBase scene file as reference. The following character is from Tsukihime (2000). The complete example can be accessed
+in examples/characters folder.
+
+### Create characters folder
+In your godot project, create a folder that will be used to store your characters.
+It can be any folder name. In this example, it's just called characters.
+
+![arcueid step 1](./images/arcueid_step_1.png.png)
+
+### Create arcueid folder
+Create the folder to store arcueid's sprites, files, etc.
+
+![alt text](./images/arcueid_step_2.png.png)
+
+### Duplicate character base to arcueid folder
+On character_base folder from DemoScripter, duplicate CharacterBase.tscn file and name it arcueid.tscn
+
+![alt text](./images/arcueid_step_3.png)
+
+Move the arcueid.tscn to arcueid folder located in characters
+
+![alt text](./images/arcueid_step_3_2.png)
+
+For safety purposes, in case AnimationPlayer gets somehow modified in the base despite only modifying on Arcueid's scene file, go to EmotionPlayer, click on Manage Animations and on \[global], click on Save Icon and click on Turn Unique.
+
+![alt text](./images/arcueid_step_3_3.png)
+
+Do the same to the AnimationPlayer node.
+
+![alt text](./images/arcueid_step_3_4.png)
+
+### Rename Arcueid scene's CharacterBase nose to Arcueid
+Change the main node's name to Arcueid.
+
+![alt text](./images/arcueid_step_4.png)
+
 # Playing audio using the framework
 W.I.P
