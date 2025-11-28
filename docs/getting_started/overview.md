@@ -234,39 +234,39 @@ In arcueid's folder, create a folder named assets.
 
 This is where the sprites images will be located.
 
-![alt text](image.png)
+![Create assets folder](./images/arcueid_step_5.png)
 
 ### Add sprites to assets folder
 In the docs/assets/characters/arcueid folder, copy all of the sprites to the arcueid's assets folder.
 
-![alt text](image-1.png)
+![Copy sprites into assets](./images/arcueid_step_6.png)
 
-![alt text](image-2.png)
+![Arcueid sprites list part 2](./images/arcueid_step_6_1.png)
 
 ### Create SpriteFrames on AnimatedSprites node
 On AnimatedSprites node, create a new SpriteFrames.
 
-![alt text](image-3.png)
+![Create SpriteFrames resource](./images/arcueid_step_7.png)
 
 
 
 ### Rename default group to normal
 >[!NOTE] This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
 
-![alt text](image-4.png)
+![Rename default group to normal](./images/arcueid_step_8.png)
 
 ### Add Arcueid's sprites from the assets folder of the character to normal group of SpriteFrames.
 
-![alt text](image-6.png)
+![Add sprites to normal group](./images/arcueid_step_9.png)
 
-![alt text](image-5.png)
+![Added sprites preview](./images/arcueid_step_9_1.png)
 
-![alt text](image-7.png)
+![All sprites loaded](./images/arcueid_step_9_2.png)
 
 ### Move AnimatedSprites's position.
 When added the arcueid's sprites, the position of the AnimatedSprites looks off and not fully to the ground.
 
-![alt text](image-8.png)
+![Adjust AnimatedSprites position](./images/arcueid_step_10.png)
 
 To fix this, use the move tool
 
