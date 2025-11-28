@@ -3,7 +3,7 @@
 
 **Demo Scripter** is a visual novel framework inspired by NScripter made in Godot.
 
-The current version of Demo Scripter is for Godot 4.2
+The current version of Demo Scripter is for Godot 4.5+
 
 ## Features
 * Multiple set of dialogue
