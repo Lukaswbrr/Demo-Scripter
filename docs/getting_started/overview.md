@@ -95,7 +95,7 @@ The moment the index reaches 3, which is test dialogue special 2, it will run th
 ![no args example 1](./images/print_no_args_example_1.png)
 ![no args example 2](./images/print_no_args_example_2.png)
 
-```
+```gdscript
 extends DemoScripter_VisualNovelScene
 
 func _ready() -> void:
