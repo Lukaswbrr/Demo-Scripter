@@ -268,7 +268,37 @@ When added the arcueid's sprites, the position of the AnimatedSprites looks off 
 
 ![Adjust AnimatedSprites position](./images/arcueid_step_10.png)
 
-To fix this, use the move tool
+To fix this, on the x position, type 720/2 which will divide 720 by 2, resulting in 360. (720 is the project's width value.)
+
+Using the move tool, hold shift and try to move it down where it overlaps with the project's resolution boundaries.
+
+![Move tool alignment](./images/arcueid_step_11.png)
+
+The final value will be:
+- x: 360
+- y: 300
+
+![Final position values](./images/arcueid_step_11_2.png)
+
+### Resize AnimatedSprites
+Right now, Arcueid's sprite seems too small.
+
+Click on the AnimatedPlayer nodes with the select mode, hold shift and resize Arcueid's top left point until it overlaps with the project's resolution.
+
+![Resize sprite top-left handle](./images/arcueid_step_12.png)
+
+![Resize confirmation](./images/arcueid_step_12_2.png)
+
+When you resize the sprite, it will look offset again from the center.
+![Offset after resize](./images/arcueid_step_12_3.png)
+
+In the position propriety of AnimatedSprites node, change the position to the following:
+- x: 360
+- y: 270
+
+It will be on center again.
+
+![Recenter to 360x270](./images/arcueid_step_12_4.png)
 
 # Playing audio using the framework
 W.I.P
