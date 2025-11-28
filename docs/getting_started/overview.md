@@ -190,6 +190,9 @@ There is a base character scene in scenes/cgaracter_base/CharacterBase.tscn.
 ![character base image](./images/character_base_image.png)
 
 ## Arcueid Example
+>[!IMPORTANT]
+>The example below uses a project resolution of 720x540.
+
 This a step-by-step example on making a character using the CharacterBase scene file as reference. The following character is from Tsukihime (2000). The complete example can be accessed
 in examples/characters folder.
 
@@ -225,6 +228,47 @@ Do the same to the AnimationPlayer node.
 Change the main node's name to Arcueid.
 
 ![alt text](./images/arcueid_step_4.png)
+
+### Create assets folder in arcueid folder
+In arcueid's folder, create a folder named assets.
+
+This is where the sprites images will be located.
+
+![alt text](image.png)
+
+### Add sprites to assets folder
+In the docs/assets/characters/arcueid folder, copy all of the sprites to the arcueid's assets folder.
+
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+### Create SpriteFrames on AnimatedSprites node
+On AnimatedSprites node, create a new SpriteFrames.
+
+![alt text](image-3.png)
+
+
+
+### Rename default group to normal
+>[!NOTE] This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
+
+![alt text](image-4.png)
+
+### Add Arcueid's sprites from the assets folder of the character to normal group of SpriteFrames.
+
+![alt text](image-6.png)
+
+![alt text](image-5.png)
+
+![alt text](image-7.png)
+
+### Move AnimatedSprites's position.
+When added the arcueid's sprites, the position of the AnimatedSprites looks off and not fully to the ground.
+
+![alt text](image-8.png)
+
+To fix this, use the move tool
 
 # Playing audio using the framework
 W.I.P
