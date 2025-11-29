@@ -300,5 +300,80 @@ It will be on center again.
 
 ![Recenter to 360x270](./images/arcueid_step_12_4.png)
 
+### Fix incorrect SAD emotion
+By default, the SAD emotion sets the frame of the AnimatedSprites to 1.
+
+In arcueid's case, this is the wrong sprite for the emotion.
+
+![alt text](image.png)
+
+The fix will change the frame to 7, which will change to sprite 7 from AnimatedSprites.
+
+![alt text](image-3.png)
+
+
+>[!NOTE]
+>In case your 7 frame is different from this screenshot, change the value to where the sprite image from 7 in the screenshot is.
+
+In the EmotionPlayer, select the SAD animation and click on the image from frame property.
+
+![alt text](image-4.png)
+
+In the right side (or where your inspector's properties screen is located on), change the value to 7.
+
+![alt text](image-1.png)
+
+Now the SAD emotion should have the right sprite.
+
+![alt text](image-2.png)
+
+>[!NOTE]
+>You may need to change the emotion from the EmotionPlayer to NORMAL then to SAD to see the difference
+
+### Create new emotions
+To create new emotions, I recommend duplicating a already existing emotion, in this case, NORMAL.
+
+The animations from EmotionPlayer runs for 0.01 seconds, which is only meant for a easy way to create emotions for characters. Duplicating a existant emotion already sets the animation time to 0.01.
+
+>[!NOTE] In case your new character emotion is not being updated, despite changing the frame property value, verify if you accidentally moved the frame property. This could change the emotion not to change.
+>![alt text](image-5.png)
+
+We will create the new emotions named:
+- NORMAL_2
+- NORMAL_3
+- ANGRY
+- ANGRY_2
+- DOUBT
+- DOUBT_2
+- SAD_2
+- SURPRISED
+- SURPRISED_2
+
+First, select NORMAL emotion, then click on duplicate.
+
+![alt text](image-6.png)
+
+By default, the name should be NORMAL_2:
+![alt text](image-7.png)
+
+Change the NORMAL_2's frame property value to 1.
+
+![alt text](image-8.png)
+
+Repeat the same process with the following values of each emotion name:
+- NORMAL_3: 2
+- ANGRY: 3
+- ANGRY_2: 4
+- DOUBT: 5
+- DOUBT_2: 6
+- SAD_2: 8
+- SURPRISED: 9
+- SURPRISED_2: 10
+
+Your EmotionPlayer's animation list should be like this.
+
+![alt text](image-9.png)
+
+
 # Playing audio using the framework
 W.I.P
