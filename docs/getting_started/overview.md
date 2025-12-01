@@ -312,7 +312,8 @@ On AnimatedSprites node, create a new SpriteFrames.
 ![Create SpriteFrames resource](./images/arcueid_step_7.png)
 
 ### Rename default group to normal
->[!NOTE] This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
+>[!NOTE] 
+>This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
 
 ![Rename default group to normal](./images/arcueid_step_8.png)
 
