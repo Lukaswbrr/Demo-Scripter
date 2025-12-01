@@ -165,7 +165,7 @@ Once you have a character done, in this case Arcueid, create a Node2D named Char
 >You can add a control named Background with a ColorRect on it, if you want. It's just for a simple color background. (which is not used in the example)
 
 
-Then, instantiate arcueid scene on Characters node
+Then, instantiate arcueid scene on Characters node.
 
 ![alt text](image-10.png)
 ![alt text](image-11.png)
