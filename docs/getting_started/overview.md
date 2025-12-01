@@ -150,7 +150,70 @@ func _on_end_dialogue_signal() -> void:
 	end_dialogue()
 
 ```
-### Characters example
+### Character example
+>[!NOTE]
+>This will be used the Arcueid's character example!
+>You can follow the creating a character section for the arcueid example or copy the arcueid folder from examples/characters to your godot project.
+
+In this example, it will be tested functionality for making a character visible, change emotions, positions and make it invisible!
+
+Once you have a character done, in this case Arcueid, create a Node2D named Characters in your visual novel scene. This is where the characters will be added.
+
+![alt text](image.png)
+
+>[!NOTE]
+>You can add a control named Background with a ColorRect on it, if you want. It's just for a simple color background. (which is not used in the example)
+
+
+Then, instantiate arcueid scene on Characters node
+![alt text](image-10.png)
+![alt text](image-11.png)
+
+Here is the code used for the example.
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+
+func _ready() -> void:
+	add_dialogue_start("character example!")
+	add_dialogue("angry")
+	add_dialogue_special(set_character_emotion, [$Characters/Arcueid, "angry"])
+	add_dialogue("angry 2")
+	add_dialogue_special(set_character_emotion, [$Characters/Arcueid, "angry_2"])
+	add_dialogue("surprised")
+	add_dialogue_special(set_character_emotion, [$Characters/Arcueid, "SURPRISED"])
+	
+	add_dialogue_next("back to normal")
+	add_dialogue_special(set_character_emotion, [$Characters/Arcueid, "NORMAL"])
+	add_dialogue("doubt emotion")
+	add_dialogue_special(set_character_emotion, [$Characters/Arcueid, "DOUBT"])
+	add_dialogue_quote("Testing quote dialogue thing.")
+	add_dialogue("yeah")
+	add_dialogue_continue("it works")
+	
+	load_dialogue_start()
+```
+
+![alt text](image-13.png)
+![alt text](image-14.png)
+![alt text](image-15.png)
+![alt text](image-16.png)
+![alt text](image-17.png)
+![alt text](image-18.png)
+![alt text](image-19.png)
+
+
+The set_character_emotion sets the character's emotion. Most of the functions has a _instant variation, which means they get executed without the hud fading in and out! (and the _instant functions gets executed once the fade out animation finishes or fast_skip button is held.)
+![alt text](image-12.png)
+
+It's optional if you want to type the emotions argument in uppercase or lowercase since it automatically sets the argument to uppercase!
+
+add_dialogue_quote automatically creates a dialogue between "".
+
+add_dialogue_continue creates a dialogue in the same line.
+
+
 
 ### Background handler example
 >[!NOTE]
@@ -247,8 +310,6 @@ In the docs/assets/characters/arcueid folder, copy all of the sprites to the arc
 On AnimatedSprites node, create a new SpriteFrames.
 
 ![Create SpriteFrames resource](./images/arcueid_step_7.png)
-
-
 
 ### Rename default group to normal
 >[!NOTE] This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
@@ -373,6 +434,66 @@ Repeat the same process with the following values of each emotion name:
 Your EmotionPlayer's animation list should be like this.
 
 ![alt text](./images/arcueid_step_14_5.png)
+
+### Set position left and right values
+When you select the Arcueid node, you can notice that DemoScripter_VisualNovelCharacter 
+has three export variables:
+
+![alt text](image-1.png)
+- Pos Middle
+- Pos Left
+- Pos Right
+
+This is for setting the character's position when setpos_character function is executed on DemoScripter_VisualNovelScene.
+
+Select Sprites node and copy it's position value. This value will be used for the Pos Middle variable.
+
+![alt text](image-2.png)
+
+Paste the value to Pos Middle.
+
+![alt text](image-4.png)
+
+After that, select the Sprites node and while holding shift, move it to the left.
+
+![alt text](image-3.png)
+
+Copy the value from position and paste it to Pos Left.
+
+In this case, the position X is 178 and Y is 270.
+
+![alt text](image-5.png)
+
+Then, copy the value from Pos Left to Pos Right and put a - in front of the x value. (178, which will turn into -178)
+
+![alt text](image-6.png)
+
+Copy the Pos Middle value to Sprites' position property to center Arcueid by default again.
+
+### Create arcueid script
+Right click on Arcueid's node and click on Extend script.
+
+![alt text](image-7.png)
+
+Save it on arcueid's character folder.
+
+![alt text](image-8.png)
+
+### Auto add emotions function
+On arcueid.gd, in the _ready function, add auto_add_emotions() function. This is for loading the emotions for the character.
+
+![alt text](image-9.png)
+
+```gdscript
+extends DemoScripter_VisualNovelCharacter
+
+
+func _ready() -> void:
+	auto_add_emotions()
+```
+
+And now, the arcued character example should be finished and ready to be added to a scene!
+
 
 
 # Playing audio using the framework
