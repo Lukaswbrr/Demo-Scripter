@@ -166,6 +166,7 @@ Once you have a character done, in this case Arcueid, create a Node2D named Char
 
 
 Then, instantiate arcueid scene on Characters node
+
 ![alt text](image-10.png)
 ![alt text](image-11.png)
 
