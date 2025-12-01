@@ -206,6 +206,7 @@ func _ready() -> void:
 
 
 The set_character_emotion sets the character's emotion. Most of the functions has a _instant variation, which means they get executed without the hud fading in and out! (and the _instant functions gets executed once the fade out animation finishes or fast_skip button is held.)
+
 ![alt text](image-12.png)
 
 It's optional if you want to type the emotions argument in uppercase or lowercase since it automatically sets the argument to uppercase!
