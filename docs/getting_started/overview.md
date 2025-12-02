@@ -215,14 +215,12 @@ add_dialogue_quote automatically creates a dialogue between "".
 
 add_dialogue_continue creates a dialogue in the same line.
 
-
-
 ### Background handler example
 >[!NOTE]
->The following background images are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
->I extracted the Tsukihime's character sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
->If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
->You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
+>This uses the Background Handler created via the Adding backgrounds for the framework example!
+>You can follow that section on how to add backgrounds for the framework.
+
+In this example, it will be used the Background Handler node to handle backgrounds, which includes background transitions, etc!
 
 
 #### Transition shader example
@@ -232,6 +230,57 @@ add_dialogue_continue creates a dialogue in the same line.
 >The following musics are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 >I got the music files from accessing the CD folder from [ReadTsukihime's Tsukihime download page](https://www.readtsukihi.me/downloads).
 >The musics is from Tsuki-Bako version of Tsukihime.
+
+# Adding backgrounds for the framework
+>[!NOTE]
+>The following background images are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
+>I extracted the Tsukihime's character sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
+>If you'd like support on how to use ONScripter-EN and it's tools, feel free to ask for help on [ONScripter-EN's discord server](https://github.com/Galladite27/ONScripter-EN)!
+>You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
+
+## Tsukihime backgrounds example
+>[!NOTE]
+>The example below uses a project resolution of 720x540.
+
+First, instantiate background handler from demoscripter folder to your visual novel scene.
+![alt text](image-20.png)
+
+
+![alt text](image-26.png)
+
+Rename the BackgroundHandler to Background.
+
+![alt text](image-22.png)
+
+Make the Background node (previuosly named BackgroundHandler) to local. This is for adding the background sprites and not altering the background handler from demoscripter folder.
+
+![alt text](image-23.png)
+
+Create a new SpriteFrame on Sprites and add the Tsukihime backgrounds from assets/backgrounds of this documentation folder.
+
+![alt text](image-24.png)
+
+As you can see, the sprite resolution inst in the correct size due to the project being in 720x540.
+
+On Sprites node, set the Scale size to x: 1.125 and y: 1.125
+![alt text](image-25.png)
+
+After changing the scale, create a Node2D on your scene named Characters.
+
+>[!NOTE]
+>Even if you're not going to use characters, this is for preventing the assert function of empty characters node from returng true, causing an error.
+
+On Background node, set the Main Scene variable to the root node (or the node that the background handler is inside, which is a DemoScripter_VisualNovelScene node)
+
+![alt text](image-21.png)
+
+Then set the Characters Node to the Node2D named Characters you just created.
+
+![alt text](image-27.png)
+
+The overlay node can be empty because it's optional and only meant to be used if Use Overlay Exclusive Node is enabled, which handles overlays on a seperate node.
+
+And done! You should have a background handler ready to use!
 
 # Creating characters using the framework
 >[!NOTE]
@@ -496,8 +545,6 @@ func _ready() -> void:
 ```
 
 And now, the arcued character example should be finished and ready to be added to a scene!
-
-
 
 # Playing audio using the framework
 W.I.P
