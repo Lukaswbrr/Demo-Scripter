@@ -586,16 +586,16 @@ func pause_dialogue(value: bool) -> void:
 
 # MUSIC/AUDIO FUNCTIONS
 
-func play_audio(audio):
+func play_audio(audio: AudioStreamPlayer) -> void:
 	audio.play()
 
-func stop_audio(audio):
+func stop_audio(audio: AudioStreamPlayer) -> void:
 	audio.stop()
 
-func play_music(music) -> void:
+func play_music(music: AudioStreamPlayer) -> void:
 	music.play()
 
-func stop_music(music) -> void:
+func stop_music(music: AudioStreamPlayer) -> void:
 	music.stop()
 
 func play_music_wait_signal(music) -> void:
@@ -612,7 +612,7 @@ func play_audio_wait_signal(audio) -> void:
 		await _animation_player.animation_started
 		play_audio(audio)
 
-func fadein_music(music, duration: float) -> void:
+func fadein_music(music: AudioStreamPlayer, duration: float, pause: bool = false) -> void:
 	var musictween = get_tree().create_tween()
 	var music_oldvalue = music.volume_db
 	music.volume_db = -55
@@ -620,14 +620,25 @@ func fadein_music(music, duration: float) -> void:
 	if music_oldvalue == -55:
 		music_oldvalue = 0
 	
+	if !music.playing:
+		if pause:
+			pause_music(music)
+		else:
+			music.play()
+	
 	musictween.tween_property(music, "volume_db", music_oldvalue, duration)
 	#print(music_oldvalue)
 
-func fadeout_music(music, duration: float) -> void:
+func fadeout_music(music, duration: float, pause: bool = false) -> void:
 	var musictween = get_tree().create_tween()
 	var music_oldvalue = music.volume_db
 	musictween.tween_property(music, "volume_db", -55, duration)
 	await musictween.finished
+	
+	if pause:
+		music.pause()
+		return
+	
 	music.stop()
 
 func set_music_pitch(music, pitch):
@@ -639,11 +650,9 @@ func pause_music(music, wait_for_anim = false):
 		wait_for_anim_func()
 		await self.animation_text_fading_in
 		music.stream_paused = !music.stream_paused
-		music.playing = !music.stream_paused
 		print("Music stream paused: " + str(music.stream_paused))
 	else:
 		music.stream_paused = !music.stream_paused
-		music.playing = !music.stream_paused # apparently if another music is playing when the stream is paused, playing gets set to false
 		print("Music stream paused: " + str(music.stream_paused))
 
 #endregion
