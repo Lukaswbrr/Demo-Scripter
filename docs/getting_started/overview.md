@@ -15,6 +15,7 @@ In step 2, the tree should look like this:
 ![tree screenshot](./images/tree_screenshot.png "Tree Screenshot")
 
 ## Example code
+
 ```gdscript
 extends DemoScripter_VisualNovelScene
 
@@ -36,14 +37,17 @@ func _on_end_dialogue_signal() -> void:
 ```
 
 ### In game screenshot
+
 Note: The resolution of the project in this screenshot is set to 720x540 (the same of VisualNovelScene_hud.tscn)
 
 ![in game example 1](./images/in_game_example_1.png? "In game screenshot")
 
 ## Other examples
+
 I made a [repository](https://github.com/Lukaswbrr/Demo-Scripter-Examples) which shows more examples using the framework.
 
 # Adding dialogue
+
 In the example above shows a very basic way of adding dialogue to a visual novel scene.
 
 However, there are more functions related to dialogue, for example, creating dialogue on a different page, a different set, running functions, etc.
@@ -196,6 +200,14 @@ func _ready() -> void:
 	add_dialogue("yeah")
 	add_dialogue_continue("it works")
 	
+	add_dialogue_next("testing left")
+	add_dialogue_special(setpos_character, [$Characters/Arcueid, "left"])
+	add_dialogue("right")
+	add_dialogue_special(setpos_character, [$Characters/Arcueid, "right"])
+	add_dialogue("back to middle")
+	add_dialogue_special(setpos_character, [$Characters/Arcueid, "middle"])
+	add_dialogue("yipeee")
+	
 	load_dialogue_start()
 ```
 
@@ -206,6 +218,12 @@ func _ready() -> void:
 ![alt text](image-17.png)
 ![alt text](image-18.png)
 ![alt text](image-19.png)
+![alt text](image-34.png)
+![alt text](image-35.png)
+![alt text](image-36.png)
+![alt text](image-37.png)
+![alt text](image-38.png)
+![alt text](image-39.png)
 
 
 The set_character_emotion sets the character's emotion. Most of the functions has a _instant variation, which means they get executed without the hud fading in and out! (and the _instant functions gets executed once the fade out animation finishes or fast_skip button is held.)
@@ -217,6 +235,10 @@ It's optional if you want to type the emotions argument in uppercase or lowercas
 add_dialogue_quote automatically creates a dialogue between "".
 
 add_dialogue_continue creates a dialogue in the same line.
+
+setpos_character sets the character pos to a specific side. It uses the exported variables of position from the character!
+
+hide_character makes the character invisible and show_character makes the character visible. the _instant variations doesnt trigger the hud fade animation.
 
 ### Background handler example
 >[!NOTE]
@@ -302,7 +324,7 @@ The character must have the following nodes:
 - AnimationPlayer for show and hide animations (can also be custom animations)
 - AnimationPlayer named EmotionPlayer for the characters's emotions
 
-There is a base character scene in scenes/cgaracter_base/CharacterBase.tscn.
+There is a base character scene in scenes/character_base/CharacterBase.tscn.
 
 ![character base image](./images/character_base_image.png)
 
