@@ -498,9 +498,8 @@ _data = {
 
 [node name="Arcueid" type="Node2D"]
 script = ExtResource("1_pj8n2")
-pos_middle = Vector2(360, 270)
-pos_left = Vector2(177.99998, 270)
-pos_right = Vector2(-178, 270)
+pos_left = Vector2(-189, 0)
+pos_right = Vector2(189, 0)
 metadata/_custom_type_script = "uid://i45kbr2ackga"
 
 [node name="Sprites" type="AnimatedSprite2D" parent="."]

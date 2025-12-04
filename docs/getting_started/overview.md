@@ -83,11 +83,13 @@ func _on_end_dialogue_signal() -> void:
 ```
 
 ## Dialogue Special
+
 Dialogue specials is a type of dialogue that runs the function the moment the dialogue index is on the above dialogue line.
 
 You can use this alongside Background Handler to change backgrounds, change characters emotions, positions, etc!
 
 ### Test function example
+
 Here is a example with a custom defined function on the same scene, running add_dialogue_special.
 
 The moment the index reaches 3, which is test dialogue special 2, it will run the function print_no_args, outputting !Hello World!" on the console.
@@ -115,6 +117,7 @@ func _on_end_dialogue_signal() -> void:
 ```
 
 ### Test function with arguments example
+
 Here is a example using a custom function that has two arguments.
 
 You can execute the arguments in the second argument of add_dialogue_special, which is a array argument (accepts multiples arguments of the function you're calling.)
@@ -304,6 +307,7 @@ There is a base character scene in scenes/cgaracter_base/CharacterBase.tscn.
 ![character base image](./images/character_base_image.png)
 
 ## Arcueid Example
+
 >[!IMPORTANT]
 >The example below uses a project resolution of 720x540.
 
@@ -311,17 +315,20 @@ This a step-by-step example on making a character using the CharacterBase scene 
 in examples/characters folder.
 
 ### Create characters folder
+
 In your godot project, create a folder that will be used to store your characters.
 It can be any folder name. In this example, it's just called characters.
 
 ![arcueid step 1](./images/arcueid_step_1.png)
 
 ### Create arcueid folder
+
 Create the folder to store arcueid's sprites, files, etc.
 
 ![alt text](./images/arcueid_step_2.png)
 
 ### Duplicate character base to arcueid folder
+
 On character_base folder from DemoScripter, duplicate CharacterBase.tscn file and name it arcueid.tscn
 
 ![alt text](./images/arcueid_step_3.png)
@@ -339,11 +346,13 @@ Do the same to the AnimationPlayer node.
 ![alt text](./images/arcueid_step_3_4.png)
 
 ### Rename Arcueid scene's CharacterBase nose to Arcueid
+
 Change the main node's name to Arcueid.
 
 ![alt text](./images/arcueid_step_4.png)
 
 ### Create assets folder in arcueid folder
+
 In arcueid's folder, create a folder named assets.
 
 This is where the sprites images will be located.
@@ -351,6 +360,7 @@ This is where the sprites images will be located.
 ![Create assets folder](./images/arcueid_step_5.png)
 
 ### Add sprites to assets folder
+
 In the docs/assets/characters/arcueid folder, copy all of the sprites to the arcueid's assets folder.
 
 ![Copy sprites into assets](./images/arcueid_step_6.png)
@@ -358,17 +368,19 @@ In the docs/assets/characters/arcueid folder, copy all of the sprites to the arc
 ![Arcueid sprites list part 2](./images/arcueid_step_6_1.png)
 
 ### Create SpriteFrames on AnimatedSprites node
+
 On AnimatedSprites node, create a new SpriteFrames.
 
 ![Create SpriteFrames resource](./images/arcueid_step_7.png)
 
 ### Rename default group to normal
+
 >[!NOTE] 
 >This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
 
 ![Rename default group to normal](./images/arcueid_step_8.png)
 
-### Add Arcueid's sprites from the assets folder of the character to normal group of SpriteFrames.
+### Add Arcueid's sprites from the assets folder of the character to normal group of SpriteFrames
 
 ![Add sprites to normal group](./images/arcueid_step_9.png)
 
@@ -376,7 +388,8 @@ On AnimatedSprites node, create a new SpriteFrames.
 
 ![All sprites loaded](./images/arcueid_step_9_2.png)
 
-### Move AnimatedSprites's position.
+### Move AnimatedSprites's position
+
 When added the arcueid's sprites, the position of the AnimatedSprites looks off and not fully to the ground.
 
 ![Adjust AnimatedSprites position](./images/arcueid_step_10.png)
@@ -394,6 +407,7 @@ The final value will be:
 ![Final position values](./images/arcueid_step_11_2.png)
 
 ### Resize AnimatedSprites
+
 Right now, Arcueid's sprite seems too small.
 
 Click on the AnimatedPlayer nodes with the select mode, hold shift and resize Arcueid's top left point until it overlaps with the project's resolution.
@@ -406,6 +420,7 @@ When you resize the sprite, it will look offset again from the center.
 ![Offset after resize](./images/arcueid_step_12_3.png)
 
 In the position propriety of AnimatedSprites node, change the position to the following:
+
 - x: 360
 - y: 270
 
@@ -414,6 +429,7 @@ It will be on center again.
 ![Recenter to 360x270](./images/arcueid_step_12_4.png)
 
 ### Fix incorrect SAD emotion
+
 By default, the SAD emotion sets the frame of the AnimatedSprites to 1.
 
 In arcueid's case, this is the wrong sprite for the emotion.
@@ -423,7 +439,6 @@ In arcueid's case, this is the wrong sprite for the emotion.
 The fix will change the frame to 7, which will change to sprite 7 from AnimatedSprites.
 
 ![alt text](./images/arcueid_step_13_2.png)
-
 
 >[!NOTE]
 >In case your 7 frame is different from this screenshot, change the value to where the sprite image from 7 in the screenshot is.
@@ -444,6 +459,7 @@ Now the SAD emotion should have the right sprite.
 >You may need to change the emotion from the EmotionPlayer to NORMAL then to SAD to see the difference
 
 ### Create new emotions
+
 To create new emotions, I recommend duplicating a already existing emotion, in this case, NORMAL.
 
 The animations from EmotionPlayer runs for 0.01 seconds, which is only meant for a easy way to create emotions for characters. Duplicating a existant emotion already sets the animation time to 0.01.
@@ -452,6 +468,7 @@ The animations from EmotionPlayer runs for 0.01 seconds, which is only meant for
 >![alt text](./images/arcueid_step_14.png)
 
 We will create the new emotions named:
+
 - NORMAL_2
 - NORMAL_3
 - ANGRY
@@ -474,6 +491,7 @@ Change the NORMAL_2's frame property value to 1.
 ![alt text](./images/arcueid_step_14_4.png)
 
 Repeat the same process with the following values of each emotion name:
+
 - NORMAL_3: 2
 - ANGRY: 3
 - ANGRY_2: 4
@@ -488,39 +506,41 @@ Your EmotionPlayer's animation list should be like this.
 ![alt text](./images/arcueid_step_14_5.png)
 
 ### Set position left and right values
-When you select the Arcueid node, you can notice that DemoScripter_VisualNovelCharacter 
-has three export variables:
+
+When you select the Arcueid node, you can notice that DemoScripter_VisualNovelCharacter has three export variables:
 
 ![alt text](image-1.png)
+
 - Pos Middle
 - Pos Left
 - Pos Right
 
 This is for setting the character's position when setpos_character function is executed on DemoScripter_VisualNovelScene.
 
-Select Sprites node and copy it's position value. This value will be used for the Pos Middle variable.
+Keep in mind, this is for setting the character's node named Arcueid and not the Sprites!
 
-![alt text](image-2.png)
+Since arcueid's position is already on the middle (0, 0), Pos middle will remain the same. (0, 0)
+![alt text](image-28.png)
 
-Paste the value to Pos Middle.
 
 ![alt text](image-4.png)
 
-After that, select the Sprites node and while holding shift, move it to the left.
+After that, select the Arcueid node and while holding shift, move it to the left.
 
-![alt text](image-3.png)
+![alt text](image-29.png)
 
 Copy the value from position and paste it to Pos Left.
 
-In this case, the position X is 178 and Y is 270.
+![alt text](image-31.png)
 
-![alt text](image-5.png)
+In this case, the position X is -189.
 
-Then, copy the value from Pos Left to Pos Right and put a - in front of the x value. (178, which will turn into -178)
+Then, copy the value from Pos Left to Pos Right and remove the minus sign of the x value. (-189, which will turn into 189)
 
-![alt text](image-6.png)
+![alt text](image-32.png)
 
-Copy the Pos Middle value to Sprites' position property to center Arcueid by default again.
+Copy the Pos Middle value to Arcueid's position property to center Arcueid by default again.
+![alt text](image-33.png)
 
 ### Create arcueid script
 Right click on Arcueid's node and click on Extend script.
