@@ -8,10 +8,13 @@
 # Ignore temporary/metadata directories
 .godot/
 
+# NOTE: I am uncertain if its necessary to add uid and .import files back to version control
+# from examples.
+
 # Re-include (un-ignore) the .import files inside the docs/examples folder and its subdirectories.
 # The ** matches any number of intermediate directories.
-!docs/examples/**/*.import
+# !docs/examples/**/*.import
 
 # Re-include (un-ignore) the .gd.uid and .tscn.uid files inside the docs/examples folder.
-!docs/examples/**/*.gd.uid
-!docs/examples/**/*.tscn.uid
+#!docs/examples/**/*.gd.uid
+#!docs/examples/**/*.tscn.uid
