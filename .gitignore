@@ -1,0 +1,17 @@
+# Ignore all .import files generated for resources (images, sounds, etc.)
+*.import
+
+# Ignore all Godot UID files
+*.gd.uid
+*.tscn.uid
+
+# Ignore temporary/metadata directories
+.godot/
+
+# Re-include (un-ignore) the .import files inside the docs/examples folder and its subdirectories.
+# The ** matches any number of intermediate directories.
+!docs/examples/**/*.import
+
+# Re-include (un-ignore) the .gd.uid and .tscn.uid files inside the docs/examples folder.
+!docs/examples/**/*.gd.uid
+!docs/examples/**/*.tscn.uid
