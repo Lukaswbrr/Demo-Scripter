@@ -1,5 +1,5 @@
-extends Control
 class_name DemoScripter_ButtonHandler
+extends Control
 
 signal button_set_appeared(set:int)
 
