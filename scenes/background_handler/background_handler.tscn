@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://cijf8scx0y1y8"]
 
-[ext_resource type="Script" uid="uid://bmjewdkjsbu6g" path="res://scripts/modules/background_handler/BackgroundHandler.gd" id="1_rmun0"]
+[ext_resource type="Script" uid="uid://bmjewdkjsbu6g" path="res://Demo-Scripter/scripts/modules/background_handler/BackgroundHandler.gd" id="1_pthio"]
 
 [sub_resource type="Animation" id="10"]
 length = 0.001
@@ -33,7 +33,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_rmun0")
+script = ExtResource("1_pthio")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1

@@ -825,4 +825,3 @@ func set_overlay_modulate_instant(newColor: Color, overlay: ColorRect) -> void:
 	overlay.set_modulate(newColor)
 
 #endregion
-
