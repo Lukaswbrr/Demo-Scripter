@@ -1,7 +1,7 @@
 [gd_resource type="Theme" load_steps=9 format=3 uid="uid://hofg2r7qn1n0"]
 
 [ext_resource type="FontFile" uid="uid://d18tkgg1nxyvk" path="res://dev/fonts/default.ttf" id="1_jr457"]
-[ext_resource type="FontFile" uid="uid://bq7lkaxqm1wn3" path="res://scenes/hud styles/nscripter/fonts/default.ttf" id="2_px105"]
+[ext_resource type="FontFile" uid="uid://bpv4uqqbrkroq" path="res://Demo-Scripter/scenes/hud styles/nscripter/fonts/default.ttf" id="2_fq1ro"]
 
 [sub_resource type="FontVariation" id="FontVariation_pri5o"]
 base_font = ExtResource("1_jr457")
@@ -17,7 +17,8 @@ base_font = ExtResource("1_jr457")
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6vxrw"]
 
 [resource]
-default_font = ExtResource("2_px105")
+default_font = ExtResource("2_fq1ro")
+default_font_size = 19
 Button/colors/font_color = Color(1, 1, 1, 1)
 Button/colors/font_hover_color = Color(0.713726, 0.713726, 0.713726, 1)
 Button/colors/font_outline_color = Color(0.176471, 0.176471, 0.176471, 1)
