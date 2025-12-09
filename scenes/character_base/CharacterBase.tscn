@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://wbx3k5nnp8pr"]
 
-[ext_resource type="Script" uid="uid://i45kbr2ackga" path="res://scripts/DemoScripter_character.gd" id="1_mxw7k"]
+[ext_resource type="Script" uid="uid://i45kbr2ackga" path="res://Demo-Scripter/scripts/DemoScripter_character.gd" id="1_qgnpi"]
 
 [sub_resource type="Animation" id="2"]
 resource_name = "NORMAL"
@@ -184,12 +184,12 @@ _data = {
 }
 
 [node name="CharacterBase" type="Node2D"]
-script = ExtResource("1_mxw7k")
+script = ExtResource("1_qgnpi")
 metadata/_custom_type_script = "uid://i45kbr2ackga"
 
 [node name="Sprites" type="AnimatedSprite2D" parent="."]
 position = Vector2(329, 284)
-animation = &"normal"
+animation = &""
 
 [node name="EmotionPlayer" type="AnimationPlayer" parent="."]
 libraries = {
