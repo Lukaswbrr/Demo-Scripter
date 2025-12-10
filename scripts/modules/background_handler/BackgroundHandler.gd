@@ -29,20 +29,36 @@ func _ready() -> void:
 
 #region NEW_FUNCS
 
-func add_overlay_normal(shader_name: String, dict: Dictionary, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func add_overlay_normal(shader_name: String, dict: Dictionary, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold_out": 0
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		add_overlay_normal_instant(shader_name, dict)
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
 	add_overlay_normal_instant(shader_name, dict)
 	
-	await get_tree().create_timer(hold_in).timeout
+	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
 func add_overlay_normal_instant(shader_name: String, dict: Dictionary) -> void:
@@ -173,7 +189,22 @@ func hide_background() -> void:
 func show_background() -> void:
 	background_sprites.set_visible(true)
 
-func change_background_transition_new_instant(index: int, group: String, duration: float, hold_signal: float = 0) -> void:
+# NOTE: maybe use a dictionary for setting arguments? 
+# like {
+# should_character_appear: true
+# }, which makes it so you dont need to always set multiple arguments at once
+func change_background_transition_instant(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
+	var default_config: Dictionary = {
+		"persistant_chars": false,
+		"hold_signal": 0
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
 	var persistant_overlays = _check_persistant_amount_overlays()
 	
 	var new_background = AnimatedSprite2D.new()
@@ -189,6 +220,9 @@ func change_background_transition_new_instant(index: int, group: String, duratio
 	else:
 		characters_node.add_child(new_background)
 	
+	if config["persistant_chars"]:
+		characters_node.move_child(new_background, 0)
+	
 	if persistant_overlays > 0:
 		if use_overlay_exclusive_node:
 			overlay_node.move_child(new_background, -persistant_overlays - 1)
@@ -197,25 +231,54 @@ func change_background_transition_new_instant(index: int, group: String, duratio
 	
 	var tween = get_tree().create_tween()
 	tween.tween_property(new_background, "modulate", Color(new_background.modulate, 1), duration)
-	tween.tween_callback(hide_characters)
+	if not config["persistant_chars"]:
+		tween.tween_callback(hide_characters)
 	tween.tween_callback(background_sprites.set_frame.bind(index))
 	tween.tween_callback(background_sprites.set_animation.bind(group))
 	tween.tween_callback(new_background.queue_free)
-	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(hold_signal)
+	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
 
-func change_background_transition_new(index: int, group: String, duration: float, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0, hold_signal: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		change_background_transition_new_instant(index, group, 0)
+func change_background_transition(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
+	# NOTE: types
+	# fast_skipable: bool
+	# persistant_chars: bool
+	# hold_in: float
+	# hold_out: float
+	# hold_signal: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"persistant_chars": false,
+		"hold_in": 0,
+		"hold_out": 0,
+		"hold_signal": 0
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	var config_instant = config.duplicate()
+	
+	for k in config_instant.keys():
+		if k in ["fast_skipable", "hold_in", "hold_out"]:
+			config_instant.erase(k)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		# remove keys from config, so it gets accepted in the instant variation	
+		
+		change_background_transition_instant(index, group, 0, config_instant)
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	change_background_transition_new_instant(index, group, duration)
+	change_background_transition_instant(index, group, duration, config_instant)
 	
-	await get_tree().create_timer(duration + hold_in).timeout
+	await get_tree().create_timer(duration + config["hold_in"]).timeout
 	
 	main_scene.dialogue_fade_in()
 
@@ -593,6 +656,21 @@ func set_rect_color_transition(newColor: Color, duration: float, fast_skipable: 
 
 #endregion
 
+#region UNDERSCORE
+
+func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
+	if dict2.is_empty():
+		return true
+	
+	for k in dict2:
+		if not k in dict1:
+			print(k)
+			return false
+	
+	return true
+
+#endregion
+
 #region OBSOLETE
 
 # OLD STUFF BELOW
@@ -627,7 +705,7 @@ func change_background_fade(index: int, group, fadeout: float, hold_out: float, 
 	await get_tree().create_timer(fadein + hold_in).timeout
 	main_scene.dialogue_fade_in()
 
-func change_background_transition(index: int, group, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
+func change_background_transition_old(index: int, group, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		change_background_instant(index, group)
 		return
@@ -783,8 +861,6 @@ func rect_blink_old(fadein: float, hold_in: float, fadeout: float, hold_out: flo
 		return
 	else:
 		main_scene.dialogue_fade_in()
-
-
 
 func set_overlay_modulate(newColor: Color, hold: float, overlay: ColorRect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
