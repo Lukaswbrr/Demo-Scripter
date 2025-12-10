@@ -266,8 +266,6 @@ func change_background_transition(index: int, group: String, duration: float, co
 			config_instant.erase(k)
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		# remove keys from config, so it gets accepted in the instant variation	
-		
 		change_background_transition_instant(index, group, 0, config_instant)
 		return
 	
@@ -283,7 +281,7 @@ func change_background_transition(index: int, group: String, duration: float, co
 	main_scene.dialogue_fade_in()
 
 
-func background_effect_in_instant(shader_name: String, property: String, value: float, duration: float, rotation: float, hold: float = 0) -> void:
+func background_effect_in_instant(shader_name: String, property: String, value: float, duration: float, rotation: float = 0, hold: float = 0) -> void:
 	var effect = load(shader_name)
 	var persistant_overlays = _check_persistant_amount_overlays()
 	
@@ -333,22 +331,51 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 	await overlay_effect_finished
 	main_scene.dialogue_fade_in()
 
-func background_fade_in(duration: float, fast_skipable: bool = true, hold_in: float = 0, hold: float = 0, hold_out: float = 0, hide_character: bool = true, hide_background: bool = true) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		#set_background_modulate_instant(newColor)
-		hide_characters()
-		hide_background()
+func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold_out: float
+	# hide_character: bool
+	# hide_background: bool
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold": 0,
+		"hold_out": 0,
+		"hide_characters": true,
+		"hide_background": true,
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	var config_instant = config.duplicate()
+	
+	for k in config_instant.keys():
+		if k in ["fast_skipable", "hold_in", "hold_out"]:
+			config_instant.erase(k)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		if config["hide_characters"]:
+			hide_characters()
+		
+		if config["hide_background"]:
+			hide_background()
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_fade_in_instant(duration, hold, hide_background, hide_character)
+	background_fade_in_instant(duration, config_instant)
 	
-	if hold_in < 0:
+	if config["hold_in"] < 0:
 		return
 	else:
 		await fade_in_finished
@@ -374,7 +401,23 @@ func background_fade_out(duration: float, fast_skipable: bool = true, hold_in: f
 		await fade_out_finished
 		main_scene.dialogue_fade_in()
 
-func background_fade_in_instant(duration: float, hold: float = 0, _hide_background: bool = true, _hide_characters: bool = true) -> void:
+func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# hold: float
+	# hide_background: bool
+	# hide_characters: bool
+	var default_config: Dictionary = {
+		"hold": 0,
+		"hide_characters": true,
+		"hide_background": true,
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
 	var persistant_overlays = _check_persistant_amount_overlays()
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
@@ -394,13 +437,13 @@ func background_fade_in_instant(duration: float, hold: float = 0, _hide_backgrou
 		
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 1), duration)
-	if _hide_background:
+	if config["hide_background"]:
 		tween.tween_callback(hide_background)
-	if _hide_characters:
+	if config["hide_characters"]:
 		tween.tween_callback(hide_characters)
 	tween.tween_callback(color_overlay.queue_free)
-	if hold > 0:
-		tween.tween_callback(emit_signal.bind("fade_in_finished")).set_delay(hold)
+	if config["hold"] > 0:
+		tween.tween_callback(emit_signal.bind("fade_in_finished")).set_delay(config["hold"])
 	else:
 		tween.tween_callback(emit_signal.bind("fade_in_finished"))
 	
@@ -587,24 +630,57 @@ func change_background_fade_new(index: int, group, fadeout: float, hold_out: flo
 	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate.r, color_overlay.modulate.g, color_overlay.modulate.b, 0), fadein)
 	tween.tween_callback(main_scene.dialogue_fade_in).set_delay(hold_in)
 
-func rect_blink(fadein: float, fadeout: float, fast_skipable: bool = true, hold_in: float = 0, hold_1: float = 0, hold_2: float = 0, hold_out: float = 0, hide_background_in: bool = true, hide_character_in: bool = false) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold_out: float
+	# hide_background_in: bool
+	# hide_character_in: bool
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold_out": 0,
+		"hold_fadein": 0,
+		"hold_fadeout": 0,
+		"hide_background_in": true,
+		"hide_characters_in": true
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	var config_fadein: Dictionary = {
+		"hold": config["hold_fadein"],
+		"hide_characters": config["hide_characters_in"],
+		"hide_background": config["hide_background_in"]
+	}
+	
+	# NOTE: in case fadeout in the future gets more optional arguments
+	var config_fadeout: Dictionary = {
+		"hold": config["hold_fadeout"]
+	}
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		return
 	
-	if hold_in > 0:
-		await get_tree().create_timer(hold_in).timeout
+	if config["hold_in"] > 0:
+		await get_tree().create_timer(config["hold_in"]).timeout
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
-	background_fade_in_instant(fadein, hold_1, hide_background_in, hide_character_in)
+	background_fade_in_instant(fadein, config_fadein)
 	await fade_in_finished
-	background_fade_out_instant(fadeout, hold_2)
+	background_fade_out_instant(fadeout, config_fadeout["hold"])
 	await fade_out_finished
-	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+		
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 		main_scene.dialogue_fade_in()
-	elif hold_out < 0:
+	elif config["hold_out"] < 0:
 		return
 	else:
 		main_scene.dialogue_fade_in()
@@ -831,7 +907,7 @@ func background_fadein_instant(duration: float) -> void:
 	var tween = get_tree().create_tween()
 	tween.tween_property(background_sprites, "modulate", Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration)
 
-func background_fadein(duration: float, hold: float = 0) -> void:
+func background_fadein_old(duration: float, hold: float = 0) -> void:
 	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
 
 func background_fadein_all(duration: float, hold: float = 0) -> void: 
@@ -841,7 +917,7 @@ func background_fadeout_instant(duration: float) -> void:
 	var tween = get_tree().create_tween()
 	tween.tween_property(background_sprites, "modulate", Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration)
 
-func background_fadeout(duration: float, hold: float = 0) -> void:
+func background_fadeout_old(duration: float, hold: float = 0) -> void:
 	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
 
 func background_fadeout_all(duration: float, hold: float = 0) -> void:
