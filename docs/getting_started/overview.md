@@ -157,7 +157,9 @@ func _on_end_dialogue_signal() -> void:
 	end_dialogue()
 
 ```
+
 ### Character example
+
 >[!NOTE]
 >This will be used the Arcueid's character example!
 >You can follow the creating a character section for the arcueid example or copy the arcueid folder from examples/characters to your godot project.
@@ -241,22 +243,141 @@ setpos_character sets the character pos to a specific side. It uses the exported
 hide_character makes the character invisible and show_character makes the character visible. the _instant variations doesnt trigger the hud fade animation.
 
 ### Background handler example
+
 >[!NOTE]
 >This uses the Background Handler created via the Adding backgrounds for the framework example!
 >You can follow that section on how to add backgrounds for the framework.
+>This also uses the Arcueid example from Adding characters to the framework!
 
 In this example, it will be used the Background Handler node to handle backgrounds, which includes background transitions, etc!
 
+Keep in mind, the current scene for this test looks like this.
+![alt text](image-40.png)
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+
+func _ready() -> void:
+	add_dialogue_start("background example!")
+	add_dialogue("normal background")
+	add_dialogue("change to sprite 1")
+	add_dialogue_special(background.change_background_transition, [1, "default", 2])
+	add_dialogue("change to sprite 3")
+	add_dialogue_special(background.change_background_transition, [3, "default", 2])
+	add_dialogue("change to sprite 7")
+	add_dialogue_special(background.change_background_transition, [7, "default", 2])
+	add_dialogue("short change to sprite 10")
+	add_dialogue_special(background.change_background_transition, [10, "default", 1])
+	add_dialogue("long change to sprite 11")
+	add_dialogue_special(background.change_background_transition, [11, "default", 3])
+	
+	add_dialogue_next("back to sprite 0")
+	add_dialogue_special(background.change_background_transition, [0, "default", 1])
+	add_dialogue("uhuh")
+	
+	add_dialogue_next("now with character visible")
+	add_dialogue_special(show_character, [$Characters/Arcueid])
+	add_dialogue("change to sprite 3")
+	add_dialogue_special(background.change_background_transition, [3, "default", 2])
+	add_dialogue("the background gets in front of the character, making the character hidden!")
+	add_dialogue("appear arcueid again")
+	add_dialogue_special(show_character, [$Characters/Arcueid])
+	add_dialogue("change to sprite 5 persistant")
+	add_dialogue_special(background.change_background_transition, [5, "default", 2, {
+		"persistant_chars": true
+	}])
+	add_dialogue("now the character is on front!")
+	add_dialogue("very cool...")
+	
+	add_dialogue_next("back to sprite 0, once again")
+	add_dialogue_special(background.change_background_transition, [0, "default", 2])
+	add_dialogue("background fade in")
+	add_dialogue_special(background.background_fade_in, [2])
+	add_dialogue("background fade out")
+	add_dialogue_special(background.background_fade_out, [2])
+	add_dialogue("arcueid appear again")
+	add_dialogue_special(show_character, [$Characters/Arcueid]) 
+	add_dialogue("fade in again")
+	add_dialogue_special(background.background_fade_in, [2])
+	add_dialogue("fade out again")
+	add_dialogue_special(background.background_fade_out, [2])
+	add_dialogue("as you can see, arcueid disappeared during the fade in animation!")
+	add_dialogue("arcueid appear again -again-")
+	add_dialogue_special(show_character, [$Characters/Arcueid]) 
+	add_dialogue("fade in again -again-")
+	add_dialogue_special(background.background_fade_in, [2, {
+		"hide_characters": false
+	}])
+	add_dialogue("while arcueid got affected by the fadein effect, arcueid didnt completely disappear!")
+	
+	add_dialogue_next("back to normal again")
+	add_dialogue_special(background.background_fade_out, [2])
+	add_dialogue("test blink")
+	add_dialogue_special(background.rect_blink, [1, 1])
+	add_dialogue("quick blink")
+	add_dialogue_special(background.rect_blink, [0.3, 0.3])
+	add_dialogue("by default, characters dont disappear during the effect of rect blink")
+	add_dialogue("hide characters test")
+	add_dialogue_special(background.rect_blink, [0.3, 0.3, {
+		"hide_characters_in": true
+	}])
+	add_dialogue("dont hide background test")
+	add_dialogue_special(background.rect_blink, [0.3, 0.3, {
+		"hold_fadein": 3,
+		"hide_background_in": false
+	}])
+	add_dialogue("only works when you set the hold_fadein argument higher than 0")
+	add_dialogue("test colored rect_blink")
+	add_dialogue_special(background.rect_blink, [0.5, 0.5, {
+		"rect_color": Color8(255, 0, 0)
+	}])
+	
+	load_dialogue_start()
+
+```
+
+![alt text](image-41.png)
+![alt text](image-42.png)
+![alt text](image-43.png)
+![alt text](image-44.png)
+![alt text](image-45.png)
+![alt text](image-46.png)
+![alt text](image-47.png)
+![alt text](image-48.png)
+![alt text](image-49.png)
+![alt text](image-50.png)
+![alt text](image-51.png)
+![alt text](image-52.png)
+![alt text](image-54.png)
+![alt text](image-55.png)
+
+change_background_transition changes the background with a transition effect that fades in the new background on top of the old background. By default, characters get affected by the transition effect. You can enable persistant characters adding { "persistant_chars": true } to the config argument.
+
+background_fade_in fades the background in, which makes it invisible and only making the color behing the Background's Sprites node visible. (ColorRect) Just like change_background_transition, characters get affected by the background fade. You can disable this by using { "hide_characters_in": false } in the config argument.
+
+![alt text](image-53.png)
+
+background_fade_out fades the background out.
+
+rect_blink fades the background in and then out. You can set the rect_color temporarily using "rect_color" in the config argument. (it sets back to the original color value background had.) Characters don't disappear during the effect of rect blink by default.
+
+#### Background colors example
 
 #### Transition shader example
 
+#### Overlay example
+
 ### Playing music example
+
 >[!NOTE]
 >The following musics are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 >I got the music files from accessing the CD folder from [ReadTsukihime's Tsukihime download page](https://www.readtsukihi.me/downloads).
 >The musics is from Tsuki-Bako version of Tsukihime.
 
 # Adding backgrounds for the framework
+
 >[!NOTE]
 >The following background images are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 >I extracted the Tsukihime's character sprites using [ONScripter-EN's](https://github.com/Galladite27/ONScripter-EN) tools maintained by [Galladite27](https://galladite.net/~galladite/). (extracting the ONScripter source code, running ./configure on terminal and running make tools on terminal.)
@@ -320,6 +441,7 @@ And done! You should have a background handler ready to use!
 To create characters to be used with the framework, you use the DemoScripter_VisualNovelCharacter class.
 
 The character must have the following nodes:
+
 - AnimatedSprites for the characters sprites
 - AnimationPlayer for show and hide animations (can also be custom animations)
 - AnimationPlayer named EmotionPlayer for the characters's emotions
