@@ -8,6 +8,9 @@
 # Ignore temporary/metadata directories
 .godot/
 
+# VS Code
+.markdownlint.jsonc
+
 # NOTE: I am uncertain if its necessary to add uid and .import files back to version control
 # from examples.
 
