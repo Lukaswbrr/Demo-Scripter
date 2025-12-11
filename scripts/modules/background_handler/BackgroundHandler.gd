@@ -581,8 +581,26 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 	
 	main_scene.dialogue_fade_in()
 
-func change_background_effect(index: int, group: String, shader_name: String, property: String, value_in: float, value_out: float, duration_in: float, duration_out: float, fast_skipable: bool = true, hold: float = 0, hold_in: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func change_background_effect(index: int, group: String, shader_name: String, property: String, value_in: float, value_out: float, duration_in: float, duration_out: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold: float
+	# hold_in: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold": 0,
+		"hold_in": 0,
+		"hold_out": 0,
+	}
+	
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		hide_characters()
 		change_background_instant(index, group)
 		return
@@ -590,14 +608,14 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_in > 0:
-		await get_tree().create_timer(hold_in).timeout
+	if config["hold_in"] > 0:
+		await get_tree().create_timer(config["hold_in"]).timeout
 	
 	#background_effect_out_instant(shader_name, property, value, duration, hold)
-	background_effect_in_instant(shader_name, property, value_in, duration_in, hold)
+	background_effect_in_instant(shader_name, property, value_in, duration_in, config["hold"])
 	await overlay_effect_finished
 	
-	background_effect_out_change_instant(index, group, shader_name, property, value_out, duration_out, hold_out)
+	background_effect_out_change_instant(index, group, shader_name, property, value_out, duration_out, config["hold_out"])
 	await overlay_effect_finished
 	
 	main_scene.dialogue_fade_in()
@@ -637,6 +655,8 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	# hold_out: float
 	# hide_background_in: bool
 	# hide_character_in: bool
+	var old_background_color: Color = background_color.modulate
+	
 	var default_config: Dictionary = {
 		"fast_skipable": true,
 		"hold_in": 0,
@@ -644,7 +664,8 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 		"hold_fadein": 0,
 		"hold_fadeout": 0,
 		"hide_background_in": true,
-		"hide_characters_in": true
+		"hide_characters_in": false,
+		"rect_color": background_color.modulate
 	}
 	
 	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
@@ -665,6 +686,9 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	}
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		if config["hide_characters_in"]:
+			hide_characters()
+		
 		return
 	
 	if config["hold_in"] > 0:
@@ -672,11 +696,17 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
+	if config["rect_color"] != background_color.modulate:
+		set_overlay_modulate_instant(config["rect_color"], background_color)
+	
 	background_fade_in_instant(fadein, config_fadein)
 	await fade_in_finished
 	background_fade_out_instant(fadeout, config_fadeout["hold"])
 	await fade_out_finished
-		
+	
+	if background_color.modulate != old_background_color:
+		set_overlay_modulate_instant(config["rect_color"], background_color) 
+	
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
 		main_scene.dialogue_fade_in()
@@ -973,6 +1003,7 @@ func set_overlay_modulate_transition(newColor: Color, hold: float, duration: flo
 	else:
 		main_scene.dialogue_fade_in()
 
+# TODO: maybe rename this to something else in the future?
 func set_overlay_modulate_instant(newColor: Color, overlay: ColorRect) -> void:
 	overlay.set_modulate(newColor)
 
