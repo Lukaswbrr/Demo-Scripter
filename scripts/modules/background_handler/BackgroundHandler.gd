@@ -697,7 +697,7 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	if config["rect_color"] != background_color.modulate:
-		set_overlay_modulate_instant(config["rect_color"], background_color)
+		set_rect_modulate_instant(config["rect_color"], background_color)
 	
 	background_fade_in_instant(fadein, config_fadein)
 	await fade_in_finished
@@ -705,7 +705,7 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	await fade_out_finished
 	
 	if background_color.modulate != old_background_color:
-		set_overlay_modulate_instant(config["rect_color"], background_color) 
+		set_rect_modulate_instant(config["rect_color"], background_color) 
 	
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
@@ -968,14 +968,14 @@ func rect_blink_old(fadein: float, hold_in: float, fadeout: float, hold_out: flo
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_overlay_modulate(newColor: Color, hold: float, overlay: ColorRect, fast_skipable: bool = true) -> void:
+func set_overlay_modulate(newColor: Color, hold: float, rect: ColorRect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		set_overlay_modulate_instant(newColor, overlay)
+		set_rect_modulate_instant(newColor, rect)
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
-	set_overlay_modulate_instant(newColor, overlay)
+	set_rect_modulate_instant(newColor, rect)
 	if hold > 0:
 		await get_tree().create_timer(hold).timeout
 		main_scene.dialogue_fade_in()
@@ -984,15 +984,15 @@ func set_overlay_modulate(newColor: Color, hold: float, overlay: ColorRect, fast
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_overlay_modulate_transition(newColor: Color, hold: float, duration: float, overlay: ColorRect, fast_skipable: bool = true) -> void:
+func set_rect_modulate_transition(newColor: Color, hold: float, duration: float, rect: ColorRect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		set_overlay_modulate_instant(newColor, overlay)
+		set_rect_modulate_instant(newColor, rect)
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	var tween = get_tree().create_tween()
-	tween.tween_property(overlay, "color", newColor, duration)
+	tween.tween_property(rect, "color", newColor, duration)
 	await tween.finished
 	
 	if hold > 0:
@@ -1004,7 +1004,7 @@ func set_overlay_modulate_transition(newColor: Color, hold: float, duration: flo
 		main_scene.dialogue_fade_in()
 
 # TODO: maybe rename this to something else in the future?
-func set_overlay_modulate_instant(newColor: Color, overlay: ColorRect) -> void:
-	overlay.set_modulate(newColor)
+func set_rect_modulate_instant(newColor: Color, rect: ColorRect) -> void:
+	rect.set_modulate(newColor)
 
 #endregion
