@@ -227,7 +227,6 @@ func _ready() -> void:
 ![alt text](image-38.png)
 ![alt text](image-39.png)
 
-
 The set_character_emotion sets the character's emotion. Most of the functions has a _instant variation, which means they get executed without the hud fading in and out! (and the _instant functions gets executed once the fade out animation finishes or fast_skip button is held.)
 
 ![alt text](image-12.png)
@@ -365,6 +364,64 @@ rect_blink fades the background in and then out. You can set the rect_color temp
 
 #### Background colors example
 
+>[!NOTE]
+>This uses the Background Handler created via the Adding backgrounds for the framework example!
+>You can follow that section on how to add backgrounds for the framework.
+>This also uses the Arcueid example from Adding characters to the framework!
+
+In this example, it will be shown functions that change the background's colors, including characters color during the transition.
+
+There is a node in this example named Overlay with a child of ColorRect named Color. This ColorRect has a material of CanvasItemShader with blend mode set to multiply. This gets used on add_dialogue_special(background.set_rect_modulate_transition, [Color8(255, 0, 0), 3, $Overlay/Color]) function.
+
+![alt text](image-57.png)
+![alt text](image-58.png)
+
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+
+func _ready() -> void:
+	add_dialogue_start("background second example!")
+	add_dialogue("arghh")
+	
+	add_dialogue_next("test background color")
+	add_dialogue_special(background.set_background_modulate, [Color8(255, 0, 0)])
+	add_dialogue("this causes the background's color to change without transition")
+	add_dialogue("back to normal")
+	add_dialogue_special(background.set_background_modulate, [Color8(255, 255, 255)])
+	
+	add_dialogue_next("background modulate transition")
+	add_dialogue_special(background.set_background_modulate_transition, [Color8(255, 0, 0), 3])
+	add_dialogue("this only sets the modulate to the background!")
+	add_dialogue("back to normal again")
+	add_dialogue_special(background.set_background_modulate_transition, [Color8(255, 255, 255), 1])
+	
+	add_dialogue_next("background modulate all transition")
+	add_dialogue_special(background.set_background_modulate_transition_all, [Color8(255, 0, 0), 3])
+	add_dialogue("this sets the background and the characters modulate to a specific value")
+	add_dialogue("back to normal again again")
+	add_dialogue_special(background.set_background_modulate_transition_all, [Color8(255, 255, 255), 1])
+	
+	add_dialogue_next("testing ColorRect with CanvasItemMaterial with blend mode on multiply transition")
+	add_dialogue_special(background.set_rect_modulate_transition, [Color8(255, 0, 0), 3, $Overlay/Color])
+	add_dialogue("back to normal again again again")
+	add_dialogue_special(background.set_rect_modulate_transition, [Color8(255, 255, 255), 1, $Overlay/Color])
+	add_dialogue("with this treasure, i summon..............")
+
+	
+	load_dialogue_start()
+```
+
+![alt text](image-56.png)
+![alt text](image-59.png)
+![alt text](image-60.png)
+![alt text](image-61.png)
+![alt text](image-62.png)
+![alt text](image-63.png)
+![alt text](image-65.png)
+
 #### Transition shader example
 
 #### Overlay example
@@ -385,6 +442,7 @@ rect_blink fades the background in and then out. You can set the rect_color temp
 >You can also filter the discord server messages via the search bar and see my first messages, which shows me asking for help on how to extract sprites.
 
 ## Tsukihime backgrounds example
+
 >[!NOTE]
 >The example below uses a project resolution of 720x540.
 
@@ -429,6 +487,7 @@ The overlay node can be empty because it's optional and only meant to be used if
 And done! You should have a background handler ready to use!
 
 # Creating characters using the framework
+
 >[!NOTE]
 >The following characters are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
 
@@ -519,7 +578,7 @@ On AnimatedSprites node, create a new SpriteFrames.
 
 ### Rename default group to normal
 
->[!NOTE] 
+>[!NOTE]
 >This is not really necessary and if you want, you can use the default group name. The reason why I ask to rename this to normal is because the EmotionPlayer emotions example (NORMAL, SAD, RESET) sets the AnimatedSprites's group propriety to normal. You can change this in the EmotionPlayer's to default group before using a group name named default on AnimatedSprites node.
 
 ![Rename default group to normal](./images/arcueid_step_8.png)
@@ -545,6 +604,7 @@ Using the move tool, hold shift and try to move it down where it overlaps with t
 ![Move tool alignment](./images/arcueid_step_11.png)
 
 The final value will be:
+
 - x: 360
 - y: 300
 
@@ -664,8 +724,8 @@ This is for setting the character's position when setpos_character function is e
 Keep in mind, this is for setting the character's node named Arcueid and not the Sprites!
 
 Since arcueid's position is already on the middle (0, 0), Pos middle will remain the same. (0, 0)
-![alt text](image-28.png)
 
+![alt text](image-28.png)
 
 ![alt text](image-4.png)
 
@@ -687,6 +747,7 @@ Copy the Pos Middle value to Arcueid's position property to center Arcueid by de
 ![alt text](image-33.png)
 
 ### Create arcueid script
+
 Right click on Arcueid's node and click on Extend script.
 
 ![alt text](image-7.png)
@@ -696,6 +757,7 @@ Save it on arcueid's character folder.
 ![alt text](image-8.png)
 
 ### Auto add emotions function
+
 On arcueid.gd, in the _ready function, add auto_add_emotions() function. This is for loading the emotions for the character.
 
 ![alt text](image-9.png)
@@ -711,4 +773,5 @@ func _ready() -> void:
 And now, the arcued character example should be finished and ready to be added to a scene!
 
 # Playing audio using the framework
+
 W.I.P
