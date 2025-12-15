@@ -889,15 +889,19 @@ func set_background_modulate_transition(newColor: Color, duration: float, hold: 
 	else:
 		main_scene.dialogue_fade_in()
 
+# NOTE: one way to do this is creating a ColorRect and adding a CanvasItemMaterial
+# with blend mode set to multiply.
+# however, if you add this on the characters node, the node stops working.
+# maybe use overlay node?
 func set_background_modulate_transition_all(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_background_modulate_instant_all(newColor)
 		return
 	
 	var characters = []
-	for k in main_scene.get_child_count():
-		if main_scene.get_child(k) is DemoScripter_VisualNovelCharacter:
-			characters.append(main_scene.get_child(k))
+	for k in characters_node.get_child_count():
+		if characters_node.get_child(k) is DemoScripter_VisualNovelCharacter:
+			characters.append(characters_node.get_child(k))
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
@@ -968,7 +972,7 @@ func rect_blink_old(fadein: float, hold_in: float, fadeout: float, hold_out: flo
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_overlay_modulate(newColor: Color, hold: float, rect: ColorRect, fast_skipable: bool = true) -> void:
+func set_rect_modulate(newColor: Color, hold: float, rect: ColorRect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
 		return
@@ -984,7 +988,7 @@ func set_overlay_modulate(newColor: Color, hold: float, rect: ColorRect, fast_sk
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_rect_modulate_transition(newColor: Color, hold: float, duration: float, rect: ColorRect, fast_skipable: bool = true) -> void:
+func set_rect_modulate_transition(newColor: Color, duration: float, rect: ColorRect, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
 		return
