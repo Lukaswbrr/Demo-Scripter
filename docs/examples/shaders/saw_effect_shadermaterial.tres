@@ -1,0 +1,9 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3 uid="uid://dqflq8u42hfqo"]
+
+[ext_resource type="Shader" uid="uid://22cw1e1if2tv" path="res://Demo-Scripter/docs/examples/shaders/gdshaders/saw_effect.gdshader" id="1_pqdey"]
+
+[resource]
+shader = ExtResource("1_pqdey")
+shader_parameter/radius = 1.0
+shader_parameter/speed = 1.888
+shader_parameter/effect_color = Color(0.251, 0, 0, 1)
