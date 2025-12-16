@@ -376,7 +376,6 @@ There is a node in this example named Overlay with a child of ColorRect named Co
 ![alt text](image-57.png)
 ![alt text](image-58.png)
 
-
 ```gdscript
 extends DemoScripter_VisualNovelScene
 
@@ -421,6 +420,14 @@ func _ready() -> void:
 ![alt text](image-62.png)
 ![alt text](image-63.png)
 ![alt text](image-65.png)
+
+set_background_modulate sets the background's modulate (color) after the fade out animation of HUD finishes.
+
+set_background_modulate_transition sets the background's modulate (color) using a transition. This doesn't affect characters.
+
+set_background_modulate_transition_all sets the background's modulate (color) using a transition. This affect characters.
+
+set_rect_modulate_transition sets a ColorRect to a specific modulate (color) with a transition. This was used to set the ColorRect from Overlay node, which affected the background and characters (alternative to set_background_modulate_transition_all and allows characters to have their own modulate instead of being forced to be on the specific modulate from set_background_modulate_transition_all.)
 
 #### Transition shader example
 
