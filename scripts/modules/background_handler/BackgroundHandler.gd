@@ -149,14 +149,7 @@ func remove_overlay_normal_id_instant_await(signalname, id: int):
 	remove_overlay_normal_id_instant(id)
 	print("yey")
 
-func _add_active_overlay(node: Node) -> void:
-	_active_overlays.append(node)
 
-func _remove_active_overlay(node: Node) -> void:
-	_active_overlays.erase(node)
-
-func _remove_active_overlay_id(id: int) -> void:
-	_active_overlays.remove_at(id)
 
 func change_background_instant(index: int, group = null) -> void:
 	if group is String:
@@ -273,8 +266,10 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 	# rotation: float
 	# hold: float
 	var default_config: Dictionary = {
-		"rotation": 0,
 		"hold": 0,
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255),
+		"quick_direction": "up"
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -284,15 +279,30 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 	
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
-	color_overlay.color = background_color.color
-	color_overlay.modulate = Color(background_color.modulate)
-	color_overlay.pivot_offset = Vector2(color_overlay.size.x / 2, color_overlay.size.y / 2)
+	color_overlay.color = config["color"]
+	color_overlay.modulate = config["modulate"]
+	#color_overlay.pivot_offset = Vector2(color_overlay.size.x / 2, color_overlay.size.y / 2)
 	color_overlay.set_material(effect)
 	
 	# TODO: make this rotation func work, where it sets the node to full screen.
-	if config["rotation"] > 0:
-		color_overlay.set_rotation(config["rotation"])
-		resize_rect_to_fullscreen(color_overlay)
+	#if config["rotation"] > 0:
+		#color_overlay.set_rotation(config["rotation"])
+		#resize_rect_to_fullscreen(color_overlay)
+	
+	if config["quick_direction"] != "up":
+		match config["quick_direction"]:
+			"down":
+				#color_overlay.size = Vector2(540, 720)
+				color_overlay.position = background_color.size
+				color_overlay.rotation_degrees = 180
+			"right":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(background_color.size.x, 0)
+				color_overlay.rotation_degrees = 90
+			"left":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(0, background_color.size.y)
+				color_overlay.rotation_degrees = 270
 	
 	if use_overlay_exclusive_node:
 		overlay_node.add_child(color_overlay)
@@ -323,15 +333,15 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 	# hold_in: float
 	# hold_out: float
 	var default_config: Dictionary = {
-		"rotation": 0,
 		"fast_skipable": true,
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
+		"quick_direction": "up"
 	}
 	
-	var config = _create_config_dict(default_config, config_arg)
-	var config_instant = _remove_config_keys(config, ["fast_skipable, hold_in, hold_out"])
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		hide_background()
@@ -364,17 +374,8 @@ func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
 		"hide_background": true,
 	}
 	
-	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
-	
-	var config = default_config.duplicate()
-	if !config_arg.is_empty():
-		config.merge(config_arg, true)
-	
-	var config_instant = config.duplicate()
-	
-	for k in config_instant.keys():
-		if k in ["fast_skipable", "hold_in", "hold_out"]:
-			config_instant.erase(k)
+	var config = _create_config_dict(default_config, config_arg)
+	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		if config["hide_characters"]:
@@ -382,6 +383,7 @@ func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
 		
 		if config["hide_background"]:
 			hide_background()
+		
 		return
 	
 	main_scene.dialogue_fade_out()
@@ -398,21 +400,35 @@ func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
 		await fade_in_finished
 		main_scene.dialogue_fade_in()
 
-func background_fade_out(duration: float, fast_skipable: bool = true, hold_in: float = 0, hold: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		#set_background_modulate_instant(newColor)
+func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold": 0,
+		"hold_out": 0,
+	}
+	
+	var config = _create_config_dict(default_config, config_arg)
+	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
 		return
 		
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_fade_out_instant(duration, hold)
+	background_fade_out_instant(duration, config_instant)
 	
-	if hold_in < 0:
+	if config["hold"] < 0:
 		return
 	else:
 		await fade_out_finished
@@ -429,11 +445,7 @@ func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) ->
 		"hide_background": true,
 	}
 	
-	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
-	
-	var config = default_config.duplicate()
-	if !config_arg.is_empty():
-		config.merge(config_arg, true)
+	var config = _create_config_dict(default_config, config_arg)
 	
 	var persistant_overlays = _check_persistant_amount_overlays()
 	var color_overlay = ColorRect.new()
@@ -465,9 +477,21 @@ func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) ->
 		tween.tween_callback(emit_signal.bind("fade_in_finished"))
 	
 
-func background_fade_out_instant(duration: float, hold: float = 0) -> void:
-	 # BUG: Somehow, the fadeout tween doesnt work
+func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -> void:
+	# BUG: Somehow, the fadeout tween doesnt work
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"hold": 0,
+	}
+	
+	var config = _create_config_dict(default_config, config_arg)
+	
 	var persistant_overlays = _check_persistant_amount_overlays()
+	
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
 	color_overlay.color = background_color.color
@@ -488,21 +512,53 @@ func background_fade_out_instant(duration: float, hold: float = 0) -> void:
 	tween.tween_callback(show_background)
 	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 0), duration)
 	tween.tween_callback(color_overlay.queue_free)
-	if hold > 0:
-		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(hold)
+	if config["hold"] > 0:
+		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(config["hold"])
 	else:
 		tween.tween_callback(emit_signal.bind("fade_out_finished"))
 
-func background_effect_out_instant(shader_name: String, property: String, value: float, duration: float, rotation: float = 0, hold: float = 0) -> void:
+func background_effect_out_instant(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# rotation: float
+	# hold: float
+	var default_config: Dictionary = {
+		"hold": 0,
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255),
+		"quick_direction": "up"
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
 	var effect = load(shader_name)
 	var persistant_overlays = _check_persistant_amount_overlays()
 	
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
-	color_overlay.color = background_color.color
-	color_overlay.modulate = Color(background_color.modulate)
-	color_overlay.set_rotation(rotation)
+	color_overlay.color = config["color"]
+	color_overlay.modulate = config["modulate"]
 	color_overlay.set_material(effect)
+	
+	# TODO: make this rotation func work, where it sets the node to full screen.
+	#if config["rotation"] > 0:
+		#color_overlay.set_rotation(config["rotation"])
+		#resize_rect_to_fullscreen(color_overlay)
+	
+	if config["quick_direction"] != "up":
+		match config["quick_direction"]:
+			"down":
+				#color_overlay.size = Vector2(540, 720)
+				color_overlay.position = background_color.size
+				color_overlay.rotation_degrees = 180
+			"right":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(background_color.size.x, 0)
+				color_overlay.rotation_degrees = 90
+			"left":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(0, background_color.size.y)
+				color_overlay.rotation_degrees = 270
+	
 	
 	if use_overlay_exclusive_node:
 		overlay_node.add_child(color_overlay)
@@ -516,14 +572,12 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 			characters_node.move_child(color_overlay, -persistant_overlays - 1)
 	
 	show_background()
-	#change_background_instant(3, "default")
-	#show_characters()
 	
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(color_overlay.queue_free)
-	if hold > 0:
-		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(hold)
+	if config["hold"] > 0:
+		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
 
@@ -532,8 +586,10 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	# rotation: float
 	# hold: float
 	var default_config: Dictionary = {
-		"rotation": 0,
-		"hold": 0
+		"hold": 0,
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255),
+		"quick_direction": "up"
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -543,14 +599,29 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	
 	var color_overlay = ColorRect.new()
 	color_overlay.size = background_color.size
-	color_overlay.color = background_color.color
-	color_overlay.modulate = Color(background_color.modulate)
+	color_overlay.color = config["color"]
+	color_overlay.modulate = config["modulate"]
 	color_overlay.set_material(effect)
 	
 	# TODO: make this rotation func work, where it sets the node to full screen.
-	if config["rotation"] > 0:
-		color_overlay.set_rotation(config["rotation"])
-		resize_rect_to_fullscreen(color_overlay)
+	#if config["rotation"] > 0:
+		#color_overlay.set_rotation(config["rotation"])
+		#resize_rect_to_fullscreen(color_overlay)
+	
+	if config["quick_direction"] != "up":
+		match config["quick_direction"]:
+			"down":
+				#color_overlay.size = Vector2(540, 720)
+				color_overlay.position = background_color.size
+				color_overlay.rotation_degrees = 180
+			"right":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(background_color.size.x, 0)
+				color_overlay.rotation_degrees = 90
+			"left":
+				color_overlay.size = Vector2(background_color.size.y, background_color.size.x)
+				color_overlay.position = Vector2(0, background_color.size.y)
+				color_overlay.rotation_degrees = 270
 	
 	if use_overlay_exclusive_node:
 		overlay_node.add_child(color_overlay)
@@ -575,35 +646,48 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
 
-func background_effect_out(shader_name: String, property: String, value: float, duration: float, rotation: float = 0, fast_skipable: bool = true, hold: float = 0, hold_in: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func background_effect_out(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
+	var default_config: Dictionary = {
+		"rotation": 0,
+		"fast_skipable": true,
+		"hold": 0,
+		"hold_in": 0,
+		"hold_out": 0,
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255)
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_effect_out_instant(shader_name, property, value, duration, rotation, hold)
+	background_effect_out_instant(shader_name, property, value, duration, config_instant)
 	await overlay_effect_finished
-	if hold_in > 0:
-		await get_tree().create_timer(hold_in).timeout
+	if config["hold_in"] > 0:
+		await get_tree().create_timer(config["hold_in"]).timeout
 	
 	main_scene.dialogue_fade_in()
 
 func background_effect_out_change(index: int, group: String, shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
-		"rotation": 0,
 		"fast_skipable": true,
 		"hold": 0,
 		"hold_in": 0,
-		"hold_out": 0
+		"hold_out": 0,
+		"quick_direction": "up"
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, [""])
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
@@ -635,7 +719,9 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
-		"rotation": 0
+		"quick_direction": "up",
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255)
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -807,13 +893,26 @@ func set_rect_color_transition(newColor: Color, duration: float, fast_skipable: 
 
 #region UNDERSCORE
 
+func _add_active_overlay(node: Node) -> void:
+	_active_overlays.append(node)
+
+func _remove_active_overlay(node: Node) -> void:
+	_active_overlays.erase(node)
+
+func _remove_active_overlay_id(id: int) -> void:
+	_active_overlays.remove_at(id)
+
 func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
 	if dict2.is_empty():
 		return true
 	
 	for k in dict2:
 		if not k in dict1:
-			print(k)
+			print_stack()
+			print("dict1: " + str(dict1))
+			print("dict2: " + str(dict2))
+			print("\n")
+			print("\"" + k + "\" is not in dict1!")
 			return false
 	
 	return true
@@ -1070,7 +1169,6 @@ func set_rect_modulate_transition(newColor: Color, duration: float, rect: ColorR
 	else:
 		main_scene.dialogue_fade_in()
 
-# TODO: maybe rename this to something else in the future?
 func set_rect_modulate_instant(newColor: Color, rect: ColorRect) -> void:
 	rect.set_modulate(newColor)
 
