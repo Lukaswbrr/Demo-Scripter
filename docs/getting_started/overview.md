@@ -431,6 +431,22 @@ set_rect_modulate_transition sets a ColorRect to a specific modulate (color) wit
 
 #### Transition shader example
 
+>[!NOTE]
+>This example uses [Pixelated diamond directional fading transition](https://godotshaders.com/shader/pixelated-diamond-directional-fading-transition/) by [Joey Bland](https://godotshaders.com/author/joey_bland/) on [Godot Shaders](https://godotshaders.com/). The example folder includes a shader folder which contains this shader.
+
+>[!NOTE]
+>This uses the Background Handler created via the Adding backgrounds for the framework example!
+>You can follow that section on how to add backgrounds for the framework.
+>This also uses the Arcueid example from Adding characters to the framework!
+
+![alt text](image-66.png)
+![alt text](image-67.png)
+![alt text](image-68.png)
+![alt text](image-69.png)
+![alt text](image-73.png)
+![alt text](image-71.png)
+![alt text](image-72.png)
+
 #### Overlay example
 
 ### Playing music example
