@@ -218,6 +218,7 @@ func change_background_transition_instant(index: int, group: String, duration: f
 		else:
 			characters_node.move_child(new_background, -persistant_overlays - 1)
 	
+	
 	var tween = get_tree().create_tween()
 	tween.tween_property(new_background, "modulate", Color(new_background.modulate, 1), duration)
 	if not config["persistant_chars"]:
@@ -265,11 +266,18 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 	# types:
 	# rotation: float
 	# hold: float
+	
+	# types of tween:
+	# auto - automatically sets the value negative
+	# manual - sets the start value from tween_from
+	# none - does not set the tween
 	var default_config: Dictionary = {
 		"hold": 0,
 		"color": Color.WHITE,
 		"modulate": Color8(255, 255, 255, 255),
-		"quick_direction": "up"
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1,
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -315,6 +323,15 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 		else:
 			characters_node.move_child(color_overlay, -persistant_overlays - 1)
 	
+	match config["tween_type"]:
+		"auto":
+			color_overlay.material.set_shader_parameter(property, -value)
+		"manual":
+			color_overlay.material.set_shader_parameter(property, config["tween_from"])
+
+		"none":
+			pass
+	
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(hide_background)
@@ -337,7 +354,9 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
-		"quick_direction": "up"
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -525,7 +544,9 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 		"hold": 0,
 		"color": Color.WHITE,
 		"modulate": Color8(255, 255, 255, 255),
-		"quick_direction": "up"
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -573,6 +594,14 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 	
 	show_background()
 	
+	match config["tween_type"]:
+		"auto":
+			color_overlay.material.set_shader_parameter(property, -value)
+		"manual":
+			color_overlay.material.set_shader_parameter(property, config["tween_from"])
+		"none":
+			pass
+	
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(color_overlay.queue_free)
@@ -585,11 +614,21 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	# types:
 	# rotation: float
 	# hold: float
+	# color: color
+	# modulate: color
+	# quick_direction: string
+	# transition_type: string
+	
+	# Types of transitions:
+	# auto (manually sets the value to negative
+	# manual
 	var default_config: Dictionary = {
 		"hold": 0,
 		"color": Color.WHITE,
 		"modulate": Color8(255, 255, 255, 255),
-		"quick_direction": "up"
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -638,6 +677,14 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	change_background_instant(index, group)
 	#show_characters()
 	
+	match config["tween_type"]:
+		"auto":
+			color_overlay.material.set_shader_parameter(property, -value)
+		"manual":
+			color_overlay.material.set_shader_parameter(property, config["tween_from"])
+		"none":
+			pass
+	
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(color_overlay.queue_free)
@@ -648,13 +695,15 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 
 func background_effect_out(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
-		"rotation": 0,
 		"fast_skipable": true,
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
 		"color": Color.WHITE,
-		"modulate": Color8(255, 255, 255, 255)
+		"modulate": Color8(255, 255, 255, 255),
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -683,7 +732,9 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
-		"quick_direction": "up"
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -721,7 +772,9 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 		"hold_out": 0,
 		"quick_direction": "up",
 		"color": Color.WHITE,
-		"modulate": Color8(255, 255, 255, 255)
+		"modulate": Color8(255, 255, 255, 255),
+		"tween_type": "auto",
+		"tween_from": -1,
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
