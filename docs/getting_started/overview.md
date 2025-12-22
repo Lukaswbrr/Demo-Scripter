@@ -439,6 +439,79 @@ set_rect_modulate_transition sets a ColorRect to a specific modulate (color) wit
 >You can follow that section on how to add backgrounds for the framework.
 >This also uses the Arcueid example from Adding characters to the framework!
 
+This example showcases a custom shader for transitions!
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+
+func _ready() -> void:
+	add_dialogue_start("background third example!")
+	add_dialogue("this is for showcasing transition with shaders")
+	add_dialogue_next("test transition")
+	add_dialogue_special(background.change_background_effect, [2, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3])
+	add_dialogue("this is a horizontal shader transition!")
+	add_dialogue_next("change background to 3")
+	add_dialogue_special(background.change_background_effect, [3, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3])
+	add_dialogue("pretty cool")
+	
+	add_dialogue_next("background effect fade in")
+	add_dialogue_special(background.background_effect_in, ["res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, 3])
+	add_dialogue("uhuh")
+	add_dialogue("background effect fade out")   
+	add_dialogue_special(background.background_effect_out, ["res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", -1, 3])
+	add_dialogue("ok")
+	add_dialogue("effect fade in fast")
+	add_dialogue_special(background.background_effect_in, ["res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, 1])
+	add_dialogue("fade out normal")
+	add_dialogue_special(background.background_fade_out, [3])
+	add_dialogue("cool")
+	
+	add_dialogue_next("fade in normal")
+	add_dialogue_special(background.background_fade_in, [1])
+	add_dialogue("effect out change background")
+	add_dialogue_special(background.background_effect_out_change, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", -1, 3])
+	add_dialogue("yeah that worked")
+	add_dialogue("change background to frame 7 with right direction")
+	add_dialogue_special(background.change_background_effect, [7, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction": "right"
+	}])
+	add_dialogue("change background to frame 10 with left direction")
+	add_dialogue_special(background.change_background_effect, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction": "left"
+	}])
+	add_dialogue("change background to frame 13 with down direction")
+	add_dialogue_special(background.change_background_effect, [13, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction": "down"
+	}])
+	add_dialogue("that worked too, incredible!")
+	
+	add_dialogue_next("character test")
+	add_dialogue_special(show_character, [$Characters/Arcueid])
+	add_dialogue("transition test with character")
+	add_dialogue_special(background.change_background_effect, [16, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction": "right"
+	}])
+	
+	load_dialogue_start()
+```
+
+background_effect_in does a background fade in using a shader.
+
+background_effect_out does a background fade out using a shader.
+
+background_effect_out_change changes the background first and does a fade out effect using a shader.
+
+change_background_effect changes the background using a shader. This contains a quick_direction config argument that you can set the direction of the shader. (up, right, left, down. the default is up) By default, in the fade out effect, it uses the value argument reversed. (1 becomes -1) You can change this behavior by using tween_type to auto and specifying the tween_from value.
+
+```gdscript
+add_dialogue_special(background.change_background_effect, [16, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+	"tween_type": "manual",
+	"tween_from: 0
+}])
+```
+
 ![alt text](image-66.png)
 ![alt text](image-67.png)
 ![alt text](image-68.png)
