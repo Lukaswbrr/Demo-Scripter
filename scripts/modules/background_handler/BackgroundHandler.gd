@@ -27,9 +27,9 @@ func _ready() -> void:
 	assert(type_string(typeof(main_scene)) == "Object", "The main scene variable hasn't been defined!")
 	assert(type_string(typeof(characters_node)) == "Object", "The characters node variable hasn't been defined! Define a node that has all characters inside the characters node.")
 
-#region NEW_FUNCS
+#region OVERLAYS
 
-func add_overlay_normal(shader_name: String, dict: Dictionary, config_arg: Dictionary = {}) -> void:
+func add_overlay_normal(shader_name: String, shader_arg: Dictionary = {}, config_arg: Dictionary = {}) -> void:
 	# types:
 	# fast_skipable: bool
 	# hold_in: float
@@ -40,14 +40,10 @@ func add_overlay_normal(shader_name: String, dict: Dictionary, config_arg: Dicti
 		"hold_out": 0
 	}
 	
-	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
-	
-	var config = default_config.duplicate()
-	if !config_arg.is_empty():
-		config.merge(config_arg, true)
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		add_overlay_normal_instant(shader_name, dict)
+		add_overlay_normal_instant(shader_name, shader_arg)
 		return
 	
 	main_scene.dialogue_fade_out()
@@ -56,12 +52,12 @@ func add_overlay_normal(shader_name: String, dict: Dictionary, config_arg: Dicti
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	add_overlay_normal_instant(shader_name, dict)
+	add_overlay_normal_instant(shader_name, shader_arg)
 	
 	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
-func add_overlay_normal_instant(shader_name: String, dict: Dictionary) -> void:
+func add_overlay_normal_instant(shader_name: String, shader_arg: Dictionary) -> void:
 	var effect = load(shader_name)
 	
 	var color_overlay = ColorRect.new()
@@ -76,10 +72,10 @@ func add_overlay_normal_instant(shader_name: String, dict: Dictionary) -> void:
 	
 	_add_active_overlay(color_overlay)
 	
-	for k in dict:
-		color_overlay.get_material().set_shader_parameter(k, dict[k])
+	for k in shader_arg:
+		color_overlay.get_material().set_shader_parameter(k, shader_arg[k])
 
-func add_overlay_persistant_instant(shader_name: String, dict: Dictionary) -> void:
+func add_overlay_persistant_instant(shader_name: String, shader_arg: Dictionary = {}) -> void:
 	var effect = load(shader_name)
 	
 	var color_overlay = ColorRect.new()
@@ -95,12 +91,12 @@ func add_overlay_persistant_instant(shader_name: String, dict: Dictionary) -> vo
 	color_overlay.set_meta("isPersistant", true)
 	_add_active_overlay(color_overlay)
 	
-	for k in dict:
-		color_overlay.get_material().set_shader_parameter(k, dict[k])
+	for k in shader_arg:
+		color_overlay.get_material().set_shader_parameter(k, shader_arg[k])
 
-func set_active_overlay_normal_id(id: int, dict: Dictionary) -> void:
-	for k in dict:
-		_active_overlays[id].get_material().set_shader_parameter(k, dict[k])
+func set_active_overlay_normal_id(id: int, shader_arg: Dictionary = {}) -> void:
+	for k in shader_arg:
+		_active_overlays[id].get_material().set_shader_parameter(k, shader_arg[k])
 
 func set_active_overlay_normal_tween_id(id: int, property: String, value, duration: float, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
@@ -147,24 +143,14 @@ func remove_overlay_normal_id_instant(id: int) -> void:
 func remove_overlay_normal_id_instant_await(signalname, id: int):
 	await signalname
 	remove_overlay_normal_id_instant(id)
-	print("yey")
 
-
+#endregion
 
 func change_background_instant(index: int, group = null) -> void:
 	if group is String:
 		background_sprites.animation = group
 	
 	background_sprites.frame = index
-
-func _check_persistant_amount_overlays() -> int:
-	var amount: int
-	
-	for k in _active_overlays:
-		if k.get_meta("isPersistant"):
-			amount += 1
-	
-	return amount
 
 func hide_characters() -> void:
 	for k in characters_node.get_children():
@@ -189,7 +175,8 @@ func show_background() -> void:
 func change_background_transition_instant(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
 		"persistant_chars": false,
-		"hold_signal": 0
+		"hold_signal": 0,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -218,7 +205,6 @@ func change_background_transition_instant(index: int, group: String, duration: f
 		else:
 			characters_node.move_child(new_background, -persistant_overlays - 1)
 	
-	
 	var tween = get_tree().create_tween()
 	tween.tween_property(new_background, "modulate", Color(new_background.modulate, 1), duration)
 	if not config["persistant_chars"]:
@@ -227,6 +213,9 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	tween.tween_callback(background_sprites.set_animation.bind(group))
 	tween.tween_callback(new_background.queue_free)
 	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
 
 func change_background_transition(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
 	# NOTE: types
@@ -240,7 +229,8 @@ func change_background_transition(index: int, group: String, duration: float, co
 		"persistant_chars": false,
 		"hold_in": 0,
 		"hold_out": 0,
-		"hold_signal": 0
+		"hold_signal": 0,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -505,6 +495,7 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 	# hold_out: float
 	var default_config: Dictionary = {
 		"hold": 0,
+		"remove_active_overlay": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -531,6 +522,9 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 	tween.tween_callback(show_background)
 	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 0), duration)
 	tween.tween_callback(color_overlay.queue_free)
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(config["hold"])
 	else:
@@ -546,7 +540,8 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 		"modulate": Color8(255, 255, 255, 255),
 		"quick_direction": "up",
 		"tween_type": "auto",
-		"tween_from": -1
+		"tween_from": -1,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -605,6 +600,9 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(color_overlay.queue_free)
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
@@ -628,7 +626,8 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 		"modulate": Color8(255, 255, 255, 255),
 		"quick_direction": "up",
 		"tween_type": "auto",
-		"tween_from": -1
+		"tween_from": -1,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -688,10 +687,14 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
 	tween.tween_callback(color_overlay.queue_free)
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
+	
 
 func background_effect_out(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
@@ -703,7 +706,8 @@ func background_effect_out(shader_name: String, property: String, value: float, 
 		"modulate": Color8(255, 255, 255, 255),
 		"quick_direction": "up",
 		"tween_type": "auto",
-		"tween_from": -1
+		"tween_from": -1,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -734,7 +738,8 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 		"hold_out": 0,
 		"quick_direction": "up",
 		"tween_type": "auto",
-		"tween_from": -1
+		"tween_from": -1,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -775,6 +780,7 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 		"modulate": Color8(255, 255, 255, 255),
 		"tween_type": "auto",
 		"tween_from": -1,
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -844,6 +850,7 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 		"hold_in": 0,
 		"hold_out": 0,
 		"hold_fadein": 0,
+		"hold_middle": 0,
 		"hold_fadeout": 0,
 		"hide_background_in": true,
 		"hide_characters_in": false,
@@ -883,7 +890,12 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	
 	background_fade_in_instant(fadein, config_fadein)
 	await fade_in_finished
-	background_fade_out_instant(fadeout, config_fadeout["hold"])
+	
+	# TODO: make it so overlays are not visible?
+	if config["hold_middle"] > 0:
+		await get_tree().create_timer(config["hold_middle"]).timeout
+	
+	background_fade_out_instant(fadeout, config_fadeout)
 	await fade_out_finished
 	
 	if background_color.modulate != old_background_color:
@@ -945,6 +957,15 @@ func set_rect_color_transition(newColor: Color, duration: float, fast_skipable: 
 #endregion
 
 #region UNDERSCORE
+
+func _check_persistant_amount_overlays() -> int:
+	var amount: int = 0
+	
+	for k in _active_overlays:
+		if k.get_meta("isPersistant"):
+			amount += 1
+	
+	return amount
 
 func _add_active_overlay(node: Node) -> void:
 	_active_overlays.append(node)
