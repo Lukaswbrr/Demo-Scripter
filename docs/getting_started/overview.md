@@ -3,6 +3,7 @@
 >This page MAY be obsolute in the future and only be used for legacy purposes. (but for now, it inst.)
 
 # Creating a basic dialogue scene
+
 1. Create a new CanvasLayer scene
 2. Duplicate the VisualNovelScene_hud.tscn scene into the new CanvasLayer scene (make the HUD scene local)
 3. Add a script to the new scene which extends DemoScripter_VisualNovelScene
@@ -63,6 +64,7 @@ However, there are more functions related to dialogue, for example, creating dia
 >Otherwise, the dialogue wouldn't end!
 
 ## Dialogue Next function
+
 Using the example above as reference, instead of setting manually the id using add_dialogue_start, you can use add_dialogue_next to create a new dialogue on a next page automatically!
 
 ```gdscript
@@ -130,7 +132,6 @@ This example also includes the previous no arguments function!
 
 ![print args example 1](./images/print_args_example_1.png)
 ![print args example 2](./images/print_args_example_2.png)
-
 
 ```gdscript
 extends DemoScripter_VisualNovelScene
@@ -475,15 +476,18 @@ func _ready() -> void:
 	add_dialogue("yeah that worked")
 	add_dialogue("change background to frame 7 with right direction")
 	add_dialogue_special(background.change_background_effect, [7, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
-		"quick_direction": "right"
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "right",
 	}])
 	add_dialogue("change background to frame 10 with left direction")
 	add_dialogue_special(background.change_background_effect, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
-		"quick_direction": "left"
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "right",
 	}])
 	add_dialogue("change background to frame 13 with down direction")
 	add_dialogue_special(background.change_background_effect, [13, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
-		"quick_direction": "down"
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "right",
 	}])
 	add_dialogue("that worked too, incredible!")
 	
@@ -491,8 +495,22 @@ func _ready() -> void:
 	add_dialogue_special(show_character, [$Characters/Arcueid])
 	add_dialogue("transition test with character")
 	add_dialogue_special(background.change_background_effect, [16, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
-		"quick_direction": "right"
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "right",
 	}])
+	
+	add_dialogue_next("different transitions directions 1")
+	add_dialogue_special(background.change_background_effect, [20, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction_fadein": "left",
+		"quick_direction_fadeout": "up",
+	}])
+	add_dialogue("different transitions directions 2")
+	add_dialogue_special(background.change_background_effect, [4, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "down",
+	}])
+	add_dialogue("yeah, thats cool")
+	
 	
 	load_dialogue_start()
 ```
@@ -519,8 +537,24 @@ add_dialogue_special(background.change_background_effect, [16, "default", "res:/
 ![alt text](image-73.png)
 ![alt text](image-71.png)
 ![alt text](image-72.png)
+![alt text](image-74.png)
+![alt text](image-75.png)
+![alt text](image-76.png)
+![alt text](image-77.png)
+![alt text](image-78.png)
+![alt text](image-79.png)
 
 #### Overlay example
+
+>[!NOTE]
+>This example uses [Pixelated diamond directional fading transition](https://godotshaders.com/shader/pixelated-diamond-directional-fading-transition/) by [Joey Bland](https://godotshaders.com/author/joey_bland/) on [Godot Shaders](https://godotshaders.com/). The example folder includes a shader folder which contains this shader.
+
+>[!NOTE]
+>This uses the Background Handler created via the Adding backgrounds for the framework example!
+>You can follow that section on how to add backgrounds for the framework.
+>This also uses the Arcueid example from Adding characters to the framework!
+
+This example showcases a custom shader for transitions!
 
 ### Playing music example
 
