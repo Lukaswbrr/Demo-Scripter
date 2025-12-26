@@ -98,20 +98,28 @@ func set_active_overlay_normal_id(id: int, shader_arg: Dictionary = {}) -> void:
 	for k in shader_arg:
 		_active_overlays[id].get_material().set_shader_parameter(k, shader_arg[k])
 
-func set_active_overlay_normal_tween_id(id: int, property: String, value, duration: float, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func set_active_overlay_normal_tween_id(id: int, property: String, value, duration: float, config_arg: Dictionary = {}) -> void:
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold_out": 0
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		set_active_overlay_normal_id(id, {property: value})
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
 	set_active_overlay_normal_tween_id_instant(id, property, value, duration)
 	
-	await get_tree().create_timer(duration + hold_in).timeout
+	await get_tree().create_timer(duration + config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
 func set_active_overlay_normal_tween_id_instant(id: int, property: String, value, duration: float) -> void:
@@ -120,29 +128,40 @@ func set_active_overlay_normal_tween_id_instant(id: int, property: String, value
 	var tween = get_tree().create_tween()
 	tween.tween_property(overlay, "material:shader_parameter/" + property, value, duration)
 
-func remove_overlay_normal_id(id: int, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
+func remove_overlay_normal_id(id: int, config_arg: Dictionary) -> void:
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold_out": 0
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		remove_overlay_normal_id_instant(id)
 		return
 	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
 	
 	remove_overlay_normal_id_instant(id)
 	
-	await get_tree().create_timer(hold_in).timeout
+	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
 func remove_overlay_normal_id_instant(id: int) -> void:
 	_active_overlays[id].queue_free()
 	_remove_active_overlay_id(id)
 
-func remove_overlay_normal_id_instant_await(signalname, id: int):
+func remove_overlay_normal_id_instant_await(signalname, id: int) -> void:
 	await signalname
 	remove_overlay_normal_id_instant(id)
+
+func set_active_overlay_visible(id: int, visible: bool) -> void:
+	_active_overlays[id].set_visible(visible)
 
 #endregion
 
@@ -176,7 +195,8 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	var default_config: Dictionary = {
 		"persistant_chars": false,
 		"hold_signal": 0,
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"active_overlay_visible": {}
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -211,11 +231,12 @@ func change_background_transition_instant(index: int, group: String, duration: f
 		tween.tween_callback(hide_characters)
 	tween.tween_callback(background_sprites.set_frame.bind(index))
 	tween.tween_callback(background_sprites.set_animation.bind(group))
-	tween.tween_callback(new_background.queue_free)
-	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
 			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	tween.tween_callback(new_background.queue_free)
+	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
+	
 
 func change_background_transition(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
 	# NOTE: types
@@ -230,6 +251,7 @@ func change_background_transition(index: int, group: String, duration: float, co
 		"hold_in": 0,
 		"hold_out": 0,
 		"hold_signal": 0,
+		"active_overlay_visible": {},
 		"remove_active_overlay": []
 	}
 	
@@ -268,6 +290,8 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -346,7 +370,9 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 		"hold_out": 0,
 		"quick_direction": "up",
 		"tween_type": "auto",
-		"tween_from": -1
+		"tween_from": -1,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -381,6 +407,8 @@ func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
 		"hold_out": 0,
 		"hide_characters": true,
 		"hide_background": true,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -420,6 +448,8 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 		"hold_in": 0,
 		"hold": 0,
 		"hold_out": 0,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -452,6 +482,8 @@ func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) ->
 		"hold": 0,
 		"hide_characters": true,
 		"hide_background": true,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -479,6 +511,9 @@ func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) ->
 		tween.tween_callback(hide_background)
 	if config["hide_characters"]:
 		tween.tween_callback(hide_characters)
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible.bind(k, config["active_overlay_visible"][k]))
 	tween.tween_callback(color_overlay.queue_free)
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("fade_in_finished")).set_delay(config["hold"])
@@ -495,6 +530,7 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 	# hold_out: float
 	var default_config: Dictionary = {
 		"hold": 0,
+		"active_overlay_visible": {},
 		"remove_active_overlay": []
 	}
 	
@@ -525,6 +561,9 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
 			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible.bind(k, config["active_overlay_visible"][k]))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(config["hold"])
 	else:
@@ -541,7 +580,8 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"active_overlay_visible": {}
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -575,7 +615,6 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 				color_overlay.position = Vector2(0, background_color.size.y)
 				color_overlay.rotation_degrees = 270
 	
-	
 	if use_overlay_exclusive_node:
 		overlay_node.add_child(color_overlay)
 	else:
@@ -603,6 +642,9 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
 			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible.bind(k, config["active_overlay_visible"][k]))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
@@ -627,6 +669,7 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
+		"active_overlay_visible": {},
 		"remove_active_overlay": []
 	}
 	
@@ -690,6 +733,9 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
 			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible.bind(k, config["active_overlay_visible"][k]))
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
@@ -707,6 +753,7 @@ func background_effect_out(shader_name: String, property: String, value: float, 
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
+		"active_overlay_visible": {},
 		"remove_active_overlay": []
 	}
 	
@@ -739,6 +786,7 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
+		"active_overlay_visible": {},
 		"remove_active_overlay": []
 	}
 	
@@ -770,21 +818,53 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	# hold_in: float
 	# hold_out: float
 	# rotation: float
+	# TODO: make seperate keys for fade in and fade out? like quick_direction_fadein, etc?
 	var default_config: Dictionary = {
 		"fast_skipable": true,
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
-		"quick_direction": "up",
-		"color": Color.WHITE,
-		"modulate": Color8(255, 255, 255, 255),
-		"tween_type": "auto",
-		"tween_from": -1,
-		"remove_active_overlay": []
+		"hold_fadein": 0,
+		"hold_fadeout": 0,
+		"quick_direction_fadein": "up",
+		"quick_direction_fadeout": "up",
+		"color_fadein": Color.WHITE,
+		"color_fadeout": Color.WHITE,
+		"modulate_fadein": Color8(255, 255, 255, 255),
+		"modulate_fadeout": Color8(255, 255, 255, 255),
+		"tween_type_fadein": "auto",
+		"tween_type_fadeout": "auto",
+		"tween_from_fadein": -1,
+		"tween_from_fadeout": -1,
+		"remove_active_overlay_fadein": [],
+		"remove_active_overlay_fadeout": [],
+		"active_overlay_visible_fadein": {},
+		"active_overlay_visible_fadeout": {}
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	var config_fadein: Dictionary = {
+		"hold": config["hold_fadein"],
+		"color": config["color_fadein"],
+		"modulate": config["modulate_fadein"],
+		"quick_direction": config["quick_direction_fadein"],
+		"tween_type": config["tween_type_fadein"],
+		"tween_from": config["tween_from_fadein"],
+		"active_overlay_visible": config["active_overlay_visible_fadein"],
+		"remove_active_overlay": config["remove_active_overlay_fadein"]
+	}
+	
+	var config_fadeout: Dictionary = {
+		"hold": config["hold_fadeout"],
+		"color": config["color_fadeout"],
+		"modulate": config["modulate_fadeout"],
+		"quick_direction": config["quick_direction_fadeout"],
+		"tween_type": config["tween_type_fadeout"],
+		"tween_from": config["tween_from_fadeout"],
+		"active_overlay_visible": config["active_overlay_visible_fadeout"],
+		"remove_active_overlay": config["remove_active_overlay_fadeout"]
+	}
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		hide_characters()
@@ -797,10 +877,10 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_effect_in_instant(shader_name, property, value_in, duration_in, config_instant)
+	background_effect_in_instant(shader_name, property, value_in, duration_in, config_fadein)
 	await overlay_effect_finished
 	
-	background_effect_out_change_instant(index, group, shader_name, property, value_out, duration_out, config_instant)
+	background_effect_out_change_instant(index, group, shader_name, property, value_out, duration_out, config_fadeout)
 	await overlay_effect_finished
 	
 	if config["hold_in"] > 0:
@@ -854,7 +934,9 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 		"hold_fadeout": 0,
 		"hide_background_in": true,
 		"hide_characters_in": false,
-		"rect_color": background_color.modulate
+		"rect_color": background_color.modulate,
+		"active_overlay_visible_fadein": {},
+		"active_overlay_visible_fadeout": {}
 	}
 	
 	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
@@ -866,12 +948,14 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	var config_fadein: Dictionary = {
 		"hold": config["hold_fadein"],
 		"hide_characters": config["hide_characters_in"],
-		"hide_background": config["hide_background_in"]
+		"hide_background": config["hide_background_in"],
+		"active_overlay_visible": config["active_overlay_visible_fadein"]
 	}
 	
 	# NOTE: in case fadeout in the future gets more optional arguments
 	var config_fadeout: Dictionary = {
-		"hold": config["hold_fadeout"]
+		"hold": config["hold_fadeout"],
+		"active_overlay_visible": config["active_overlay_visible_fadeout"]
 	}
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
