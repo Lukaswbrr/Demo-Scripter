@@ -490,11 +490,11 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 	
 	background_fade_out_instant(duration, config_instant)
 	
-	if config["hold"] < 0:
-		return
-	else:
-		await fade_out_finished
-		main_scene.dialogue_fade_in()
+	await fade_out_finished
+	if config["hold_in"] > 0:
+		await get_tree().create_timer(config["hold_in"]).timeout
+	
+	main_scene.dialogue_fade_in()
 
 func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) -> void:
 	# types:
