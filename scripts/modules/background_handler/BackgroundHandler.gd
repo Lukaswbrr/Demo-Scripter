@@ -1033,7 +1033,7 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	await fade_out_finished
 	
 	if background_color.modulate != old_background_color:
-		set_rect_modulate_instant(config["rect_color"], background_color) 
+		set_rect_modulate_instant(old_background_color, background_color) 
 	
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
