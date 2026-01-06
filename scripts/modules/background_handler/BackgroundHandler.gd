@@ -75,6 +75,34 @@ func add_overlay_normal_instant(shader_name: String, shader_arg: Dictionary) -> 
 	for k in shader_arg:
 		color_overlay.get_material().set_shader_parameter(k, shader_arg[k])
 
+func add_overlay_persistant(shader_name: String, shader_arg: Dictionary = {}, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold_out": 0
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		add_overlay_persistant_instant(shader_name, shader_arg)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
+	
+	add_overlay_persistant_instant(shader_name, shader_arg)
+	
+	await get_tree().create_timer(config["hold_in"]).timeout
+	main_scene.dialogue_fade_in()
+
 func add_overlay_persistant_instant(shader_name: String, shader_arg: Dictionary = {}) -> void:
 	var effect = load(shader_name)
 	
@@ -1005,7 +1033,7 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 			for k in config["hide_character_out"]:
 				main_scene.hide_character_instant.call(k)
 		
-		if config["show_character_out "]:
+		if config["show_character_out"]:
 			for k in config["show_character_out"]:
 				main_scene.show_character_instant.call(k)
 			
