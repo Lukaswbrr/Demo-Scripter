@@ -694,8 +694,8 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 	show_background()
 	
 	if config["hide_character"]:
-			for k in config["hide_character"]:
-				main_scene.hide_character.call(k)
+		for k in config["hide_character"]:
+			main_scene.hide_character.call(k)
 	
 	if config["show_character"]:
 		for k in config["show_character"]:
