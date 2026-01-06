@@ -481,7 +481,9 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 		"hold": 0,
 		"hold_out": 0,
 		"active_overlay_visible": {},
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -489,6 +491,14 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
+		
+		if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+		if config["show_character"]:
+			for k in config["show_character"]:
+				main_scene.show_character.call(k)
 		
 		if config["active_overlay_visible"]:
 			for k in config["active_overlay_visible"]:
@@ -574,7 +584,9 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 	var default_config: Dictionary = {
 		"hold": 0,
 		"active_overlay_visible": {},
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
 	}
 	
 	var config = _create_config_dict(default_config, config_arg)
@@ -596,7 +608,15 @@ func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -
 			overlay_node.move_child(color_overlay, -persistant_overlays - 1)
 		else:
 			characters_node.move_child(color_overlay, -persistant_overlays - 1)
+	
+	if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
 		
+	if config["show_character"]:
+		for k in config["show_character"]:
+			main_scene.show_character.call(k)
+	
 	var tween = get_tree().create_tween()
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
@@ -624,7 +644,9 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 		"tween_type": "auto",
 		"tween_from": -1,
 		"remove_active_overlay": [],
-		"active_overlay_visible": {}
+		"active_overlay_visible": {},
+		"show_character": [],
+		"hide_character": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -670,6 +692,14 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 			characters_node.move_child(color_overlay, -persistant_overlays - 1)
 	
 	show_background()
+	
+	if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+	
+	if config["show_character"]:
+		for k in config["show_character"]:
+			main_scene.show_character.call(k)
 	
 	match config["tween_type"]:
 		"auto":
@@ -826,6 +856,14 @@ func background_effect_out(shader_name: String, property: String, value: float, 
 		if config["show_character"]:
 			for k in config["show_character"]:
 				main_scene.show_character.call(k)
+				
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
 		
 		return
 	
@@ -871,6 +909,14 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 		if config["show_character"]:
 			for k in config["show_character"]:
 				main_scene.show_character.call(k)
+		
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
 		
 		return
 	
