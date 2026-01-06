@@ -511,8 +511,34 @@ func _ready() -> void:
 	}])
 	add_dialogue("yeah, thats cool")
 	
+	add_dialogue_next("character test again")
+	add_dialogue_special(show_character, [$Characters/Arcueid])
+	add_dialogue_next("transition without character hide")
+	add_dialogue_special(background.change_background_effect, [16, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction_fadein": "right",
+		"quick_direction_fadeout": "right",
+		"hide_characters_in": false
+	}])
+	add_dialogue("transition without character hide hold middle")
+	add_dialogue_special(background.change_background_effect, [6, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction_fadein": "left",
+		"quick_direction_fadeout": "left",
+		"hide_characters_in": false,
+		"hold_middle": 3
+	}])
+	add_dialogue("by holding the middle by default, the character appears in the hold middle")
+	add_dialogue("to make the character appear again after the effect background, use show_character_out and specific the character inside a array argument")
+	add_dialogue("transition with character hide, hold middle and show character out")
+	add_dialogue_special(background.change_background_effect, [6, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"quick_direction_fadein": "left",
+		"quick_direction_fadeout": "left",
+		"hold_middle": 3,
+		"show_character_out": [$Characters/Arcueid]
+	}])
+	add_dialogue("now the character appears at the fade out!")
 	
 	load_dialogue_start()
+
 ```
 
 background_effect_in does a background fade in using a shader.
