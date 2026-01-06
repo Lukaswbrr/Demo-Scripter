@@ -287,6 +287,8 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 	var default_config: Dictionary = {
 		"hold": 0,
 		"color": Color.WHITE,
+		"hide_background": true,
+		"hide_characters": true,
 		"modulate": Color8(255, 255, 255, 255),
 		"quick_direction": "up",
 		"tween_type": "auto",
@@ -343,14 +345,15 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 			color_overlay.material.set_shader_parameter(property, -value)
 		"manual":
 			color_overlay.material.set_shader_parameter(property, config["tween_from"])
-
 		"none":
 			pass
 	
 	var tween = get_tree().create_tween()
 	tween.tween_property(color_overlay, "material:shader_parameter/" + property, value, duration)
-	tween.tween_callback(hide_background)
-	tween.tween_callback(hide_characters)
+	if config["hide_background"]:
+		tween.tween_callback(hide_background)
+	if config["hide_characters"]:
+		tween.tween_callback(hide_characters)
 	tween.tween_callback(color_overlay.queue_free)
 	if config["remove_active_overlay"]:
 		for k in config["remove_active_overlay"]:
@@ -372,6 +375,8 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 	# hold_out: float
 	var default_config: Dictionary = {
 		"fast_skipable": true,
+		"hide_characters": true,
+		"hide_background": true,
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
@@ -386,8 +391,20 @@ func background_effect_in(shader_name: String, property: String, value: float, d
 	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		hide_background()
-		hide_characters()
+		if config["hide_characters"]:
+			hide_characters()
+		
+		if config["hide_background"]:
+			hide_background()
+		
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
+		
 		return
 	
 	main_scene.dialogue_fade_out()
@@ -696,6 +713,8 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 		"tween_type": "auto",
 		"tween_from": -1,
 		"active_overlay_visible": {},
+		"show_character": [],
+		"hide_character": [],
 		"remove_active_overlay": []
 	}
 	
@@ -743,6 +762,14 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	
 	show_background()
 	change_background_instant(index, group)
+	
+	if config["hide_character"]:
+		for k in config["hide_character"]:
+			main_scene.hide_character_instant.call(k)
+	
+	if config["show_character"]:
+		for k in config["show_character"]:
+			main_scene.show_character_instant.call(k)
 	#show_characters()
 	
 	match config["tween_type"]:
@@ -762,6 +789,7 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 	if config["active_overlay_visible"]:
 		for k in config["active_overlay_visible"].keys():
 			tween.tween_callback(set_active_overlay_visible_instant.bind(k, config["active_overlay_visible"][k]))
+	
 	if config["hold"] > 0:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
@@ -780,7 +808,9 @@ func background_effect_out(shader_name: String, property: String, value: float, 
 		"tween_type": "auto",
 		"tween_from": -1,
 		"active_overlay_visible": {},
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -788,6 +818,15 @@ func background_effect_out(shader_name: String, property: String, value: float, 
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
+		
+		if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+		if config["show_character"]:
+			for k in config["show_character"]:
+				main_scene.show_character.call(k)
+		
 		return
 	
 	main_scene.dialogue_fade_out()
@@ -813,7 +852,9 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 		"tween_type": "auto",
 		"tween_from": -1,
 		"active_overlay_visible": {},
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -822,6 +863,15 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
 		change_background_instant(index, group)
+		
+		if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+		if config["show_character"]:
+			for k in config["show_character"]:
+				main_scene.show_character.call(k)
+		
 		return
 	
 	main_scene.dialogue_fade_out()
@@ -847,6 +897,10 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	# TODO: make seperate keys for fade in and fade out? like quick_direction_fadein, etc?
 	var default_config: Dictionary = {
 		"fast_skipable": true,
+		"hide_characters_in": true,
+		"hide_background_in": true,
+		"show_character_out": [],
+		"hide_character_out": [],
 		"hold": 0,
 		"hold_in": 0,
 		"hold_middle": 0,
@@ -873,6 +927,8 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	
 	var config_fadein: Dictionary = {
 		"hold": config["hold_fadein"],
+		"hide_characters": config["hide_characters_in"],
+		"hide_background": config["hide_background_in"],
 		"color": config["color_fadein"],
 		"modulate": config["modulate_fadein"],
 		"quick_direction": config["quick_direction_fadein"],
@@ -890,11 +946,23 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 		"tween_type": config["tween_type_fadeout"],
 		"tween_from": config["tween_from_fadeout"],
 		"active_overlay_visible": config["active_overlay_visible_fadeout"],
-		"remove_active_overlay": config["remove_active_overlay_fadeout"]
+		"remove_active_overlay": config["remove_active_overlay_fadeout"],
+		"show_character": config["show_character_out"],
+		"hide_character": config["hide_character_out"]
 	}
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		hide_characters()
+		if config["hide_characters_in"]:
+			hide_characters()
+		
+		if config["hide_character_out"]:
+			for k in config["hide_character_out"]:
+				main_scene.hide_character_instant.call(k)
+		
+		if config["show_character_out "]:
+			for k in config["show_character_out"]:
+				main_scene.show_character_instant.call(k)
+			
 		change_background_instant(index, group)
 		return
 	
