@@ -584,8 +584,6 @@ func pause_dialogue(value: bool) -> void:
 
 #region MUSIC_AUDIO
 
-# MUSIC/AUDIO FUNCTIONS
-
 func play_audio(audio: AudioStreamPlayer) -> void:
 	audio.play()
 
