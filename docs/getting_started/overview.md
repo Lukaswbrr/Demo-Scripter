@@ -582,6 +582,100 @@ add_dialogue_special(background.change_background_effect, [16, "default", "res:/
 
 This example showcases a custom shader for transitions!
 
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+
+func _ready() -> void:
+	add_dialogue_start("background fourth example!")
+	add_dialogue("this is for showcasing custom overlays")
+	
+	add_dialogue_next("testing red overlay")
+	add_dialogue_special(background.add_overlay_normal, ["res://Demo-Scripter/docs/examples/shaders/saw_effect_shadermaterial.tres"])
+	add_dialogue("this is a red flame thing overlay")
+	add_dialogue("change background to 5")
+	add_dialogue_special(background.change_background_transition, [5, "default", 3])
+	add_dialogue("by default, the overlay does not get removed when the transition gets finished")
+	add_dialogue("change background to 7 with remove active overlay")
+	add_dialogue_special(background.change_background_transition, [7, "default", 3, {
+		"remove_active_overlay": [0]
+	}])
+	add_dialogue("the overlay effect has been removed!")
+	
+	add_dialogue_next("rect blink test")
+	add_dialogue("add overlay")
+	add_dialogue_special(background.add_overlay_normal, ["res://Demo-Scripter/docs/examples/shaders/saw_effect_shadermaterial.tres"])
+	add_dialogue("rect blink remove overlay on fadein test")
+	add_dialogue_special(background.rect_blink, [1, 1, {
+		"hold_middle": 2,
+		"remove_active_overlay_fadein": [0]
+	}])
+	add_dialogue("add overlay again")
+	add_dialogue_special(background.add_overlay_normal, ["res://Demo-Scripter/docs/examples/shaders/saw_effect_shadermaterial.tres"])
+	add_dialogue("rect blink remove overlay on fadeout test")
+	add_dialogue_special(background.rect_blink, [1, 1, {
+		"hold_middle": 2,
+		"remove_active_overlay_fadeout": [0]
+	}])
+	add_dialogue("while it worked as expected, it didnt remove the overlay during the white background part")
+	add_dialogue("in this case, we will use active_overlay_visible key")
+	
+	add_dialogue_next("add overlay again again")
+	add_dialogue_special(background.add_overlay_normal, ["res://Demo-Scripter/docs/examples/shaders/saw_effect_shadermaterial.tres"])
+	add_dialogue("rect blink again")
+	add_dialogue_special(background.rect_blink, [1, 1, {
+		"hold_middle": 2,
+		"active_overlay_visible_fadein": {0: false},
+		"active_overlay_visible_fadeout": {0: true}
+	}])
+	add_dialogue("now, it worked fine!")
+	
+	add_dialogue_next("testing background effect")
+	add_dialogue_special(background.change_background_effect, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3])
+	add_dialogue("ok...")
+	add_dialogue("testing hold middle")
+	add_dialogue_special(background.change_background_effect, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"hold_middle": 3
+	}])
+	add_dialogue("as you can see, the overlay still appeared in the middle!")
+	add_dialogue("testing hold middle with overlay visible")
+	add_dialogue_special(background.change_background_effect, [10, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3, {
+		"hold_middle": 3,
+		"active_overlay_visible_fadein": {0: false},
+		"active_overlay_visible_fadeout": {0: false},
+	}])
+	
+	add_dialogue("removed the overlay for the next test")
+	add_dialogue_special(background.remove_overlay_normal_id_instant, [0])
+	
+	add_dialogue_next("now testing overlay persistant")
+	add_dialogue_special(background.add_overlay_persistant, ["res://Demo-Scripter/docs/examples/shaders/saw_effect_shadermaterial.tres"])
+	add_dialogue("change background transition with overlay persistant")
+	add_dialogue_special(background.change_background_transition, [2, "default", 3])
+	add_dialogue("change background effect with overlay persistant")
+	add_dialogue_special(background.change_background_effect, [20, "default", "res://Demo-Scripter/docs/examples/shaders/transition_shadermaterial.tres", "height", 1, -1, 3, 3])
+	add_dialogue("the overlay persistant gets on top of the transition effect!")
+	add_dialogue("lastly, removing overlay persistant")
+	add_dialogue_special(background.remove_overlay_normal_id_instant, [0])
+	
+	load_dialogue_start()
+
+```
+
+![alt text](image-80.png)
+![alt text](image-81.png)
+![alt text](image-82.png)
+![alt text](image-83.png)
+![alt text](image-84.png)
+![alt text](image-85.png)
+![alt text](image-86.png)
+![alt text](image-87.png)
+![alt text](image-88.png)
+![alt text](image-89.png)
+![alt text](image-90.png)
+![alt text](image-91.png)
+
 ### Playing music example
 
 >[!NOTE]
