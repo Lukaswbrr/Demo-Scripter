@@ -189,7 +189,6 @@ func remove_overlay_normal_id_instant_await(signalname, id: int) -> void:
 	remove_overlay_normal_id_instant(id)
 
 func set_active_overlay_visible_instant(id: int, visible: bool) -> void:
-	print_stack()
 	_active_overlays[id].set_visible(visible)
 
 #endregion
