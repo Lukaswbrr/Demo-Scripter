@@ -1066,17 +1066,12 @@ If your music ins't looping, don't forget to set it as loopable in the reimport 
 
 This is a scene script example showcasing music functions.
 
-play_music - plays a music node
-
-stop_music - stops a music node
-
-pause_music - pauses a music node. When executing the function again on a paused music node, it resumes.
-
-set_music_pitch - sets a music node's pitch
-
-fadein_music - fades in a music node
-
-fadeout_music - fades out a music node
+- play_music - plays a music node
+- stop_music - stops a music node
+- pause_music - pauses a music node. When executing the function again on a paused music node, it resumes.
+- set_music_pitch - sets a music node's pitch
+- fadein_music - fades in a music node
+- fadeout_music - fades out a music node
 
 ```gdscript
 extends DemoScripter_VisualNovelScene
