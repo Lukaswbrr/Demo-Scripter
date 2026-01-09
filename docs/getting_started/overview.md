@@ -955,7 +955,7 @@ Your EmotionPlayer's animation list should be like this.
 
 When you select the Arcueid node, you can notice that DemoScripter_VisualNovelCharacter has three export variables:
 
-![alt text](image-1.png)
+![arcueid_step_15_1](./images/arcueid_step_15_1.png)
 
 - Pos Middle
 - Pos Left
@@ -967,42 +967,42 @@ Keep in mind, this is for setting the character's node named Arcueid and not the
 
 Since arcueid's position is already on the middle (0, 0), Pos middle will remain the same. (0, 0)
 
-![alt text](image-28.png)
+![arcueid_step_15_2](./images/arcueid_step_15_2.png)
 
-![alt text](image-4.png)
+![arcueid_step_15_3](./images/arcueid_step_15_3.png)
 
 After that, select the Arcueid node and while holding shift, move it to the left.
 
-![alt text](image-29.png)
+![arcueid_step_15_4](./images/arcueid_step_15_4.png)
 
 Copy the value from position and paste it to Pos Left.
 
-![alt text](image-31.png)
+![arcueid_step_15_5](./images/arcueid_step_15_5.png)
 
 In this case, the position X is -189.
 
 Then, copy the value from Pos Left to Pos Right and remove the minus sign of the x value. (-189, which will turn into 189)
 
-![alt text](image-32.png)
+![arcueid_step_15_6](./images/arcueid_step_15_6.png)
 
 Copy the Pos Middle value to Arcueid's position property to center Arcueid by default again.
-![alt text](image-33.png)
+![arcueid_step_15_7](./images/arcueid_step_15_7.png)
 
 ### Create arcueid script
 
 Right click on Arcueid's node and click on Extend script.
 
-![alt text](image-7.png)
+![arcueid_step_16_1](./images/arcueid_step_16_1.png)
 
 Save it on arcueid's character folder.
 
-![alt text](image-8.png)
+![arcueid_step_16_2](./images/arcueid_step_16_2.png)
 
 ### Auto add emotions function
 
 On arcueid.gd, in the _ready function, add auto_add_emotions() function. This is for loading the emotions for the character.
 
-![alt text](image-9.png)
+![arcueid_step_17_1](./images/arcueid_step_17_1.png)
 
 ```gdscript
 extends DemoScripter_VisualNovelCharacter
