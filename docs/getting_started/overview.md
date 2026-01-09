@@ -676,13 +676,6 @@ func _ready() -> void:
 ![alt text](image-90.png)
 ![alt text](image-91.png)
 
-### Playing music example
-
->[!NOTE]
->The following musics are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
->I got the music files from accessing the CD folder from [ReadTsukihime's Tsukihime download page](https://www.readtsukihi.me/downloads).
->The musics is from Tsuki-Bako version of Tsukihime.
-
 # Adding backgrounds for the framework
 
 >[!NOTE]
@@ -698,7 +691,6 @@ func _ready() -> void:
 
 First, instantiate background handler from demoscripter folder to your visual novel scene.
 ![alt text](image-20.png)
-
 
 ![alt text](image-26.png)
 
@@ -1022,6 +1014,175 @@ func _ready() -> void:
 
 And now, the arcued character example should be finished and ready to be added to a scene!
 
-# Playing audio using the framework
+# Playing music or audio using the framework
 
-W.I.P
+In order to play music or audio, you use play_music for music or play_audio.
+
+>[!NOTE]
+>While theses functions do the same thing (play a audio), it's probably going to be changed in the future their functionality.
+
+## Tsukihime music example
+
+>[!NOTE]
+>The following musics are from Tsukihime. Tsukihime is owned by TYPE-MOON. This is only for example purposes.
+>I got the music files from accessing the CD folder from [ReadTsukihime's Tsukihime download page](https://www.readtsukihi.me/downloads).
+>The musics is from Tsuki-Bako version of Tsukihime.
+>The musics is located in the assets/musics in this doc folder.
+>Keep in mind this example has nodes from Background handler section. It's not necessary to follow the background handler example to play music in DemoScripter.
+
+This example showcases how to add and play musics from Tsukihime.
+
+First, add a AudioStreamPlayer to your scene.
+
+![alt text](image-92.png)
+
+Then, rename the node to Music1.
+
+![alt text](image-93.png)
+
+![alt text](image-94.png)
+
+In this example, it will be used track01, track02 and track03 from Tsukihime. Because of that, duplicate the Music1 node two times. (CTRL + D)
+
+In Music1, select track01 from docs/assets/musics.
+
+![alt text](image-95.png)
+
+![alt text](image-96.png)
+
+![alt text](image-97.png)
+
+In Music2, select track02 and in Music3, select track03.
+
+![alt text](image-98.png)
+
+And done! Now you can use your music nodes using any music function from DemoScripter! (play_music, stop_music, etc)
+
+If your music ins't looping, don't forget to set it as loopable in the reimport settings when you select a music file!
+
+![alt text](image-99.png)
+
+### Scene script example
+
+This is a scene script example showcasing music functions.
+
+play_music - plays a music node
+
+stop_music - stops a music node
+
+pause_music - pauses a music node. When executing the function again on a paused music node, it resumes.
+
+set_music_pitch - sets a music node's pitch
+
+fadein_music - fades in a music node
+
+fadeout_music - fades out a music node
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+
+func _ready() -> void:
+	add_dialogue_start("music example!")
+	add_dialogue("playing track 1")
+	add_dialogue_special(play_music, [$Music1])
+	add_dialogue("working...")
+	add_dialogue("playing track 2")
+	add_dialogue_special(play_music, [$Music2])
+	add_dialogue("as you can see, by default, it doesnt stop track 1")
+	add_dialogue("it also doesnt trigger a fadein and fadeout dialogue animation!")
+	add_dialogue("stopping both tracks")
+	add_dialogue_special(stop_music, [$Music1])
+	add_dialogue_special(stop_music, [$Music2])
+	
+	add_dialogue_next("playing track 1")
+	add_dialogue_special(play_music, [$Music1])
+	add_dialogue("in order to change to a different music and stop the previous one, you use stop_music with the name of the track you want to stop")
+	add_dialogue("and the argument for both functions is a AudioStreamPlayer node, so you need to add a node with the track you want")
+	add_dialogue("stopping track 1, playing track 2")
+	add_dialogue_special(stop_music, [$Music1])
+	add_dialogue_special(play_music, [$Music2])
+	add_dialogue("stopping track 2, playing track 3")
+	add_dialogue_special(stop_music, [$Music2])
+	add_dialogue_special(play_music, [$Music3])
+	add_dialogue("very cool....")
+	
+	add_dialogue_next("you can also pause musics, too")
+	add_dialogue("pausing track03")
+	add_dialogue_special(pause_music, [$Music3])
+	add_dialogue("now its paused.....")
+	add_dialogue("resuming track03")
+	add_dialogue_special(pause_music, [$Music3])
+	add_dialogue("now its resumed.....")
+	add_dialogue("...yeah")
+	
+	add_dialogue_next("and set music pitchs, too")
+	add_dialogue("setting to 1.25 pitch track03")
+	add_dialogue_special(set_music_pitch, [$Music3, 1.25])
+	add_dialogue("now its fast...")
+	add_dialogue("1.50 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 1.50])
+	add_dialogue("2 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 2])
+	add_dialogue("3 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 3])
+	add_dialogue("5 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 5])
+	add_dialogue("10 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 10])
+	add_dialogue("now back to 1")
+	add_dialogue_special(set_music_pitch, [$Music3, 1])
+	add_dialogue("damn, ngl, it feels kinda weird listening to tsukihime musics with different pitch")
+	
+	add_dialogue_next("setting to 0.9 pitch track03")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.9])
+	add_dialogue("0.8 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.8])
+	add_dialogue("0.7 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.7])
+	add_dialogue("0.5 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.5])
+	add_dialogue("0.3 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.3])
+	add_dialogue("0.1 pitch")
+	add_dialogue_special(set_music_pitch, [$Music3, 0.1])
+	add_dialogue("now back to 1.0")
+	add_dialogue_special(set_music_pitch, [$Music3, 1])
+	add_dialogue("creepy....")
+	
+	add_dialogue_next("you can also fade out and fade in music, too")
+	add_dialogue("fade out track03 with 3 duration")
+	add_dialogue_special(fadeout_music, [$Music3, 3])
+	add_dialogue("it slowly fades out")
+	add_dialogue("fade in track03 with 3 duration")
+	add_dialogue_special(fadein_music, [$Music3, 3])
+	add_dialogue("slowly fades in")
+	add_dialogue("by default, it doesnt pause the music once it reaches 0 in fade out")
+	add_dialogue("its the same to fade in, too, where it doesnt resume the music where it stopped")
+	add_dialogue("fade out track03 with 3 duration with pause")
+	add_dialogue_special(fadeout_music, [$Music3, 3, {
+		"pause": true
+	}])
+	add_dialogue("fade in track03 with 3 duration with pause")
+	add_dialogue_special(fadein_music, [$Music3, 3, {
+		"pause": true
+	}])
+	add_dialogue("now, it resumed!")
+	add_dialogue("cool.....")
+	
+	add_dialogue_next("you can also make the fadein not set to 55 instantly and instead, go to volume 0 from current volume!")
+	add_dialogue("fading in")
+	add_dialogue_special(fadeout_music, [$Music3, 3, {
+		"pause": true
+	}])
+	add_dialogue("fading out with no set to 55")
+	add_dialogue_special(fadein_music, [$Music3, 3, {
+		"pause": true,
+		"set_node_volume_to_55": false
+	}])
+	add_dialogue("uhuh...")
+	
+	load_dialogue_start()
+
+```
