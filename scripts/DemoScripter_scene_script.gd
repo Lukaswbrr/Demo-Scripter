@@ -610,34 +610,76 @@ func play_audio_wait_signal(audio) -> void:
 		await _animation_player.animation_started
 		play_audio(audio)
 
-func fadein_music(music: AudioStreamPlayer, duration: float, pause: bool = false) -> void:
-	var musictween = get_tree().create_tween()
-	var music_oldvalue = music.volume_db
-	music.volume_db = -55
+func fadein_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}, pause: bool = false) -> void:
+	if music.has_meta("isFadingOut") and music.get_meta("isFadingOut"):
+		music.get_meta("fadeOutTween").kill()
 	
-	if music_oldvalue == -55:
-		music_oldvalue = 0
+	music.set_meta("isFadingIn", true)
+	
+	var default_config: Dictionary = {
+		"volume_to": 0,
+		"use_node_old_volume_as_to": false,
+		"set_node_volume_to_55": true,
+		"pause": false
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
+	var musictween = get_tree().create_tween()
+	var music_volume_to: float
+
+	music.set_meta("fadeInTween", musictween)
+	
+	if config["use_node_old_volume_as_to"]:
+		music_volume_to = music.volume_db
+	else:
+		music_volume_to = config["volume_to"]
+	
+	if config["set_node_volume_to_55"]:
+		music.volume_db = -55
+	
+	if music_volume_to == -55:
+		music_volume_to = 0
 	
 	if !music.playing:
-		if pause:
+		if config["pause"]:
 			pause_music(music)
 		else:
 			music.play()
 	
-	musictween.tween_property(music, "volume_db", music_oldvalue, duration)
-	#print(music_oldvalue)
+	musictween.tween_property(music, "volume_db", music_volume_to, duration)
+	musictween.tween_callback(music.remove_meta.bind("fadeInTween"))
+	musictween.tween_callback(music.remove_meta.bind("isFadingIn"))
 
-func fadeout_music(music, duration: float, pause: bool = false) -> void:
+func fadeout_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}) -> void:
+	if music.has_meta("isFadingIn") and music.get_meta("isFadingIn"):
+		music.get_meta("fadeInTween").kill()
+	
+	music.set_meta("isFadingOut", true)
+	
+	var default_config: Dictionary = {
+		"volume_from": 0,
+		"set_custom_volume_to": null,
+		"pause": false
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	
 	var musictween = get_tree().create_tween()
-	var music_oldvalue = music.volume_db
-	musictween.tween_property(music, "volume_db", -55, duration)
-	await musictween.finished
+	music.set_meta("fadeOutTween", musictween)
 	
-	if pause:
-		music.pause()
+	if config["set_custom_volume_to"]:
+		musictween.tween_property(music, "volume_db", config["set_custom_volume_to"], duration)
+	else:
+		musictween.tween_property(music, "volume_db", -55, duration)
+	musictween.tween_callback(music.remove_meta.bind("fadeOutTween"))
+	if config["pause"]:
+		musictween.tween_callback(music.set_meta.bind("isFadingOut", false))
+		musictween.tween_callback(pause_music.bind(music))
 		return
+	musictween.tween_callback(music.set_meta.bind("isFadingOut", false))
+	musictween.tween_callback(music.stop)
 	
-	music.stop()
 
 func set_music_pitch(music, pitch):
 	music.set_pitch_scale(pitch)
@@ -724,3 +766,40 @@ func _on_text_tween_completed() -> void:
 			return
 		
 		show_icon_modular()
+
+#region CONFIG_UTILS
+# TODO: maybe make a DemoScripterUtils global node in the future? probably after refactoring the
+# framework, tbh (around v1.0.0)
+
+func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
+	if dict2.is_empty():
+		return true
+	
+	for k in dict2:
+		if not k in dict1:
+			print_stack()
+			print("dict1: " + str(dict1))
+			print("dict2: " + str(dict2))
+			print("\n")
+			print("\"" + k + "\" is not in dict1!")
+			return false
+	
+	return true
+
+func _create_config_dict(default_config: Dictionary, config_arg: Dictionary) -> Dictionary:
+	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
+	
+	var config = default_config.duplicate()
+	if !config_arg.is_empty():
+		config.merge(config_arg, true)
+	
+	return config
+
+func _remove_config_keys(config_arg: Dictionary, keys: Array) -> Dictionary:
+	var config = config_arg.duplicate()
+	
+	for k in config.keys():
+		if k in keys:
+			config.erase(k)
+	
+	return config
