@@ -252,7 +252,7 @@ hide_character makes the character invisible and show_character makes the charac
 In this example, it will be used the Background Handler node to handle backgrounds, which includes background transitions, etc!
 
 Keep in mind, the current scene for this test looks like this.
-![alt text](image-40.png)
+![background_handler_example_1](./images/background_handler_example_1.png)
 
 ```gdscript
 extends DemoScripter_VisualNovelScene
@@ -338,26 +338,26 @@ func _ready() -> void:
 
 ```
 
-![alt text](image-41.png)
-![alt text](image-42.png)
-![alt text](image-43.png)
-![alt text](image-44.png)
-![alt text](image-45.png)
-![alt text](image-46.png)
-![alt text](image-47.png)
-![alt text](image-48.png)
-![alt text](image-49.png)
-![alt text](image-50.png)
-![alt text](image-51.png)
-![alt text](image-52.png)
-![alt text](image-54.png)
-![alt text](image-55.png)
+![background_handler_example_2](./images/background_handler_example_2.png)
+![background_handler_example_3](./images/background_handler_example_3.png)
+![background_handler_example_4](./images/background_handler_example_4.png)
+![background_handler_example_5](./images/background_handler_example_5.png)
+![background_handler_example_6](./images/background_handler_example_6.png)
+![background_handler_example_7](./images/background_handler_example_7.png)
+![background_handler_example_8](./images/background_handler_example_8.png)
+![background_handler_example_9](./images/background_handler_example_9.png)
+![background_handler_example_10](./images/background_handler_example_10.png)
+![background_handler_example_11](./images/background_handler_example_11.png)
+![background_handler_example_12](./images/background_handler_example_12.png)
+![background_handler_example_13](./images/background_handler_example_13.png)
+![background_handler_example_14](./images/background_handler_example_14.png)
+![background_handler_example_15](./images/background_handler_example_15.png)
 
 change_background_transition changes the background with a transition effect that fades in the new background on top of the old background. By default, characters get affected by the transition effect. You can enable persistant characters adding { "persistant_chars": true } to the config argument.
 
 background_fade_in fades the background in, which makes it invisible and only making the color behing the Background's Sprites node visible. (ColorRect) Just like change_background_transition, characters get affected by the background fade. You can disable this by using { "hide_characters_in": false } in the config argument.
 
-![alt text](image-53.png)
+![background_handler_example_16](./images/background_handler_example_16.png)
 
 background_fade_out fades the background out.
 
