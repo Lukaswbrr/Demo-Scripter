@@ -610,7 +610,7 @@ func play_audio_wait_signal(audio) -> void:
 		await _animation_player.animation_started
 		play_audio(audio)
 
-func fadein_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}, pause: bool = false) -> void:
+func fadein_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}) -> void:
 	if music.has_meta("isFadingOut") and music.get_meta("isFadingOut"):
 		music.get_meta("fadeOutTween").kill()
 	
