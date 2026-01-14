@@ -169,7 +169,7 @@ In this example, it will be tested functionality for making a character visible,
 
 Once you have a character done, in this case Arcueid, create a Node2D named Characters in your visual novel scene. This is where the characters will be added.
 
-![alt text](image.png)
+![character_example_1](./images/character_example_1.png)
 
 >[!NOTE]
 >You can add a control named Background with a ColorRect on it, if you want. It's just for a simple color background. (which is not used in the example)
@@ -177,8 +177,8 @@ Once you have a character done, in this case Arcueid, create a Node2D named Char
 
 Then, instantiate arcueid scene on Characters node.
 
-![alt text](image-10.png)
-![alt text](image-11.png)
+![character_example_2](./images/character_example_2.png)
+![character_example_3](./images/character_example_3.png)
 
 Here is the code used for the example.
 
@@ -214,23 +214,23 @@ func _ready() -> void:
 	load_dialogue_start()
 ```
 
-![alt text](image-13.png)
-![alt text](image-14.png)
-![alt text](image-15.png)
-![alt text](image-16.png)
-![alt text](image-17.png)
-![alt text](image-18.png)
-![alt text](image-19.png)
-![alt text](image-34.png)
-![alt text](image-35.png)
-![alt text](image-36.png)
-![alt text](image-37.png)
-![alt text](image-38.png)
-![alt text](image-39.png)
+![character_example_4](./images/character_example_4.png)
+![character_example_5](./images/character_example_5.png)
+![character_example_6](./images/character_example_6.png)
+![character_example_7](./images/character_example_7.png)
+![character_example_8](./images/character_example_8.png)
+![character_example_9](./images/character_example_9.png)
+![character_example_10](./images/character_example_10.png)
+![character_example_11](./images/character_example_11.png)
+![character_example_12](./images/character_example_12.png)
+![character_example_13](./images/character_example_13.png)
+![character_example_14](./images/character_example_14.png)
+![character_example_15](./images/character_example_15.png)
+![character_example_16](./images/character_example_16.png)
 
 The set_character_emotion sets the character's emotion. Most of the functions has a _instant variation, which means they get executed without the hud fading in and out! (and the _instant functions gets executed once the fade out animation finishes or fast_skip button is held.)
 
-![alt text](image-12.png)
+![character_example_17](./images/character_example_17.png)
 
 It's optional if you want to type the emotions argument in uppercase or lowercase since it automatically sets the argument to uppercase!
 
