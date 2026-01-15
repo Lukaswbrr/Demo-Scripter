@@ -663,18 +663,18 @@ func _ready() -> void:
 
 ```
 
-![alt text](image-80.png)
-![alt text](image-81.png)
-![alt text](image-82.png)
-![alt text](image-83.png)
-![alt text](image-84.png)
-![alt text](image-85.png)
-![alt text](image-86.png)
-![alt text](image-87.png)
-![alt text](image-88.png)
-![alt text](image-89.png)
-![alt text](image-90.png)
-![alt text](image-91.png)
+![overlay_example_1](./images/overlay_example_1.png)
+![overlay_example_2](./images/overlay_example_2.png)
+![overlay_example_3](./images/overlay_example_3.png)
+![overlay_example_4](./images/overlay_example_4.png)
+![overlay_example_5](./images/overlay_example_5.png)
+![overlay_example_6](./images/overlay_example_6.png)
+![overlay_example_7](./images/overlay_example_7.png)
+![overlay_example_8](./images/overlay_example_8.png)
+![overlay_example_9](./images/overlay_example_9.png)
+![overlay_example_10](./images/overlay_example_10.png)
+![overlay_example_11](./images/overlay_example_11.png)
+![overlay_example_12](./images/overlay_example_12.png)
 
 # Adding backgrounds for the framework
 
