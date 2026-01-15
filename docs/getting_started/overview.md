@@ -374,8 +374,8 @@ In this example, it will be shown functions that change the background's colors,
 
 There is a node in this example named Overlay with a child of ColorRect named Color. This ColorRect has a material of CanvasItemShader with blend mode set to multiply. This gets used on add_dialogue_special(background.set_rect_modulate_transition, [Color8(255, 0, 0), 3, $Overlay/Color]) function.
 
-![alt text](image-57.png)
-![alt text](image-58.png)
+![background_colors_example_1](./images/background_colors_example_1.png)
+![background_colors_example_2](./images/background_colors_example_2.png)
 
 ```gdscript
 extends DemoScripter_VisualNovelScene
@@ -414,13 +414,13 @@ func _ready() -> void:
 	load_dialogue_start()
 ```
 
-![alt text](image-56.png)
-![alt text](image-59.png)
-![alt text](image-60.png)
-![alt text](image-61.png)
-![alt text](image-62.png)
-![alt text](image-63.png)
-![alt text](image-65.png)
+![background_colors_example_3](./images/background_colors_example_3.png)
+![background_colors_example_4](./images/background_colors_example_4.png)
+![background_colors_example_5](./images/background_colors_example_5.png)
+![background_colors_example_6](./images/background_colors_example_6.png)
+![background_colors_example_7](./images/background_colors_example_7.png)
+![background_colors_example_8](./images/background_colors_example_8.png)
+![background_colors_example_9](./images/background_colors_example_9.png)
 
 set_background_modulate sets the background's modulate (color) after the fade out animation of HUD finishes.
 
@@ -556,19 +556,19 @@ add_dialogue_special(background.change_background_effect, [16, "default", "res:/
 }])
 ```
 
-![alt text](image-66.png)
-![alt text](image-67.png)
-![alt text](image-68.png)
-![alt text](image-69.png)
-![alt text](image-73.png)
-![alt text](image-71.png)
-![alt text](image-72.png)
-![alt text](image-74.png)
-![alt text](image-75.png)
-![alt text](image-76.png)
-![alt text](image-77.png)
-![alt text](image-78.png)
-![alt text](image-79.png)
+![transition_shader_example_1](./images/transition_shader_example_1.png)
+![transition_shader_example_2](./images/transition_shader_example_2.png)
+![transition_shader_example_3](./images/transition_shader_example_3.png)
+![transition_shader_example_4](./images/transition_shader_example_4.png)
+![transition_shader_example_5](./images/transition_shader_example_5.png)
+![transition_shader_example_6](./images/transition_shader_example_6.png)
+![transition_shader_example_7](./images/transition_shader_example_7.png)
+![transition_shader_example_8](./images/transition_shader_example_8.png)
+![transition_shader_example_9](./images/transition_shader_example_9.png)
+![transition_shader_example_10](./images/transition_shader_example_10.png)
+![transition_shader_example_11](./images/transition_shader_example_11.png)
+![transition_shader_example_12](./images/transition_shader_example_12.png)
+![transition_shader_example_13](./images/transition_shader_example_13.png)
 
 #### Overlay example
 
