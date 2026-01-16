@@ -690,26 +690,26 @@ func _ready() -> void:
 >The example below uses a project resolution of 720x540.
 
 First, instantiate background handler from demoscripter folder to your visual novel scene.
-![alt text](image-20.png)
+![tsukihime_backgrounds_example_1](./images/tsukihime_backgrounds_example_1.png)
 
-![alt text](image-26.png)
+![tsukihime_backgrounds_example_2](./images/tsukihime_backgrounds_example_2.png)
 
 Rename the BackgroundHandler to Background.
 
-![alt text](image-22.png)
+![tsukihime_backgrounds_example_3](./images/tsukihime_backgrounds_example_3.png)
 
 Make the Background node (previuosly named BackgroundHandler) to local. This is for adding the background sprites and not altering the background handler from demoscripter folder.
 
-![alt text](image-23.png)
+![tsukihime_backgrounds_example_4](./images/tsukihime_backgrounds_example_4.png)
 
 Create a new SpriteFrame on Sprites and add the Tsukihime backgrounds from assets/backgrounds of this documentation folder.
 
-![alt text](image-24.png)
+![tsukihime_backgrounds_example_5](./images/tsukihime_backgrounds_example_5.png)
 
 As you can see, the sprite resolution inst in the correct size due to the project being in 720x540.
 
 On Sprites node, set the Scale size to x: 1.125 and y: 1.125
-![alt text](image-25.png)
+![tsukihime_backgrounds_example_6](./images/tsukihime_backgrounds_example_6.png)
 
 After changing the scale, create a Node2D on your scene named Characters.
 
@@ -718,11 +718,11 @@ After changing the scale, create a Node2D on your scene named Characters.
 
 On Background node, set the Main Scene variable to the root node (or the node that the background handler is inside, which is a DemoScripter_VisualNovelScene node)
 
-![alt text](image-21.png)
+![tsukihime_backgrounds_example_7](./images/tsukihime_backgrounds_example_7.png)
 
 Then set the Characters Node to the Node2D named Characters you just created.
 
-![alt text](image-27.png)
+![tsukihime_backgrounds_example_8](./images/tsukihime_backgrounds_example_8.png)
 
 The overlay node can be empty because it's optional and only meant to be used if Use Overlay Exclusive Node is enabled, which handles overlays on a seperate node.
 
