@@ -1034,33 +1034,33 @@ This example showcases how to add and play musics from Tsukihime.
 
 First, add a AudioStreamPlayer to your scene.
 
-![alt text](image-92.png)
+![tsukihime_music_example_1](./images/tsukihime_music_example_1.png)
 
 Then, rename the node to Music1.
 
-![alt text](image-93.png)
+![tsukihime_music_example_2](./images/tsukihime_music_example_2.png)
 
-![alt text](image-94.png)
+![tsukihime_music_example_3](./images/tsukihime_music_example_3.png)
 
 In this example, it will be used track01, track02 and track03 from Tsukihime. Because of that, duplicate the Music1 node two times. (CTRL + D)
 
 In Music1, select track01 from docs/assets/musics.
 
-![alt text](image-95.png)
+![tsukihime_music_example_4](./images/tsukihime_music_example_4.png)
 
-![alt text](image-96.png)
+![tsukihime_music_example_5](./images/tsukihime_music_example_5.png)
 
-![alt text](image-97.png)
+![tsukihime_music_example_6](./images/tsukihime_music_example_6.png)
 
 In Music2, select track02 and in Music3, select track03.
 
-![alt text](image-98.png)
+![tsukihime_music_example_7](./images/tsukihime_music_example_7.png)
 
 And done! Now you can use your music nodes using any music function from DemoScripter! (play_music, stop_music, etc)
 
 If your music ins't looping, don't forget to set it as loopable in the reimport settings when you select a music file!
 
-![alt text](image-99.png)
+![tsukihime_music_example_8](./images/tsukihime_music_example_8.png)
 
 ### Scene script example
 
