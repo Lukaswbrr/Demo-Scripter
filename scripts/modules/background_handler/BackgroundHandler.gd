@@ -224,7 +224,10 @@ func change_background_transition_instant(index: int, group: String, duration: f
 		"persistant_chars": false,
 		"hold_signal": 0,
 		"remove_active_overlay": [],
-		"active_overlay_visible": {}
+		"active_overlay_visible": {},
+		"hide_character": [],
+		"hide_characters_on_end": true,
+		"show_character": []
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -247,6 +250,14 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	if config["persistant_chars"]:
 		characters_node.move_child(new_background, 0)
 	
+	if config["hide_character"]:
+		for k in config["hide_character"]:
+			main_scene.hide_character_instant.call(k, 0)
+		
+	if config["show_character"]:
+		for k in config["show_character"]:
+			main_scene.show_character_instant.call(k, 0)
+	
 	if persistant_overlays > 0:
 		if use_overlay_exclusive_node:
 			overlay_node.move_child(new_background, -persistant_overlays - 1)
@@ -255,7 +266,8 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	
 	var tween = get_tree().create_tween()
 	tween.tween_property(new_background, "modulate", Color(new_background.modulate, 1), duration)
-	if not config["persistant_chars"]:
+	if config["hide_characters_on_end"]:
+		print("hide characters is true!")
 		tween.tween_callback(hide_characters)
 	tween.tween_callback(background_sprites.set_frame.bind(index))
 	tween.tween_callback(background_sprites.set_animation.bind(group))
@@ -280,7 +292,10 @@ func change_background_transition(index: int, group: String, duration: float, co
 		"hold_out": 0,
 		"hold_signal": 0,
 		"active_overlay_visible": {},
-		"remove_active_overlay": []
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": [],
+		"hide_characters_on_end": true
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
@@ -1486,7 +1501,7 @@ func rect_blink_old(fadein: float, hold_in: float, fadeout: float, hold_out: flo
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_rect_modulate(newColor: Color, hold: float, rect: ColorRect, fast_skipable: bool = true) -> void:
+func set_rect_modulate(newColor: Color, hold: float, rect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
 		return
@@ -1502,7 +1517,7 @@ func set_rect_modulate(newColor: Color, hold: float, rect: ColorRect, fast_skipa
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_rect_modulate_transition(newColor: Color, duration: float, rect: ColorRect, hold: float = 0, fast_skipable: bool = true) -> void:
+func set_rect_modulate_transition(newColor: Color, duration: float, rect, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
 		return
@@ -1510,7 +1525,7 @@ func set_rect_modulate_transition(newColor: Color, duration: float, rect: ColorR
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	var tween = get_tree().create_tween()
-	tween.tween_property(rect, "color", newColor, duration)
+	tween.tween_property(rect, "modulate", newColor, duration)
 	await tween.finished
 	
 	if hold > 0:
@@ -1521,7 +1536,7 @@ func set_rect_modulate_transition(newColor: Color, duration: float, rect: ColorR
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_rect_modulate_instant(newColor: Color, rect: ColorRect) -> void:
+func set_rect_modulate_instant(newColor: Color, rect) -> void:
 	rect.set_modulate(newColor)
 
 #endregion
