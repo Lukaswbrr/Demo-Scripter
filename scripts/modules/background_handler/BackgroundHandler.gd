@@ -267,7 +267,6 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	var tween = get_tree().create_tween()
 	tween.tween_property(new_background, "modulate", Color(new_background.modulate, 1), duration)
 	if config["hide_characters_on_end"]:
-		print("hide characters is true!")
 		tween.tween_callback(hide_characters)
 	tween.tween_callback(background_sprites.set_frame.bind(index))
 	tween.tween_callback(background_sprites.set_animation.bind(group))

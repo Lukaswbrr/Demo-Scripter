@@ -20,45 +20,97 @@ signal text_animation_finished
 ## Emits when the current page of dialogie is finished and goes to the next one.
 ## id is what page it gone to.
 signal dialogue_next_page(id: int)
-## Emits when
+## Emits when dialogue's fade_in animation is about to play.
+## Occurs at the end of dialogue's fade_out animatiion.
 signal animation_text_fading_in
-signal end_dialogue_signal
+## Emits when play_dialogue has reached the last possible dialogue index of a
+## set.
+signal end_dialogue_signal 
 
 # Variables related to HUD node
-@export var hud_node_path: NodePath = "Text" ## The main node which is going to be used for dialogue text, etc.
+ ## The main node path which is going to be used for dialogue text, etc.
+@export var hud_node_path: NodePath = "Text"
+## The HUD node got from [member hud_node_path].
 @onready var hud_node = get_node(hud_node_path)
+## The Label or RichTextNode used to display dialogue.
+## Must be a child node of [member hud_node]
 @onready var dialogue_node = hud_node.get_node("Dialogue")
+## The background used behind the dialogue's text.
+## Must be a child node of [member hud_node]
 @onready var darkbackground_node = hud_node.get_node("DarkBackground")
+## The animation player for the dialogue, used for fading in and fading out.
+## Must be a child node of [member hud_node]
 @onready var _animation_player: AnimationPlayer = darkbackground_node.get_node("AnimationPlayer")
+## The icon of the dialogue system.
+## Must be a child node of [member hud_node]
 @onready var icon_text = hud_node.get_node("IconText")
 
+## Dictionary where all the dialogue created from [method add_dialogue] is
+## stored on.
+## [br]
+## [br]
+## The keys (member dialogue_index]) is the incremented by 1 everytime add_dialogue is executed
+## and the values are the information of the text.
+## [br]
+## [br]
+## The following syntax for the values in the dictionary is:
+## [br]
+## index 0: Text of the dialogue
+## [br]
+## index 1: Number of words the text has
+## [br]
+## index 2: The page that the dialogue was added on
+## [br]
+## index 3: The set where the dialogue was added on.
+## @experimental: In the v1.0.0 refactor version, this dictionary's structure will change.
 var dialogue_dictionary: Dictionary = {}
+## Dictionary where the functions created from [member add_dialogue_special] is stored on.
+## [br]
+## [br]
+## Used for which function will be executed.
 var function_dialogue_dictionary: Dictionary = {}
-
+## Dictionary in which ID of [member dialogue_dictionary] that has a function
+## created by [member add_dialogue_special].
 var function_array_numbers: Array = []
 
-# Current dialogue IDs
+## The current index of dialogue that is being displayed.
 var dialogue_index: int = 1 # The current dialogue displaying
-var dialogue_current_id: int = 1 # The current group of dialogue [example, list of dialogues with ID 1]
+## The current page of dialogue.
+var dialogue_current_id: int = 1
 
-# Add dialogue id
+## Used for [member add_dialogue], where once the argument is set, next dialogue
+## will use the same ID until a different id is used.
 var add_dialogue_id: int = 1
 
 # Dialogue states and system variables
+## Used for when a dialogue is finished displaying.
+## (when the tween animation is finished, showing all the text.)
 var finished: bool
+## Used for when a dialogue is paused.
+## @experimental: This seems inconsistent because when using [member play_dialogue], dialogue is considered paused? I don't remember much why I used it since the framework base was worked in 2023 where I was still a begineer in GDScript and Godot. Will be reworked in v1.0.0 version.
 var paused: bool
+## Used for when the dialogue's system is disabled.
+## Occurs during fade in and fade outs, functions like [method set_character_emotion], etc.
 var disabled: bool
-var loadanimation: bool
+## Used for when the dialogue has been ended by [method end_dialogue].
 var dialogue_ended: bool
-var check_wait_for_anim: bool # checks if the current animation_player is fade_out for wait_for()_func to run
+## Used for checking if the current animation from [member _animation_player] is playing fade_out.
+## Used on method [method wait_for_anim_func].
+var check_wait_for_anim: bool
+## If the dialogue has been started by [method load_dialogue].
 var dialogue_started: bool
 
-## Regex for filtering [] tags in dialogue
+## Regex for filtering [] tags in dialogue.
+## This fixes the issue where [] counts as characters, which is not meant to when using BBCode effects.
 var regex = RegEx.new()
+## If regex has been already compiled.
+## If not, [method add_dialogue] compiles it automatically.
 var regex_compiled = false
 
 # Variables for tween
-var tweenthing
+## The tween object used for text animations. (showing the text per word)
+## @experimental: The name will be changed in v1.0.0 and functionality may change.
+var tweenthing: Tween
 var maxvisible: int = 0
 
 var dialogue_current_set: String = "start" # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
@@ -106,13 +158,6 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, setname: Strin
 	
 	add_dialogue_id = id
 	add_dialogue_set = setname
-	
-	#	Some information about the values in the dictionary:
-#		1: Text of the dialogue
-#		2: Number of words the text has
-#		3: ID that the dialogue was added in
-#		4: Function if the dialogue has one
-#		5: Speed of the dialogue (probably)
 	
 	if !first_text:
 #		print(str(text.begins_with("\"")) + ": " + str(text))
@@ -308,7 +353,7 @@ func load_dialogue_start(id: int = 1, set_id: String = "start", loadinstant = tr
 		wait_for_anim_func()
 
 		if check_wait_for_anim:
-			await self.animation_text_fading_in
+			await animation_text_fading_in
 			tweenthing = get_tree().create_tween()
 			tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
 			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(0)

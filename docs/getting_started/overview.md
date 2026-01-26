@@ -286,7 +286,8 @@ func _ready() -> void:
 	add_dialogue_special(show_character, [$Characters/Arcueid])
 	add_dialogue("change to sprite 5 persistant")
 	add_dialogue_special(background.change_background_transition, [5, "default", 2, {
-		"persistant_chars": true
+		"persistant_chars": true,
+		"hide_characters_on_end": false
 	}])
 	add_dialogue("now the character is on front!")
 	add_dialogue("very cool...")
