@@ -16,12 +16,10 @@ var _active_overlays: Array[Node]
 @export var characters_node: Node
 @export var overlay_node: Node # only use this if use_overlay_exclusive_node is enabled!
 
-
 @onready var anim_player = $AnimationPlayer
 @onready var background_color = $ColorRect
 @onready var background_sprites = $Sprites
 @onready var current_background = background_sprites.frame
-
 
 func _ready() -> void:
 	assert(type_string(typeof(main_scene)) == "Object", "The main scene variable hasn't been defined!")

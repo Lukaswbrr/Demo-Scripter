@@ -104,6 +104,8 @@ var dialogue_started: bool
 ## This fixes the issue where [] counts as characters, which is not meant to when using BBCode effects.
 var regex = RegEx.new()
 ## If regex has been already compiled.
+## [br]
+## [br]
 ## If not, [method add_dialogue] compiles it automatically.
 var regex_compiled = false
 
@@ -111,40 +113,82 @@ var regex_compiled = false
 ## The tween object used for text animations. (showing the text per word)
 ## @experimental: The name will be changed in v1.0.0 and functionality may change.
 var tweenthing: Tween
+## The to value used for [member tweehthing], where it gets the max length of the text from
+## a dialogue.
+## @experimental: The name will be changed in v1.0.0.
 var maxvisible: int = 0
 
+## The current dialogue set displaying the dialogue from.
 var dialogue_current_set: String = "start" # The current set of dialogue (example set 1 is normal route, set 2 is different route, etc)
+## Used in [method add_dialogue] where if you set the setname argument once, the next dialogues
+## will be added in the specific set until set to another set.
 var add_dialogue_set: String = "start"
 
 @export_group("Text")
-@export var auto_space: bool = true ## Adds a space on texts that doesn't start with "
-@export var enable_icon_text: bool = true ## A icon appears after a text is finished displaying.
-@export var default_text_speed: float = 0.030 ## Duration of text_speed (this value gets multipled) [if i add the feature of every text having different speed, use the speed argument from add_dialogue. This feature doesn't seem stable from outside default value!]
+## Adds a space on texts that doesn't start with ".
+@export var auto_space: bool = true 
+## A icon appears after a text is finished displaying. This enables the icon from [member icon_text].
+@export var enable_icon_text: bool = true 
+## Duration of the dialogue's text speed. (this value gets multipled) 
+## @experimental: This feature is currently not implemented and during test periods, this wasn't stable using non default values. May be added in v1.0.0.
+@export var default_text_speed: float = 0.030 
 
-var allowed_fast_skip: bool = true ## Checks if it's allowed to use fast skip
-var can_fast_skip: bool = true ## If true, player can use fast skip [for rate of fire delay]
+## Checks if it's allowed to use fast skip.
+## @experimetal: In v1.0.0, this may be changed to a export variable. Right now, [method pause_dialogue] changes this variable instead of [member can_fast_skip] so in order to not break compability (and the entire code, tbh), it will only be changed in v1.0.0.
+var allowed_fast_skip: bool = true 
+## If true, player can use fast skip.
+var can_fast_skip: bool = true 
 
 @export_group("Fast Skip")
-@export var fast_skip_delay: float = 0.15 ## The delay of fast skip
-@export var ignore_text_full_display_fast_skip: bool = true ## If true, text will not be display at full if text wasn't fully displayed.
+## The delay of fast skip.
+@export var fast_skip_delay: float = 0.15 
+## If true, text will not be display fully if text wasn't fully displayed, 
+## playing the text tween animation instead.
+@export var ignore_text_full_display_fast_skip: bool = true 
 
 @export_group("Character variables")
+## The default used in [method set_character_emotion] before dialogue go to fade_in state.
 @export var default_emotion_delay_end: float = 0.35
 
+## If true, this kills the [member tweenthing] Tween and forces the text to be fully displayed.
+## Used in fast skip.
 @onready var ignore_text: bool = ignore_text_full_display_fast_skip
-var forced_paused: bool ## Checks if its paused caused by pause_dialogue
-var about_to_pause: bool ## Checks if its going to be pause at the of dialogue (used for fast skip not go to next dialouge)
+## Checks if its paused caused by [method pause_dialogue]
+var forced_paused: bool
+## Checks if its going to be paused at the end of the dialogue. 
+## (used for fast skip not go to next dialouge)
+var about_to_pause: bool 
 
 # Modular stuff
 @export_group("Modulars")
+## If true, this uses default behavior and does not use custom icon funcionality.
 var _use_default_icon_behavior: bool = true
+## The custom icons created using [DemoScripter_IconModule] class.
 @export var icon_modular: Array[Node]
+## The extra modules created using [DemoScripter_ExtraModule] class.
 @export var extra_modular: Array[Node]
 
+## Starts the compile for filtering [] tags in dialogue.
+## This is for preventing BBCode effects tags count as a character in the dialogue system,
+## causing unexpected behavior.
 func start_regex_compile() -> void:
 	regex.compile("\\[.*?\\]")
 	regex_compiled = true
 
+## Adds a dialogue text to [member dialogue_dictionary] variable.
+## This is for adding dialogues to your Visual Novel scenes.
+## [br]
+## [br]
+## [param text] is the text of the dialogue.
+## [br]
+## [param id] is the dialogue's page.
+## [br]
+## If [param first_text] is true, it doesn't add a new line before the text.
+## [br]
+## [param setname] is the set where the dialogue will be added.
+## [br]
+## [param _speed] is how fast the dialogue text will be displayed. Currently unused.
+## @experimental: In v1.0.0, the arguments may be changed to a Options Object pattern where it uses a Dictionary instead. (or maybe a class made in the script for config) A example of Options Object pattern used in [method DemoScripter_BackgroundHandler.change_background_transition]. the _speed argument may be functional in v1.0.0. 
 func add_dialogue(text, id = add_dialogue_id, first_text = false, setname: String = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
 	if !regex_compiled:
 		start_regex_compile() 
