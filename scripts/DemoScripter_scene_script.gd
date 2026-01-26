@@ -1,14 +1,26 @@
 class_name DemoScripter_VisualNovelScene
 extends CanvasLayer
+## Base class for handling Visual Novel scenes.
+##
+## Base class for handling Visual Novel scenes, which contains dialogue
+## functions, character functions, music/audio functions, etc.
 
-## This is the base that handles the current scene (dialogue, set characters, play music, etc)
-
+## Emits when [method add_dialogue] has been executed.
 signal add_dialogue_finished(text: String, id: int, setname: String)
+## Emits when [method add_dialogue_special] has been executed.
 signal add_dialogue_special_finished(funcname: Callable, args)
+## Emits when [method load_dialogue] has been executed.
 signal load_dialogue_finished()
+## @deprecated: This signal does not get emitted at all. Will be reworked in
+## v1.0.0 version. (refactor)
 signal load_dialogue_special_signal
+## Emits when the text animation (tween) of the dialogue has been finished.
+## This is used for the text icon to show up when a dialogue line is finished. 
 signal text_animation_finished
+## Emits when the current page of dialogie is finished and goes to the next one.
+## id is what page it gone to.
 signal dialogue_next_page(id: int)
+## Emits when
 signal animation_text_fading_in
 signal end_dialogue_signal
 
@@ -41,8 +53,9 @@ var dialogue_ended: bool
 var check_wait_for_anim: bool # checks if the current animation_player is fade_out for wait_for()_func to run
 var dialogue_started: bool
 
-## Regex for filtering [] tags
+## Regex for filtering [] tags in dialogue
 var regex = RegEx.new()
+var regex_compiled = false
 
 # Variables for tween
 var tweenthing
@@ -70,8 +83,6 @@ var can_fast_skip: bool = true ## If true, player can use fast skip [for rate of
 var forced_paused: bool ## Checks if its paused caused by pause_dialogue
 var about_to_pause: bool ## Checks if its going to be pause at the of dialogue (used for fast skip not go to next dialouge)
 
-var regex_compiled = false
-
 # Modular stuff
 @export_group("Modulars")
 var _use_default_icon_behavior: bool = true
@@ -81,9 +92,6 @@ var _use_default_icon_behavior: bool = true
 func start_regex_compile() -> void:
 	regex.compile("\\[.*?\\]")
 	regex_compiled = true
-
-func _ready() -> void:
-	pass
 
 func add_dialogue(text, id = add_dialogue_id, first_text = false, setname: String = add_dialogue_set, _speed = 1, should_auto_space: bool = auto_space) -> void:
 	if !regex_compiled:
