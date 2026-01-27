@@ -223,33 +223,53 @@ func add_dialogue(text, id = add_dialogue_id, first_text = false, setname: Strin
 		
 	add_dialogue_finished.emit(text, id, first_text, setname)
 
+## Adds a function to be executed in current dialogue index.
+## [br]
+## [br]
+## [param funcname] is the function that will be executed.
+## [br]
+## [param args] is an array with arguments to be used with the function.
 func add_dialogue_special(funcname: Callable, args: Array = []) -> void:
 	# This function adds a dialogue to a array with a function as a extra value, making it possible to
 	# run code if the id is the same as the special dialogue. (Example: changing character emotion, etc)
 	function_dialogue_dictionary[function_dialogue_dictionary.size() + 1] = [dialogue_dictionary.keys().back(), funcname, args]
 	add_dialogue_special_finished.emit(funcname, args)
 
+## Wrapper for [method add_dialogue] that adds a dialogue in next page.
 func add_dialogue_next(text, id = add_dialogue_id + 1, setname = add_dialogue_set) -> void:
 	add_dialogue(text, id, true, setname)
 
+## Wrapper for [method add_dialogue] for adding the first dialogue in a scene.
+## [br]
+## [param id] is automatically set to 1.
 func add_dialogue_start(text, setname = add_dialogue_set) -> void: ## The id is automatically 1 instead of manual
 	add_dialogue(text, 1, true, setname)
 
+## Wrapper for [method add_dialogue_start] for adding " at the start and at the end 
+## of the text in the first dialogue of the scene.
 func add_dialogue_start_quote(text, setname = add_dialogue_set) -> void: 
 	add_dialogue_start("\"" + text + "\"", setname)
 
+## Wrapper for [method add_dialogue] that adds a dialogue in the same line.
 func add_dialogue_continue(text, id = add_dialogue_id, setname = add_dialogue_set ) -> void: # Adds dialogue on same line (making it not necessary to set the id and then set to true first_text)
 	add_dialogue(text, id, true, setname)
 
+## Wrapper for [method add_dialogue] that adds a dialogue in the same line
+## without the initial space.
 func add_dialogue_continue_no_space(text, id = add_dialogue_id, setname = add_dialogue_set) -> void: # Same as add_dialogue_continue, expect if auto_space is enabled, it will not add a auto space to the same line
 	add_dialogue(text, id, true, setname, 1, false)
 
+## Wrapper for [method add_dialogue] for adding " at the start and at the end
+## of the text.
 func add_dialogue_quote(text, id = add_dialogue_id, first_text = false, setname = add_dialogue_set, speed = 1) -> void:
 	add_dialogue("\"" + text + "\"", id, first_text, setname, speed)
 
+## Increments [member add_dialogue_id] by 1.
 func next_add_dialogue_id() -> void:
 	add_dialogue_id = add_dialogue_id + 1
-	
+
+## Once current text is displayed finishing, goes to the next dialogue.
+## @experimental: May be changed in v1.0.0.
 func next_dialogue() -> void: # Go into the next dialogue after a dialogue's text is finished displaying
 	pause_dialogue(true)
 	await self.text_animation_finished
@@ -257,20 +277,26 @@ func next_dialogue() -> void: # Go into the next dialogue after a dialogue's tex
 	play_dialogue()
 	pause_dialogue(false)
 
+## Wrapper (?) for [method delay_text] for delaying dialogue.
+## @experimental: May be changed in v1.0.0.
 func delay_dialogue(timer, clear_dialogue = false) -> void: # Delays a dialogue text
 	add_dialogue("", add_dialogue_id, true, add_dialogue_set)
 	add_dialogue_special(delay_text, [timer])
 	if clear_dialogue:
 		add_dialogue_special(reset_dialogue)
 
+## Fades in the [member hud_node].
 func dialogue_fade_in() -> void:
 	pause_dialogue(false)
 	dialogue_state("fade_in")
 
+## Fades out the [member hud_node].
 func dialogue_fade_out() -> void:
 	pause_dialogue(true)
 	dialogue_state("fade_out")
 
+## Delays current dialogue by using a timer.
+## @experimental: May be changed in v1.0.0.
 func delay_text(time) -> void:
 	pause_dialogue(true)
 	await get_tree().create_timer(time).timeout
@@ -278,17 +304,25 @@ func delay_text(time) -> void:
 	play_dialogue()
 	pause_dialogue(false)
 
+## Sets the [member add_dialogue_id] to a specific number.
 func set_add_dialogue_id(id) -> void:
 	add_dialogue_id = id
 
+## Pauses fast skip.
 func fastskip_pause() -> void:
 	if ignore_text_full_display_fast_skip:
 		ignore_text = false
 
+## Unpauses fast skip.
 func fastskip_unpause() -> void:
 	if ignore_text_full_display_fast_skip:
 		ignore_text = true
 
+## The functionality of fast skip.
+## In order to use fast skip, you will need to set a Input named fast_skip on your project.
+## [br]
+## [br]
+## Used in [method hide_darkbackground].
 func fast_skip_button() -> void:
 	if Input.is_action_pressed("fast_skip"):
 		if !allowed_fast_skip:
@@ -316,7 +350,20 @@ func fast_skip_button() -> void:
 			await get_tree().create_timer(fast_skip_delay).timeout
 			can_fast_skip = true
 
-
+## Loads a dialogue from [member dialogue_dictionary].
+## [br]
+## [br]
+## [br]
+## [param id] is the dialogue page.
+## [br]
+## If [param loadinstant] is true, loads first line of dialogue immediatly, 
+## without playing text tween animation.
+## [br]
+## [param set_id] is for which set of dialogue it will load.
+## @experimental: Will be reworked in v1.0.0.
+## @obsolete: As of v0.1.0, it's currently recommended to use
+## [method load_dialogue_start] for loading the dialogue in a Visual Novel scene
+## instead.
 func load_dialogue(id, loadinstant = true, set_id: String = dialogue_current_set) -> void: # This loads all the dialogue into the text
 	dialogue_current_id = id
 	dialogue_current_set = set_id
@@ -342,6 +389,10 @@ func load_dialogue(id, loadinstant = true, set_id: String = dialogue_current_set
 	
 	emit_signal("load_dialogue_finished")
 
+## Wrapper for [method load_dialogue] for loading a dialogue's set without
+## needing to use ID manually.
+## @experimental: Will be reworked in v1.0.0.
+## @obsolete: Use [method load_dialogue_start] instead.
 func load_dialogue_set(set_id: String, load_instant = true) -> void:
 	dialogue_current_set = set_id
 	for check in dialogue_dictionary.size():
@@ -362,6 +413,14 @@ func load_dialogue_set(set_id: String, load_instant = true) -> void:
 		
 	check_dialogue_function()
 
+## Wrapper for [method load_dialogue] for loading the first id by default of a
+## dialogue's set.
+## [br]
+## [br]
+## If [param load_func] is true, it runs [member load_dialogue_function] automatically.
+## [br]
+## If [param play_tween] is true, it plays the text tween animation when the dialogue has been 
+## loaded.
 func load_dialogue_start(id: int = 1, set_id: String = "start", loadinstant = true, load_func = true, play_tween = false) -> void: # Sets the max visible when loading dialogue by start
 	dialogue_started = true
 	
@@ -406,7 +465,8 @@ func load_dialogue_start(id: int = 1, set_id: String = "start", loadinstant = tr
 			tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
 			tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(0)
 
-
+## Checks if current dialogue index has a function in [member function_dialogue_dictionary].
+## If it does, executes the function with the arguments added by [method add_dialogue_special].
 func check_dialogue_function() -> void:
 	if function_array_numbers.has(dialogue_index):
 		for i in function_dialogue_dictionary.size():
@@ -416,6 +476,7 @@ func check_dialogue_function() -> void:
 				
 				function.callv(arguments)
 
+## The dialogue system which keeps running in _process().
 func dialogue_system() -> void: # Checks if space button is pressed, right click and etc! [Runs every frame]
 	if !dialogue_started:
 		return
@@ -435,10 +496,22 @@ func dialogue_system() -> void: # Checks if space button is pressed, right click
 	if !paused and !forced_paused:
 		fast_skip_button()
 
+## If the player right clicks, it hides the [member hud_node].
+## [br]
+## [br]
+## Used in [method dialogue_system].
 func hide_darkbackground() -> void:
 	if Input.is_action_just_pressed("right_click"):
-		$Text.visible = !$Text.visible
+		hud_node.visible = !hud_node.visible
 
+## Goes to the next dialogue. 
+## [br]
+## [br]
+## If [param ignore_textanimation] is true, it goes to the next dialogue
+## without displaying fully the current text's tween animation first.
+## [br]
+## [br]
+## Used in [method dialogue_system] for when the player presses ui_accept.
 func play_dialogue(ignore_textanimation: bool = false) -> void: # This will start the dialogue [Making the dialogue appear]
 	if enable_icon_text:
 		if _use_default_icon_behavior:
@@ -504,24 +577,38 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 		emit_signal("dialogue_next_page", dialogue_current_id)
 		load_dialogue(dialogue_current_id, false)
 
+## Resets the dialogue text to empty.
 func reset_dialogue() -> void:
 	dialogue_node.text = ""
 
 func _process(_delta: float) -> void:
 	dialogue_system()
 
+## Ends the dialogue of the Visual Novel scene.
+## Sets [member dialogue_ended] to true.
 func end_dialogue() -> void:
 	reset_dialogue()
 	dialogue_ended = true
 	print_rich("[color=crimson]The current dialogue has ended.[/color]")
 
-func load_function_dialogue() -> void: # Checks for functions on dialogue dictionary. If it finds a function, adds the dialogue index to array
+## Checks for functions on dialogue dictionary. If it finds a function, adds the dialogue page to
+## [member function_array_numbers].
+## @experimental: Will be reworked in v1.0.0.
+func load_function_dialogue() -> void: 
 	for i in function_dialogue_dictionary.size():
 		function_array_numbers.append(function_dialogue_dictionary[i + 1][0])
 	#print(function_array_numbers)
 
-
-func set_character_emotion(character, emotion: String, delay: float = default_emotion_delay_end) -> void:
+## Sets a [DemoScripter_VisualNovelCharacter]'s emotion to specific value.
+## [br]
+## [br]
+## [param character] is the character target.
+## [br]
+## [param emotion] is the emotion it will be set to.
+## [br]
+## [param delay] is the amount of delay before [method dialogue_state] fade in is executed.
+## @experimental: Will have a Options Object pattern in v1.0.0 as arguments.
+func set_character_emotion(character: DemoScripter_VisualNovelCharacter, emotion: String, delay: float = default_emotion_delay_end, fast_skipable: bool = true) -> void:
 	if Input.is_action_pressed("fast_skip"):
 		set_character_emotion_instant(character, emotion)
 	else:
@@ -538,6 +625,13 @@ func set_character_emotion(character, emotion: String, delay: float = default_em
 		dialogue_state("fade_in")
 		disabled = false
 
+## Instant version of [method set_character_emotion] where it doesn't trigger the fade in and fade
+## out of dialogue's system.
+## [br]
+## [br]
+## [param playShow] is true, it makes the character invisible and creates a tween to make it visible.
+## @experimental: The [param playShow] may be changed in V1.0.0 due to not being consistent compared
+## to the show animation from the [DemoScripter_VisualNovelCharater]'s [AnimationPlayer].
 func set_character_emotion_instant(character, emotion: String, playShow: bool = false) -> void:
 	emotion = emotion.to_upper()
 	
@@ -557,6 +651,16 @@ func set_character_emotion_instant(character, emotion: String, playShow: bool = 
 	
 	character.current_emotion = emotion
 
+## Sets a [DemoScripter_VisualNovelCharacter]'s position using a string value. (right, middle, left)
+## If the [param pos] is not a string value, uses it as Vector2 value.
+## [br]
+## [br]
+## [param character] is the character target.
+## [br]
+## [param pos] is the position. Accepts string (right, middle, left) and Vector2 values.
+## [br]
+## [param fast_skipable] is true, allows to be fast skipable, executing 
+## [method setpos_character_instant] instead.
 func setpos_character(character: DemoScripter_VisualNovelCharacter, pos, fast_skipable: bool = true) -> void: # Set position of a character with delay
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
 		setpos_character_instant(character, pos)
@@ -570,7 +674,8 @@ func setpos_character(character: DemoScripter_VisualNovelCharacter, pos, fast_sk
 	
 	dialogue_fade_in()
 
-
+## Instant version of [member setpos_character] where it doesn't trigger the fade in and fade
+## out of dialogue's system.
 func setpos_character_instant(character: DemoScripter_VisualNovelCharacter, pos) -> void: # Set position of a character
 	match pos:
 		"right":
@@ -582,7 +687,15 @@ func setpos_character_instant(character: DemoScripter_VisualNovelCharacter, pos)
 		_:
 			character.position = pos
 
-func playanim_character(character, anim, speed = 1) -> void:
+## Plays a animation of a [DemoScripter_VisualNovelCharacter].
+## [br]
+## [br]
+## [param character] is the character target.
+## [br]
+## [param anim] is the animation.
+## [br]
+## [param speed] is the animation's speed.
+func playanim_character(character: DemoScripter_VisualNovelCharacter, anim: String, speed: float = 1) -> void:
 	disabled = true
 	dialogue_state("fade_out")
 	
@@ -595,12 +708,21 @@ func playanim_character(character, anim, speed = 1) -> void:
 	dialogue_state("fade_in")
 	disabled = false
 
-func playanim_character_instant(character, anim: String, speed = 1) -> void:
+## Instant version of [method playanim_character]where it doesn't trigger the 
+## fade in and fade out of dialogue's system.
+func playanim_character_instant(character: DemoScripter_VisualNovelCharacter, anim: String, speed: float = 1) -> void:
 	character.anim_player.play(anim)
 	character.anim_player.set_speed_scale(speed)
 
-func playanim_object(object, animation) -> void:
-	object.play(animation)
+## Plays animation of a [AnimationPlayer] node.
+## [br]
+## [br]
+## [param object] is the [AnimationPlayer] node target.
+## [br]
+## [param anim] is the animation.
+## @experimental: May be changed in V1.0.0.
+func playanim_object(object: AnimationPlayer, anim: String) -> void:
+	object.play(anim)
 
 func show_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
@@ -626,6 +748,8 @@ func show_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 	else:
 		dialogue_fade_in()
 
+## where it doesn't trigger the fade in and fade
+## out of dialogue's system.
 func show_character_instant(character, duration: float = 0.35) -> void:
 	character.set_modulate(Color(character.modulate.r, character.modulate.g, character.modulate.b, 0))
 	character.set_visible(true)
@@ -634,7 +758,6 @@ func show_character_instant(character, duration: float = 0.35) -> void:
 	tween.tween_property(character, "modulate", Color(character.modulate.r, character.modulate.g, character.modulate.b, 1), duration)
 	await tween.finished
 	character.emit_signal("show_finished")
-	
 
 func hide_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
@@ -663,6 +786,8 @@ func hide_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 	else:
 		dialogue_fade_in()
 
+## where it doesn't trigger the fade in and fade
+## out of dialogue's system.
 func hide_character_instant(character, duration: float = 0.35) -> void:
 	if duration > 0:
 		var tween = get_tree().create_tween()
