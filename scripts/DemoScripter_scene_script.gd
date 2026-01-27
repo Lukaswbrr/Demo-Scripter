@@ -49,7 +49,7 @@ signal end_dialogue_signal
 ## stored on.
 ## [br]
 ## [br]
-## The keys (member dialogue_index]) is the incremented by 1 everytime add_dialogue is executed
+## The keys ([member dialogue_index]) is the incremented by 1 everytime add_dialogue is executed
 ## and the values are the information of the text.
 ## [br]
 ## [br]
