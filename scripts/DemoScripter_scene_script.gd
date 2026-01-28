@@ -4,6 +4,9 @@ extends CanvasLayer
 ##
 ## Base class for handling Visual Novel scenes, which contains dialogue
 ## functions, character functions, music/audio functions, etc.
+##
+## @tutorial (Creating a basic dialogue scene): https://github.com/Lukaswbrr/Demo-Scripter/blob/main/docs/getting_started/overview.md#creating-a-basic-dialogue-scene
+## @tutorial (More examples on adding dialogue): https://github.com/Lukaswbrr/Demo-Scripter/blob/main/docs/getting_started/overview.md#adding-dialogue
 
 ## Emits when [method add_dialogue] has been executed.
 signal add_dialogue_finished(text: String, id: int, setname: String)
