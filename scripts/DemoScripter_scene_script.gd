@@ -724,7 +724,18 @@ func playanim_character_instant(character: DemoScripter_VisualNovelCharacter, an
 func playanim_object(object: AnimationPlayer, anim: String) -> void:
 	object.play(anim)
 
-func show_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
+## Makes a [DemoScripter_VisualNovelCharacter] visible.
+## [br]
+## [br]
+## [param character] is the [DemoScripter_VisualNovelCharacter] target.
+## [br]
+## [param duration] is the duration of the show animation.
+## [br]
+## [param hold] is how much time will pass before [method dialogue_fade_in] gets executed.
+## [br]
+## If [param fast_skipable] is true, the player can fast skip this function, finishing the show animation
+## immediatly.
+func show_character(character: DemoScripter_VisualNovelCharacter, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
 		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 1)
 		character.set_visible(true)
@@ -748,7 +759,7 @@ func show_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 	else:
 		dialogue_fade_in()
 
-## where it doesn't trigger the fade in and fade
+## Instant version of [show_character] where it doesn't trigger the fade in and fade
 ## out of dialogue's system.
 func show_character_instant(character, duration: float = 0.35) -> void:
 	character.set_modulate(Color(character.modulate.r, character.modulate.g, character.modulate.b, 0))
@@ -759,6 +770,17 @@ func show_character_instant(character, duration: float = 0.35) -> void:
 	await tween.finished
 	character.emit_signal("show_finished")
 
+## Makes a [DemoScripter_VisualNovelCharacter] invisible.
+## [br]
+## [br]
+## [param character] is the [DemoScripter_VisualNovelCharacter] target.
+## [br]
+## [param duration] is the duration of the hide animation.
+## [br]
+## [param hold] is how much time will pass before [method dialogue_fade_in] gets executed.
+## [br]
+## If [param fast_skipable] is true, the player can fast skip this function, finishing the hide animation
+## immediatly.
 func hide_character(character, duration: float = 0.35, hold: float = 0, fast_skipable: bool = true):
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
 		character.modulate = Color(character.modulate.r, character.modulate.g, character.modulate.b, 0)
@@ -786,7 +808,7 @@ func hide_character(character, duration: float = 0.35, hold: float = 0, fast_ski
 	else:
 		dialogue_fade_in()
 
-## where it doesn't trigger the fade in and fade
+## Instant version of [method hide_character] where it doesn't trigger the fade in and fade
 ## out of dialogue's system.
 func hide_character_instant(character, duration: float = 0.35) -> void:
 	if duration > 0:
@@ -798,26 +820,39 @@ func hide_character_instant(character, duration: float = 0.35) -> void:
 	
 	character.set_visible(false)
 	character.emit_signal("hide_finished")
-	
 
+## Pauses the dialogue.
+## [br]
+## [br]
+## If [param value] is true, pauses the dialogue. If false, unpauses it. 
 func pause_dialogue(value: bool) -> void:
 	forced_paused = value
 	allowed_fast_skip = !value
 
 #region MUSIC_AUDIO
 
+## Plays a [AudioStreamPlayer] audio node.
+## @experimental: This and [member play_music] does the same thing. May be reworked in v1.0.0.
 func play_audio(audio: AudioStreamPlayer) -> void:
 	audio.play()
 
+## Stops a [AudioStreamPlayer] audio node.
+## @experimental: This and [member stop_music] does the same thing. May be reworked in v1.0.0.
 func stop_audio(audio: AudioStreamPlayer) -> void:
 	audio.stop()
 
+## Plays a [AudioStreamPlayer] music node.
 func play_music(music: AudioStreamPlayer) -> void:
 	music.play()
 
+## Stops a [AudioStreamPlayer] music node.
 func stop_music(music: AudioStreamPlayer) -> void:
 	music.stop()
 
+## Wrapper for [method play_music] where it awaits for [member _animation_player] to start a animation
+## before playing a music.
+## Useful for situations like showing a character and waiting the show animation to finish for
+## then to play the music.
 func play_music_wait_signal(music) -> void:
 	if Input.is_action_pressed("fast_skip"):
 		play_music(music)
@@ -825,6 +860,8 @@ func play_music_wait_signal(music) -> void:
 		await _animation_player.animation_started
 		play_music(music)
 
+## Wrapper for [method play_audio] where it awaits for [member _animation_player] to start a animation
+## before playing a music.
 func play_audio_wait_signal(audio) -> void:
 	if Input.is_action_pressed("fast_skip"):
 		play_audio(audio)
@@ -832,6 +869,28 @@ func play_audio_wait_signal(audio) -> void:
 		await _animation_player.animation_started
 		play_audio(audio)
 
+## Fades in a [AudioStreamPlayer] music node.
+## [br]
+## [br]
+## [param music] is the [AudioStreamPlayer] music it will fade in.
+## [br]
+## [param duration] is how long the fade in will last.
+## [br]
+## [param config_arg] is the configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## [param volume_to] is which volume it will go to during fade in. [param use_node_old_volume_as_to]
+## must be false first.
+## [br]
+## If [param use_node_old_volume_as_to] is true, it will use the music node's volume 
+## (before this function was executed) as to value and ignores [param volume_to].
+## [br]
+## If [param set_node_volume_to_55] is true, it sets the music node volume to -55 before causing fade 
+## in.
+## [br]
+## If [param pause] is true, pauses the music node once fade in is finished.
 func fadein_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}) -> void:
 	if music.has_meta("isFadingOut") and music.get_meta("isFadingOut"):
 		music.get_meta("fadeOutTween").kill()
@@ -873,6 +932,28 @@ func fadein_music(music: AudioStreamPlayer, duration: float, config_arg: Diction
 	musictween.tween_callback(music.remove_meta.bind("fadeInTween"))
 	musictween.tween_callback(music.remove_meta.bind("isFadingIn"))
 
+## Fades out a [AudioStreamPlayer] music node.
+## [br]
+## [br]
+## [param music] is the [AudioStreamPlayer] music it will fade out.
+## [br]
+## [param duration] is how long the fade out will last.
+## [br]
+## [param config_arg] is the configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## [param volume_from] is which volume it will go to during fade in. [param use_node_old_volume_as_to]
+## must be false first.
+## [br]
+## If [param use_node_old_volume_as_to] is true, it will use the music node's volume 
+## (before this function was executed) as to value and ignores [param volume_to].
+## [br]
+## If [param set_node_volume_to_55] is true, it sets the music node volume to -55 before causing fade 
+## in.
+## [br]
+## If [param pause] is true, pauses the music node once fade in is finished.
 func fadeout_music(music: AudioStreamPlayer, duration: float, config_arg: Dictionary = {}) -> void:
 	if music.has_meta("isFadingIn") and music.get_meta("isFadingIn"):
 		music.get_meta("fadeInTween").kill()
@@ -880,7 +961,6 @@ func fadeout_music(music: AudioStreamPlayer, duration: float, config_arg: Dictio
 	music.set_meta("isFadingOut", true)
 	
 	var default_config: Dictionary = {
-		"volume_from": 0,
 		"set_custom_volume_to": null,
 		"pause": false
 	}
@@ -894,23 +974,37 @@ func fadeout_music(music: AudioStreamPlayer, duration: float, config_arg: Dictio
 		musictween.tween_property(music, "volume_db", config["set_custom_volume_to"], duration)
 	else:
 		musictween.tween_property(music, "volume_db", -55, duration)
+	
 	musictween.tween_callback(music.remove_meta.bind("fadeOutTween"))
+	
 	if config["pause"]:
 		musictween.tween_callback(music.set_meta.bind("isFadingOut", false))
 		musictween.tween_callback(pause_music.bind(music))
 		return
+	
 	musictween.tween_callback(music.set_meta.bind("isFadingOut", false))
 	musictween.tween_callback(music.stop)
-	
 
-func set_music_pitch(music, pitch):
+## Sets a [AudioStreamPlayer] music node.
+## [br]
+## [br]
+## [param music] is the music node target.
+## [br]
+## [param pitch] is the pitch it will set to.
+func set_music_pitch(music: AudioStreamPlayer, pitch: float):
 	music.set_pitch_scale(pitch)
 
-func pause_music(music, wait_for_anim = false):
-	# maybe make the wait_for_anim emits a signal when the animation is fading in?
+## Pauses a [AudioStreamPlayer] music node.
+## [br]
+## [br]
+## [param music] is the music node target.
+## [br]
+## If [param wait_or_anim] is true, it awaits for [signal animation_text_fading_in] to emit before
+## pausing the music.
+func pause_music(music: AudioStreamPlayer, wait_for_anim: bool = false):
 	if wait_for_anim: # this is used in cases first dialogue of set contains a special function that makes the hud transparent
 		wait_for_anim_func()
-		await self.animation_text_fading_in
+		await animation_text_fading_in
 		music.stream_paused = !music.stream_paused
 		print("Music stream paused: " + str(music.stream_paused))
 	else:
@@ -921,38 +1015,77 @@ func pause_music(music, wait_for_anim = false):
 
 #region MODULAR
 
+## Loads all the [DemoScripter_IconModule] stored in [member icon_modular].
+## Must be executed after [method load_dialogue_start] is executed.
+## [codeblock]
+## func _ready():
+##    add_dialogue_start("Hello world!")
+##    add_dialogue("Dialogue 2")
+##    add_dialogue("Dialogue 3")
+##
+##    load_dialogue_start()
+##    load_icon_modules()
+## [/codeblock]
 func load_icon_modules() -> void:
 	_use_default_icon_behavior = false
 	for k in icon_modular:
 		k.connect_module(self)
 
+## Shows all the [DemoScripter_IconModule] stored in [member icon_modular].
 func show_icon_modular() -> void:
 	for k in icon_modular:
 		k.show_icon()
 
+## Hides all the [DemoScripter_IconModule] stored in [member icon_modular].
 func hide_icon_modular() -> void:
 	for k in icon_modular:
 		k.hide_icon()
 
+## Loads all the [DemoScripter_ExtraModule] stored in [member extra_modular].
+## Must be executed after [method load_dialogue_start] is executed.
+## [codeblock]
+## func _ready():
+##    add_dialogue_start("Hello world!")
+##    add_dialogue("Dialogue 2")
+##    add_dialogue("Dialogue 3")
+##
+##    load_dialogue_start()
+##    load_extra_modules()
+## [/codeblock]
 func load_extra_modules() -> void:
 	for k in extra_modular:
 		k.connect_module(self)
 
 #endregion
 
+## Changes the current state of the dialogue system.
+## [br]
+## [br]
+## [param state] is the state it will go to. Acceptable states are:
+## [br]
+## [param show] shows the dialogue node and darkbackground.
+## [br]
+## [param hide] hides the dialogue node and darkbackground.
+## [br]
+## [param fade_in] fades in the [member hud_node] node.
+## [br]
+## [param fade_out] fades out the [member hud_node] node.
 func dialogue_state(state: String) -> void:
 	match state:
-		"hide":
-			darkbackground_node.hide()
-			dialogue_node.hide()
 		"show":
 			darkbackground_node.show()
 			dialogue_node.show()
+		"hide":
+			darkbackground_node.hide()
+			dialogue_node.hide()
 		"fade_in":
 			_animation_player.play("fade_in")
 		"fade_out":
 			_animation_player.play("fade_out")
 
+## If the current [member _animation_player] animation is fade_out, it awaits
+## for the animation to start, creates a 0.15 timer and emits [signal animation_text_fading_in].
+## @experimental: May be reworked in v1.0.0. I'm not sure if i'm going to keep the 0.15 timer.
 func wait_for_anim_func() -> void:
 	if _animation_player.get_current_animation() == "fade_out":
 		check_wait_for_anim = true
@@ -962,14 +1095,26 @@ func wait_for_anim_func() -> void:
 	else:
 		check_wait_for_anim = false
 
-func wait_signal_func(signalName, funcname: Callable, args: Array = [], fast_skipable: bool = true) -> void:
+## Awaits for a specific [Signal] to be emitted before calling a function.
+## [br]
+## [br]
+## [param signalname] is the signal it will await to be emitted.
+## [br]
+## [param funcname] is the [Callable] it will call once [param signalname] is emitted.
+## [br]
+## [param args] is the arguments [param funcname] will have.
+## [br]
+## [param fast_skipable] is true, the player can fast skip this function, executing [param funcname]
+## immediately.
+func wait_signal_func(signalname: Signal, funcname: Callable, args: Array = [], fast_skipable: bool = true) -> void:
 	if Input.is_action_pressed("fast_skip") and fast_skipable:
 		funcname.callv(args)
 		return
 	
-	await signalName
+	await signalname
 	funcname.callv(args)
 
+## Once the text animation tween is finished, this function gets executed.
 func _on_text_tween_completed() -> void:
 	if dialogue_ended:
 		return
@@ -993,6 +1138,10 @@ func _on_text_tween_completed() -> void:
 # TODO: maybe make a DemoScripterUtils global node in the future? probably after refactoring the
 # framework, tbh (around v1.0.0)
 
+## Checks if a dictionary has the same keys in [param dict2].
+## Used in [param config_arg] type of functions, making sure that if a invalid key exists in
+## [param dict1], it throws a error.
+## @experimental: In v1.0.0, this may be moved to a global node named DemoScripter which has utility functions.
 func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
 	if dict2.is_empty():
 		return true
@@ -1008,6 +1157,13 @@ func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
 	
 	return true
 
+## Returns a new Dictionary config merged from [param default_config] to [param config_arg].
+## Used in functions that support [param config_arg] configuration.
+## [br]
+## [br]
+## The [param default_config] gets merged with new values from [param config_arg], returning the
+## new merged config.
+## @experimental: In v1.0.0, this may be moved to a global node named DemoScripter which has utility functions.
 func _create_config_dict(default_config: Dictionary, config_arg: Dictionary) -> Dictionary:
 	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
 	
@@ -1017,6 +1173,9 @@ func _create_config_dict(default_config: Dictionary, config_arg: Dictionary) -> 
 	
 	return config
 
+## Returns a Dictionary config with specified [param keys] removed. 
+## Used in functions that support [param config_arg] configuration.
+## @experimental: In v1.0.0, this may be moved to a global node named DemoScripter which has utility functions.
 func _remove_config_keys(config_arg: Dictionary, keys: Array) -> Dictionary:
 	var config = config_arg.duplicate()
 	
