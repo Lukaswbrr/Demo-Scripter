@@ -171,12 +171,18 @@ var _use_default_icon_behavior: bool = true
 ## The extra modules created using [DemoScripter_ExtraModule] class.
 @export var extra_modular: Array[Node]
 
+#region REGEX
+
 ## Starts the compile for filtering [] tags in dialogue.
 ## This is for preventing BBCode effects tags count as a character in the dialogue system,
 ## causing unexpected behavior.
 func start_regex_compile() -> void:
 	regex.compile("\\[.*?\\]")
 	regex_compiled = true
+
+#endregion
+
+#region DIALOGUE
 
 ## Adds a dialogue text to [member dialogue_dictionary] variable.
 ## This is for adding dialogues to your Visual Novel scenes.
@@ -311,48 +317,6 @@ func delay_text(time) -> void:
 func set_add_dialogue_id(id) -> void:
 	add_dialogue_id = id
 
-## Pauses fast skip.
-func fastskip_pause() -> void:
-	if ignore_text_full_display_fast_skip:
-		ignore_text = false
-
-## Unpauses fast skip.
-func fastskip_unpause() -> void:
-	if ignore_text_full_display_fast_skip:
-		ignore_text = true
-
-## The functionality of fast skip.
-## In order to use fast skip, you will need to set a Input named fast_skip on your project.
-## [br]
-## [br]
-## Used in [method hide_darkbackground].
-func fast_skip_button() -> void:
-	if Input.is_action_pressed("fast_skip"):
-		if !allowed_fast_skip:
-			return
-		
-		if paused:
-			return
-		
-		if can_fast_skip and !dialogue_ended:
-			if tweenthing and ignore_text:
-				if tweenthing.is_running():
-					tweenthing.stop()
-					tweenthing.custom_step(10)
-				tweenthing.kill()
-			can_fast_skip = false
-			
-			if ignore_text:
-				dialogue_index += 1
-			else:
-				if finished:
-					dialogue_index += 1
-			
-			#print_rich("[color=red]Current dialogue index from fast skip button: [/color]" + str(dialogue_index) + "\n")
-			play_dialogue(ignore_text)
-			await get_tree().create_timer(fast_skip_delay).timeout
-			can_fast_skip = true
-
 ## Loads a dialogue from [member dialogue_dictionary].
 ## [br]
 ## [br]
@@ -479,33 +443,20 @@ func check_dialogue_function() -> void:
 				
 				function.callv(arguments)
 
-## The dialogue system which keeps running in _process().
-func dialogue_system() -> void: # Checks if space button is pressed, right click and etc! [Runs every frame]
-	if !dialogue_started:
-		return
-	
-	hide_darkbackground()
-	
-	if disabled: # above: functions that works even if dialogue system is disabled, below: functions that only works if dialogue system is not disabled
-		return
-	
-	if Input.is_action_just_pressed("ui_accept") and !dialogue_ended:
-		if !paused and !forced_paused:
-			if finished:
-				dialogue_index += 1
-			play_dialogue()
-			#print("Current dialogue index: " + str(dialogue_index) + "\n")
-	
-	if !paused and !forced_paused:
-		fast_skip_button()
+## Ends the dialogue of the Visual Novel scene.
+## Sets [member dialogue_ended] to true.
+func end_dialogue() -> void:
+	reset_dialogue()
+	dialogue_ended = true
+	print_rich("[color=crimson]The current dialogue has ended.[/color]")
 
-## If the player right clicks, it hides the [member hud_node].
-## [br]
-## [br]
-## Used in [method dialogue_system].
-func hide_darkbackground() -> void:
-	if Input.is_action_just_pressed("right_click"):
-		hud_node.visible = !hud_node.visible
+## Checks for functions on dialogue dictionary. If it finds a function, adds the dialogue page to
+## [member function_array_numbers].
+## @experimental: Will be reworked in v1.0.0.
+func load_function_dialogue() -> void: 
+	for i in function_dialogue_dictionary.size():
+		function_array_numbers.append(function_dialogue_dictionary[i + 1][0])
+	#print(function_array_numbers)
 
 ## Goes to the next dialogue. 
 ## [br]
@@ -584,23 +535,123 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 func reset_dialogue() -> void:
 	dialogue_node.text = ""
 
+## Pauses the dialogue.
+## [br]
+## [br]
+## If [param value] is true, pauses the dialogue. If false, unpauses it. 
+func pause_dialogue(value: bool) -> void:
+	forced_paused = value
+	allowed_fast_skip = !value
+
+## Changes the current state of the dialogue system.
+## [br]
+## [br]
+## [param state] is the state it will go to. Acceptable states are:
+## [br]
+## [param show] shows the dialogue node and darkbackground.
+## [br]
+## [param hide] hides the dialogue node and darkbackground.
+## [br]
+## [param fade_in] fades in the [member hud_node] node.
+## [br]
+## [param fade_out] fades out the [member hud_node] node.
+func dialogue_state(state: String) -> void:
+	match state:
+		"show":
+			darkbackground_node.show()
+			dialogue_node.show()
+		"hide":
+			darkbackground_node.hide()
+			dialogue_node.hide()
+		"fade_in":
+			_animation_player.play("fade_in")
+		"fade_out":
+			_animation_player.play("fade_out")
+
+#endregion
+
+#region FAST SKIP
+
+## Pauses fast skip.
+func fastskip_pause() -> void:
+	if ignore_text_full_display_fast_skip:
+		ignore_text = false
+
+## Unpauses fast skip.
+func fastskip_unpause() -> void:
+	if ignore_text_full_display_fast_skip:
+		ignore_text = true
+
+## The functionality of fast skip.
+## In order to use fast skip, you will need to set a Input named fast_skip on your project.
+## [br]
+## [br]
+## Used in [method hide_darkbackground].
+func fast_skip_button() -> void:
+	if Input.is_action_pressed("fast_skip"):
+		if !allowed_fast_skip:
+			return
+		
+		if paused:
+			return
+		
+		if can_fast_skip and !dialogue_ended:
+			if tweenthing and ignore_text:
+				if tweenthing.is_running():
+					tweenthing.stop()
+					tweenthing.custom_step(10)
+				tweenthing.kill()
+			can_fast_skip = false
+			
+			if ignore_text:
+				dialogue_index += 1
+			else:
+				if finished:
+					dialogue_index += 1
+			
+			#print_rich("[color=red]Current dialogue index from fast skip button: [/color]" + str(dialogue_index) + "\n")
+			play_dialogue(ignore_text)
+			await get_tree().create_timer(fast_skip_delay).timeout
+			can_fast_skip = true
+
+#endregion
+
+#region PROCESS
+
+## The dialogue system which keeps running in _process().
+func dialogue_system() -> void: # Checks if space button is pressed, right click and etc! [Runs every frame]
+	if !dialogue_started:
+		return
+	
+	hide_darkbackground()
+	
+	if disabled: # above: functions that works even if dialogue system is disabled, below: functions that only works if dialogue system is not disabled
+		return
+	
+	if Input.is_action_just_pressed("ui_accept") and !dialogue_ended:
+		if !paused and !forced_paused:
+			if finished:
+				dialogue_index += 1
+			play_dialogue()
+			#print("Current dialogue index: " + str(dialogue_index) + "\n")
+	
+	if !paused and !forced_paused:
+		fast_skip_button()
+
+## If the player right clicks, it hides the [member hud_node].
+## [br]
+## [br]
+## Used in [method dialogue_system].
+func hide_darkbackground() -> void:
+	if Input.is_action_just_pressed("right_click"):
+		hud_node.visible = !hud_node.visible
+
 func _process(_delta: float) -> void:
 	dialogue_system()
 
-## Ends the dialogue of the Visual Novel scene.
-## Sets [member dialogue_ended] to true.
-func end_dialogue() -> void:
-	reset_dialogue()
-	dialogue_ended = true
-	print_rich("[color=crimson]The current dialogue has ended.[/color]")
+#endregion
 
-## Checks for functions on dialogue dictionary. If it finds a function, adds the dialogue page to
-## [member function_array_numbers].
-## @experimental: Will be reworked in v1.0.0.
-func load_function_dialogue() -> void: 
-	for i in function_dialogue_dictionary.size():
-		function_array_numbers.append(function_dialogue_dictionary[i + 1][0])
-	#print(function_array_numbers)
+#region CHARACTER FUNCS
 
 ## Sets a [DemoScripter_VisualNovelCharacter]'s emotion to specific value.
 ## [br]
@@ -717,16 +768,6 @@ func playanim_character_instant(character: DemoScripter_VisualNovelCharacter, an
 	character.anim_player.play(anim)
 	character.anim_player.set_speed_scale(speed)
 
-## Plays animation of a [AnimationPlayer] node.
-## [br]
-## [br]
-## [param object] is the [AnimationPlayer] node target.
-## [br]
-## [param anim] is the animation.
-## @experimental: May be changed in V1.0.0.
-func playanim_object(object: AnimationPlayer, anim: String) -> void:
-	object.play(anim)
-
 ## Makes a [DemoScripter_VisualNovelCharacter] visible.
 ## [br]
 ## [br]
@@ -824,13 +865,72 @@ func hide_character_instant(character, duration: float = 0.35) -> void:
 	character.set_visible(false)
 	character.emit_signal("hide_finished")
 
-## Pauses the dialogue.
+#endregion
+
+#region MISC
+
+## Plays animation of a [AnimationPlayer] node.
 ## [br]
 ## [br]
-## If [param value] is true, pauses the dialogue. If false, unpauses it. 
-func pause_dialogue(value: bool) -> void:
-	forced_paused = value
-	allowed_fast_skip = !value
+## [param object] is the [AnimationPlayer] node target.
+## [br]
+## [param anim] is the animation.
+## @experimental: May be changed in V1.0.0.
+func playanim_object(object: AnimationPlayer, anim: String) -> void:
+	object.play(anim)
+
+## If the current [member _animation_player] animation is fade_out, it awaits
+## for the animation to start, creates a 0.15 timer and emits [signal animation_text_fading_in].
+## @experimental: May be reworked in v1.0.0. I'm not sure if i'm going to keep the 0.15 timer.
+func wait_for_anim_func() -> void:
+	if _animation_player.get_current_animation() == "fade_out":
+		check_wait_for_anim = true
+		await _animation_player.animation_started
+		await get_tree().create_timer(0.15).timeout
+		emit_signal("animation_text_fading_in")
+	else:
+		check_wait_for_anim = false
+
+## Awaits for a specific [Signal] to be emitted before calling a function.
+## [br]
+## [br]
+## [param signalname] is the signal it will await to be emitted.
+## [br]
+## [param funcname] is the [Callable] it will call once [param signalname] is emitted.
+## [br]
+## [param args] is the arguments [param funcname] will have.
+## [br]
+## [param fast_skipable] is true, the player can fast skip this function, executing [param funcname]
+## immediately.
+func wait_signal_func(signalname: Signal, funcname: Callable, args: Array = [], fast_skipable: bool = true) -> void:
+	if Input.is_action_pressed("fast_skip") and fast_skipable:
+		funcname.callv(args)
+		return
+	
+	await signalname
+	funcname.callv(args)
+
+## Once the text animation tween is finished, this function gets executed.
+func _on_text_tween_completed() -> void:
+	if dialogue_ended:
+		return
+
+	finished = true
+	emit_signal( "text_animation_finished" )
+	#print_rich("[color=cyan]" + str(finished) + "[/color]")
+	
+	if !enable_icon_text:
+		print("false, returning")
+		return
+	
+	if !paused and !forced_paused:
+		if _use_default_icon_behavior:
+			icon_text.set_visible(true)
+			return
+		
+		show_icon_modular()
+
+#endregion
 
 #region MUSIC_AUDIO
 
@@ -1061,82 +1161,6 @@ func load_extra_modules() -> void:
 
 #endregion
 
-## Changes the current state of the dialogue system.
-## [br]
-## [br]
-## [param state] is the state it will go to. Acceptable states are:
-## [br]
-## [param show] shows the dialogue node and darkbackground.
-## [br]
-## [param hide] hides the dialogue node and darkbackground.
-## [br]
-## [param fade_in] fades in the [member hud_node] node.
-## [br]
-## [param fade_out] fades out the [member hud_node] node.
-func dialogue_state(state: String) -> void:
-	match state:
-		"show":
-			darkbackground_node.show()
-			dialogue_node.show()
-		"hide":
-			darkbackground_node.hide()
-			dialogue_node.hide()
-		"fade_in":
-			_animation_player.play("fade_in")
-		"fade_out":
-			_animation_player.play("fade_out")
-
-## If the current [member _animation_player] animation is fade_out, it awaits
-## for the animation to start, creates a 0.15 timer and emits [signal animation_text_fading_in].
-## @experimental: May be reworked in v1.0.0. I'm not sure if i'm going to keep the 0.15 timer.
-func wait_for_anim_func() -> void:
-	if _animation_player.get_current_animation() == "fade_out":
-		check_wait_for_anim = true
-		await _animation_player.animation_started
-		await get_tree().create_timer(0.15).timeout
-		emit_signal("animation_text_fading_in")
-	else:
-		check_wait_for_anim = false
-
-## Awaits for a specific [Signal] to be emitted before calling a function.
-## [br]
-## [br]
-## [param signalname] is the signal it will await to be emitted.
-## [br]
-## [param funcname] is the [Callable] it will call once [param signalname] is emitted.
-## [br]
-## [param args] is the arguments [param funcname] will have.
-## [br]
-## [param fast_skipable] is true, the player can fast skip this function, executing [param funcname]
-## immediately.
-func wait_signal_func(signalname: Signal, funcname: Callable, args: Array = [], fast_skipable: bool = true) -> void:
-	if Input.is_action_pressed("fast_skip") and fast_skipable:
-		funcname.callv(args)
-		return
-	
-	await signalname
-	funcname.callv(args)
-
-## Once the text animation tween is finished, this function gets executed.
-func _on_text_tween_completed() -> void:
-	if dialogue_ended:
-		return
-
-	finished = true
-	emit_signal( "text_animation_finished" )
-	#print_rich("[color=cyan]" + str(finished) + "[/color]")
-	
-	if !enable_icon_text:
-		print("false, returning")
-		return
-	
-	if !paused and !forced_paused:
-		if _use_default_icon_behavior:
-			icon_text.set_visible(true)
-			return
-		
-		show_icon_modular()
-
 #region CONFIG_UTILS
 # TODO: maybe make a DemoScripterUtils global node in the future? probably after refactoring the
 # framework, tbh (around v1.0.0)
@@ -1187,3 +1211,5 @@ func _remove_config_keys(config_arg: Dictionary, keys: Array) -> Dictionary:
 			config.erase(k)
 	
 	return config
+
+#endregion
