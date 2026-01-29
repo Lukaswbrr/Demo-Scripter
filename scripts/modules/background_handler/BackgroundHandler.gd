@@ -1,24 +1,50 @@
 extends Node
 class_name DemoScripter_BackgroundHandler
+## Module for handling backgrounds.
+##
+## Module for handling backgrounds to be used with [DemoScripter_VisualNovelScene].
 
+## Emits when the background finishes fading in. Used in [method background_fade_in].
 signal fade_in_finished
+## Emits when the background finishes fading out. Used in [method background_fade_out].
 signal fade_out_finished
+## Emits when an overlay effect has been added.
+## @experimental: This never gets emitted. Will be worked in v1.0.0.
 signal overlay_effect_added
+## Emits when an overlay effect has been finished.
+## @experimental: This seems inconsistent because it only gets emitted on [method background_effect_in] instead of overlay functions. Will be reworked in v1.0.0.
 signal overlay_effect_finished
+## Emits when a background transitions has been started.
+## @experimental: This never gets emitted. Will be worked in v1.0.0.
 signal background_transition_started
+## Emits when a background transitions has been finished.
+## [change_background_transition] emits this when background transition is finished.
 signal background_transition_finished
 
+## The current active overlays added by [method _add_active_overlay].
 var _active_overlays: Array[Node]
 
-# Makes it so instead of using Characters node, it uses a seperate node for overlay effects
-@export var use_overlay_exclusive_node: bool 
+## If this is true, it uses [member overlay_node] instead of background node for handling with
+## overlay effects.
+@export var use_overlay_exclusive_node: bool
+## The [DemoScripter_VisualNovelScene] scene. Must be set otherwise it will throw a error!
 @export var main_scene: DemoScripter_VisualNovelScene
+## The node where all the [DemoScripter_VisualNovelCharacter] is on.
+## Must be set otherwise it will throw a error!
 @export var characters_node: Node
+## The node where the overlay effects created by overlay functions will be. 
+## [member use_overlay_exclusive_node] must be true!
 @export var overlay_node: Node # only use this if use_overlay_exclusive_node is enabled!
 
+## The [AnimationPlayer] of the background node.
+## @experimental: This never gets used. May be reworked or removed in v1.0.0.
 @onready var anim_player = $AnimationPlayer
+## The [ColorRect] used before the [member background_sprites] which is used for plain colors.
 @onready var background_color = $ColorRect
+## The background sprites.
 @onready var background_sprites = $Sprites
+## The current background of [member background_sprites]
+## @experimental: This never gets used. Will be reworked in v1.0.0.
 @onready var current_background = background_sprites.frame
 
 func _ready() -> void:
@@ -27,6 +53,26 @@ func _ready() -> void:
 
 #region OVERLAYS
 
+## Adds a overlay effect.
+## [br]
+## [br]
+## [param shader_name] is the [Shader] file path.
+## [br]
+## [param shader_arg] is the [Dictionary] configuration for the shader. (sets the shader parameters)
+## [br]
+## [param config_arg] is the [Dictionary] configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## If [param fast_skipable] is true, allows the player to fast skip this function, running
+## [memthod add_overlay_normal_instant] instead.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets called.
+## [br]
+## [param hold_out] is how long before it executes [method add_overlay_normal_instant].
+## @experimental: I don't really like how the hold out and hold in is defined. In v1.0.0, I'll probably add a hold_middle argument.
 func add_overlay_normal(shader_name: String, shader_arg: Dictionary = {}, config_arg: Dictionary = {}) -> void:
 	# types:
 	# fast_skipable: bool
@@ -55,6 +101,7 @@ func add_overlay_normal(shader_name: String, shader_arg: Dictionary = {}, config
 	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
+## Instant version of [method add_overlay_normal].
 func add_overlay_normal_instant(shader_name: String, shader_arg: Dictionary) -> void:
 	var effect = load(shader_name)
 	
@@ -73,6 +120,26 @@ func add_overlay_normal_instant(shader_name: String, shader_arg: Dictionary) -> 
 	for k in shader_arg:
 		color_overlay.get_material().set_shader_parameter(k, shader_arg[k])
 
+## Adds a overlay effect that is persistant on background transitions.
+## This means that a overlay that is considered persistant will be on top of background transitions.
+## [br]
+## [br]
+## [param shader_name] is the [Shader] file path.
+## [br]
+## [param shader_arg] is the [Dictionary] configuration for the shader. (sets the shader parameters)
+## [br]
+## [param config_arg] is the [Dictionary] configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## If [param fast_skipable] is true, allows the player to fast skip this function, running
+## [memthod add_overlay_normal_instant] instead.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets called.
+## [br]
+## [param hold_out] is how long before it executes [method add_overlay_persistant_instant].
 func add_overlay_persistant(shader_name: String, shader_arg: Dictionary = {}, config_arg: Dictionary = {}) -> void:
 	# types:
 	# fast_skipable: bool
@@ -101,6 +168,7 @@ func add_overlay_persistant(shader_name: String, shader_arg: Dictionary = {}, co
 	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
+## Instant version of [method add_overlay_persistant].
 func add_overlay_persistant_instant(shader_name: String, shader_arg: Dictionary = {}) -> void:
 	var effect = load(shader_name)
 	
@@ -120,10 +188,21 @@ func add_overlay_persistant_instant(shader_name: String, shader_arg: Dictionary 
 	for k in shader_arg:
 		color_overlay.get_material().set_shader_parameter(k, shader_arg[k])
 
+## Sets shader parameters on a active overlay from [member _active_overlays].
+## This does not trigger [DemoScripter_VisualNovelScene.dialogue_fade_in] and
+## [DemoScripter_VisualNovelScene.dialogue_fade_out].
+## [br]
+## [br]
+## [member id] is the shader id from [member _active_overlays].
+## [br]
+## [param shader_arg] is the [Dictionary] configuration for the shader. (sets the shader parameters)
 func set_active_overlay_normal_id(id: int, shader_arg: Dictionary = {}) -> void:
 	for k in shader_arg:
 		_active_overlays[id].get_material().set_shader_parameter(k, shader_arg[k])
 
+## Sets shader parameters on a active overlay from [member _active_overlays] using a Tween transition.
+## This triggers [DemoScripter_VisualNovelScene.dialogue_fade_in] and
+## [DemoScripter_VisualNovelScene.dialogue_fade_out].
 func set_active_overlay_normal_tween_id(id: int, property: String, value, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
 		"fast_skipable": true,
@@ -148,12 +227,30 @@ func set_active_overlay_normal_tween_id(id: int, property: String, value, durati
 	await get_tree().create_timer(duration + config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
+## Instant version of [method set_actiev_overlay_normal_tween_id].
 func set_active_overlay_normal_tween_id_instant(id: int, property: String, value, duration: float) -> void:
 	var overlay = _active_overlays[id]
 	
 	var tween = get_tree().create_tween()
 	tween.tween_property(overlay, "material:shader_parameter/" + property, value, duration)
 
+## Removes a overlay using a id.
+## [br]
+## [br]
+## [param id] is the overlay id target to be removed.
+## [br]
+## [param config_arg] is the [Dictionary] configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## If [param fast_skipable] is true, allows the player to fast skip this function, running
+## [memthod add_overlay_normal_instant] instead.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets called.
+## [br]
+## [param hold_out] is how long before it executes [method add_overlay_persistant_instant].
 func remove_overlay_normal_id(id: int, config_arg: Dictionary) -> void:
 	var default_config: Dictionary = {
 		"fast_skipable": true,
@@ -178,45 +275,142 @@ func remove_overlay_normal_id(id: int, config_arg: Dictionary) -> void:
 	await get_tree().create_timer(config["hold_in"]).timeout
 	main_scene.dialogue_fade_in()
 
+## Instant version of [method remove_overlay_normal_id_instant].
 func remove_overlay_normal_id_instant(id: int) -> void:
 	_active_overlays[id].queue_free()
 	_remove_active_overlay_id(id)
 
-func remove_overlay_normal_id_instant_await(signalname, id: int) -> void:
+## Wrapper for [method remove_overlay_normal_id_instant] where it awaits a [Signal] before
+## executing [method remove_overlay_normal_id_instant].
+func remove_overlay_normal_id_instant_await(signalname: Signal, id: int) -> void:
 	await signalname
 	remove_overlay_normal_id_instant(id)
 
+## Sets a overlay visible or invisible.
+## [br]
+## [br]
+## [param id] is the id of the overlay from [member _active_overlays].
+## [br]
+## [param visible] is the visibility of the overlay. If true, it's visible and if false, invisible.
 func set_active_overlay_visible_instant(id: int, visible: bool) -> void:
 	_active_overlays[id].set_visible(visible)
 
 #endregion
 
-func change_background_instant(index: int, group = null) -> void:
-	if group is String:
-		background_sprites.animation = group
-	
-	background_sprites.frame = index
+#region CHARACTER FUNCS
 
+## Hides all the [DemoScripter_VisualNovelCharacter]s from [member characters_node].
 func hide_characters() -> void:
 	for k in characters_node.get_children():
 		if k is DemoScripter_VisualNovelCharacter:
 			main_scene.hide_character_instant(k, 0)
 
+## Show all the [DemoScripter_VisualNovelCharacter]s from [member characters_node].
 func show_characters() -> void:
 	for k in characters_node.get_children():
 		if k is DemoScripter_VisualNovelCharacter:
 			main_scene.show_character_instant(k, 0)
 
+#endregion
+
+#region BACKGROUND FUNCS
+
+## Changes [member background_sprites] frame.
+## [br]
+## [br]
+## [param index] is the index it will change to.
+## [br]
+## If [param group] ins't empty, it will change the [member background_sprites]'s animation.
+## In this case, it would change the group.
+func change_background_instant(index: int, group: String = "") -> void:
+	if group:
+		background_sprites.animation = group
+	
+	background_sprites.frame = index
+
+## Hides [member background_sprites].
 func hide_background() -> void:
 	background_sprites.set_visible(false)
 
+## Shows [member background_sprites].
 func show_background() -> void:
 	background_sprites.set_visible(true)
 
-# NOTE: maybe use a dictionary for setting arguments? 
-# like {
-# should_character_appear: true
-# }, which makes it so you dont need to always set multiple arguments at once
+## Changes background using a transition.
+## [br]
+## [br]
+## [param index] is the index it will change to.
+## [br]
+## [param group] is the group it will change to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg]
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method change_background_transition_instant] with 0 [param duration] instead.
+## [br]
+## If [param persistant_chars] is true, the characters will be on top of the background transition.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## [param hold_out] is how long before [method change_background_transition_instant] gets executed.
+## [br]
+## [param hold_signal] is how long before [signal background_transition_finished] gets emitted.
+## [br]
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed.
+## [br]
+## [param show_character] is an array of which characters will be show.
+## [br]
+## [param hide_character] is an array of which characters will be hidden.
+## [br]
+## If [param hide_characters_on_end] is true, runs [method hide_characters] when transition finishes.
+func change_background_transition(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
+	# NOTE: types
+	# fast_skipable: bool
+	# persistant_chars: bool
+	# hold_in: float
+	# hold_out: float
+	# hold_signal: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"persistant_chars": false,
+		"hold_in": 0,
+		"hold_out": 0,
+		"hold_signal": 0,
+		"active_overlay_visible": {},
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": [],
+		"hide_characters_on_end": true
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		change_background_transition_instant(index, group, 0, config_instant)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
+	
+	change_background_transition_instant(index, group, duration, config_instant)
+	
+	await get_tree().create_timer(duration + config["hold_in"]).timeout
+	
+	main_scene.dialogue_fade_in()
+
 func change_background_transition_instant(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
 		"persistant_chars": false,
@@ -273,46 +467,6 @@ func change_background_transition_instant(index: int, group: String, duration: f
 			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
 	tween.tween_callback(new_background.queue_free)
 	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
-	
-
-func change_background_transition(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
-	# NOTE: types
-	# fast_skipable: bool
-	# persistant_chars: bool
-	# hold_in: float
-	# hold_out: float
-	# hold_signal: float
-	var default_config: Dictionary = {
-		"fast_skipable": true,
-		"persistant_chars": false,
-		"hold_in": 0,
-		"hold_out": 0,
-		"hold_signal": 0,
-		"active_overlay_visible": {},
-		"remove_active_overlay": [],
-		"show_character": [],
-		"hide_character": [],
-		"hide_characters_on_end": true
-	}
-	
-	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
-	
-	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		change_background_transition_instant(index, group, 0, config_instant)
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	if config["hold_out"] > 0:
-		await get_tree().create_timer(config["hold_out"]).timeout
-	
-	change_background_transition_instant(index, group, duration, config_instant)
-	
-	await get_tree().create_timer(duration + config["hold_in"]).timeout
-	
-	main_scene.dialogue_fade_in()
-
 
 func background_effect_in_instant(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	# types:
