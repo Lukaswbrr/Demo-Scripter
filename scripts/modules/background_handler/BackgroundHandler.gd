@@ -411,19 +411,19 @@ func change_background_transition(index: int, group: String, duration: float, co
 	
 	main_scene.dialogue_fade_in()
 
+## Instant version of [method change_background_transition].
 func change_background_transition_instant(index: int, group: String, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
 		"persistant_chars": false,
 		"hold_signal": 0,
 		"remove_active_overlay": [],
 		"active_overlay_visible": {},
+		"show_character": [],
 		"hide_character": [],
-		"hide_characters_on_end": true,
-		"show_character": []
+		"hide_characters_on_end": true
 	}
 	
 	var config: Dictionary = _create_config_dict(default_config, config_arg)
-
 	var persistant_overlays = _check_persistant_amount_overlays()
 	
 	var new_background = AnimatedSprite2D.new()
@@ -468,6 +468,102 @@ func change_background_transition_instant(index: int, group: String, duration: f
 	tween.tween_callback(new_background.queue_free)
 	tween.tween_callback(emit_signal.bind("background_transition_finished")).set_delay(config["hold_signal"])
 
+## Fades in the background with a shader effect. Useful for custom transitions.
+## [br]
+## [br]
+## [param shader_name] is the shader file path.
+## [br]
+## [param property] is the property that will be changed during transition.
+## [br]
+## [param value] is the value the [param property] will go to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration of the function.
+## [br]
+## [br]
+## Parameters for [config_arg].
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method background_effect_in_instant] instead.
+## [br]
+## [param hold] is how long before [signal overlay_effect_finished] gets emitted.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed. Keep in mind that
+## [param hold] occurs before [param hold_in]!
+## [br]
+## [param hold_out] is how long before [method background_effect_in_instant] gets executed.
+## [br]
+## [param quick_direction] is the angle where the overlay effect will be on.
+## Acceptable values are "up" (default), "down", "left" and "right".
+## [param tween_type] is the type of the fade in will start on.
+## Acceptable values are "auto" (uses the [param value] as negative value) and "manual"
+## (uses [param tween_from] value.)
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed.
+## [br]
+## If [method hide_characters] is true, [method hide_characters] is executed when transition is
+## finished.
+## [br]
+## If [method hide_background] is true, [method hide_background] is executed when transition is
+## finished.
+func background_effect_in(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# rotation: float
+	# fast_skipable: bool
+	# hold: float
+	# hold_in: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hide_characters": true,
+		"hide_background": true,
+		"hold": 0,
+		"hold_in": 0,
+		"hold_out": 0,
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		if config["hide_characters"]:
+			hide_characters()
+		
+		if config["hide_background"]:
+			hide_background()
+		
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
+		
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
+	
+	background_effect_in_instant(shader_name, property, value, duration, config_instant)
+	
+	await overlay_effect_finished
+	await get_tree().create_timer(config["hold_in"]).timeout
+	main_scene.dialogue_fade_in()
+
+## Instant version pf [method background_effect_in].
 func background_effect_in_instant(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	# types:
 	# rotation: float
@@ -559,128 +655,70 @@ func background_effect_in_instant(shader_name: String, property: String, value: 
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
 
-func background_effect_in(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
-	# types:
-	# rotation: float
-	# fast_skipable: bool
-	# hold: float
-	# hold_in: float
-	# hold_out: float
+## Fades out the background with a shader effect. Useful for custom transitions.
+## [br]
+## [br]
+## [param shader_name] is the shader file path.
+## [br]
+## [param property] is the property that will be changed during transition.
+## [br]
+## [param value] is the value the [param property] will go to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration of the function.
+## [br]
+## [br]
+## Parameters for [config_arg].
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method background_effect_in_instant] instead.
+## [br]
+## [param hold] is how long before [signal overlay_effect_finished] gets emitted.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed. Keep in mind that
+## [param hold] occurs before [param hold_in]!
+## [br]
+## [param hold_out] is how long before [method background_effect_out_instant] gets executed.
+## [br]
+## [param color] is the color the effect will have.
+## [br]
+## [param modulate] is the modulate the effect will have.
+## [br]
+## [param quick_direction] is the angle where the overlay effect will be on.
+## Acceptable values are "up" (default), "down", "left" and "right".
+## [param tween_type] is the type of the fade in will start on.
+## Acceptable values are "auto" (uses the [param value] as negative value) and "manual"
+## (uses [param tween_from] value.)
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed.
+## [br]
+## [param show_character] is an array of which characters will be show.
+## [br]
+## [param hide_character] is an array of which characters will be hidden.
+func background_effect_out(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	var default_config: Dictionary = {
 		"fast_skipable": true,
-		"hide_characters": true,
-		"hide_background": true,
 		"hold": 0,
 		"hold_in": 0,
 		"hold_out": 0,
+		"color": Color.WHITE,
+		"modulate": Color8(255, 255, 255, 255),
 		"quick_direction": "up",
 		"tween_type": "auto",
 		"tween_from": -1,
-		"active_overlay_visible": {},
-		"remove_active_overlay": []
-	}
-	
-	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
-	
-	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		if config["hide_characters"]:
-			hide_characters()
-		
-		if config["hide_background"]:
-			hide_background()
-		
-		if config["active_overlay_visible"]:
-			for k in config["active_overlay_visible"]:
-				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
-		
-		if config["remove_active_overlay"]:
-			for k in config ["remove_active_overlay"]:
-				remove_overlay_normal_id_instant(k)
-		
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	if config["hold_out"] > 0:
-		await get_tree().create_timer(config["hold_out"]).timeout
-	
-	background_effect_in_instant(shader_name, property, value, duration, config_instant)
-	
-	await overlay_effect_finished
-	main_scene.dialogue_fade_in()
-
-func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
-	# types:
-	# fast_skipable: bool
-	# hold_in: float
-	# hold_out: float
-	# hide_character: bool
-	# hide_background: bool
-	var default_config: Dictionary = {
-		"fast_skipable": true,
-		"hold_in": 0,
-		"hold": 0,
-		"hold_out": 0,
-		"hide_characters": true,
-		"hide_background": true,
-		"active_overlay_visible": {},
-		"remove_active_overlay": []
-	}
-	
-	var config = _create_config_dict(default_config, config_arg)
-	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
-	
-	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		if config["hide_characters"]:
-			hide_characters()
-		
-		if config["hide_background"]:
-			hide_background()
-		
-		if config["active_overlay_visible"]:
-			for k in config["active_overlay_visible"]:
-				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
-		
-		if config["remove_active_overlay"]:
-			for k in config ["remove_active_overlay"]:
-				remove_overlay_normal_id_instant(k)
-		
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	
-	if config["hold_out"] > 0:
-		await get_tree().create_timer(config["hold_out"]).timeout
-	
-	background_fade_in_instant(duration, config_instant)
-	
-	if config["hold_in"] < 0:
-		return
-	else:
-		await fade_in_finished
-		main_scene.dialogue_fade_in()
-
-func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
-	# types:
-	# fast_skipable: bool
-	# hold_in: float
-	# hold: float
-	# hold_out: float
-	var default_config: Dictionary = {
-		"fast_skipable": true,
-		"hold_in": 0,
-		"hold": 0,
-		"hold_out": 0,
 		"active_overlay_visible": {},
 		"remove_active_overlay": [],
 		"show_character": [],
 		"hide_character": []
 	}
 	
-	var config = _create_config_dict(default_config, config_arg)
-	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
 		show_background()
@@ -692,7 +730,7 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 		if config["show_character"]:
 			for k in config["show_character"]:
 				main_scene.show_character.call(k)
-		
+				
 		if config["active_overlay_visible"]:
 			for k in config["active_overlay_visible"]:
 				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
@@ -700,131 +738,23 @@ func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
 		if config["remove_active_overlay"]:
 			for k in config ["remove_active_overlay"]:
 				remove_overlay_normal_id_instant(k)
-		return
 		
+		return
+	
 	main_scene.dialogue_fade_out()
 	await main_scene._animation_player.animation_finished
 	
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_fade_out_instant(duration, config_instant)
-	
-	await fade_out_finished
+	background_effect_out_instant(shader_name, property, value, duration, config_instant)
+	await overlay_effect_finished
 	if config["hold_in"] > 0:
 		await get_tree().create_timer(config["hold_in"]).timeout
 	
 	main_scene.dialogue_fade_in()
 
-func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) -> void:
-	# types:
-	# hold: float
-	# hide_background: bool
-	# hide_characters: bool
-	var default_config: Dictionary = {
-		"hold": 0,
-		"hide_characters": true,
-		"hide_background": true,
-		"active_overlay_visible": {},
-		"remove_active_overlay": []
-	}
-	
-	var config = _create_config_dict(default_config, config_arg)
-	
-	var persistant_overlays = _check_persistant_amount_overlays()
-	var color_overlay = ColorRect.new()
-	color_overlay.size = background_color.size
-	color_overlay.color = background_color.color
-	color_overlay.modulate = Color(background_color.modulate, 0)
-	
-	if use_overlay_exclusive_node:
-		overlay_node.add_child(color_overlay)
-	else:
-		characters_node.add_child(color_overlay)
-	
-	if persistant_overlays > 0:
-		if use_overlay_exclusive_node:
-			overlay_node.move_child(color_overlay, -persistant_overlays - 1)
-		else:
-			characters_node.move_child(color_overlay, -persistant_overlays - 1)
-		
-	var tween = get_tree().create_tween()
-	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 1), duration)
-	if config["hide_background"]:
-		tween.tween_callback(hide_background)
-	if config["hide_characters"]:
-		tween.tween_callback(hide_characters)
-	if config["remove_active_overlay"]:
-		for k in config["remove_active_overlay"]:
-			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
-	if config["active_overlay_visible"]:
-		for k in config["active_overlay_visible"].keys():
-			tween.tween_callback(set_active_overlay_visible_instant.bind(k, config["active_overlay_visible"][k]))
-	tween.tween_callback(color_overlay.queue_free)
-	if config["hold"] > 0:
-		tween.tween_callback(emit_signal.bind("fade_in_finished")).set_delay(config["hold"])
-	else:
-		tween.tween_callback(emit_signal.bind("fade_in_finished"))
-	
-
-func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -> void:
-	# BUG: Somehow, the fadeout tween doesnt work
-	# types:
-	# fast_skipable: bool
-	# hold_in: float
-	# hold: float
-	# hold_out: float
-	var default_config: Dictionary = {
-		"hold": 0,
-		"active_overlay_visible": {},
-		"remove_active_overlay": [],
-		"show_character": [],
-		"hide_character": []
-	}
-	
-	var config = _create_config_dict(default_config, config_arg)
-	
-	var persistant_overlays = _check_persistant_amount_overlays()
-	
-	var color_overlay = ColorRect.new()
-	color_overlay.size = background_color.size
-	color_overlay.color = background_color.color
-	color_overlay.modulate = Color(background_color.modulate)
-	
-	if use_overlay_exclusive_node:
-		overlay_node.add_child(color_overlay)
-	else:
-		characters_node.add_child(color_overlay)
-	
-	if persistant_overlays > 0:
-		if use_overlay_exclusive_node:
-			overlay_node.move_child(color_overlay, -persistant_overlays - 1)
-		else:
-			characters_node.move_child(color_overlay, -persistant_overlays - 1)
-	
-	if config["hide_character"]:
-			for k in config["hide_character"]:
-				main_scene.hide_character.call(k)
-		
-	if config["show_character"]:
-		for k in config["show_character"]:
-			main_scene.show_character.call(k)
-	
-	var tween = get_tree().create_tween()
-	if config["remove_active_overlay"]:
-		for k in config["remove_active_overlay"]:
-			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
-	if config["active_overlay_visible"]:
-		for k in config["active_overlay_visible"].keys():
-			tween.tween_callback(set_active_overlay_visible_instant.bind(k, config["active_overlay_visible"][k]))
-	tween.tween_callback(show_background)
-	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 0), duration)
-	tween.tween_callback(color_overlay.queue_free)
-	if config["hold"] > 0:
-		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(config["hold"])
-	else:
-		tween.tween_callback(emit_signal.bind("fade_out_finished"))
-
+## Instant version [method background_effect_out].
 func background_effect_out_instant(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	# types:
 	# rotation: float
@@ -916,6 +846,110 @@ func background_effect_out_instant(shader_name: String, property: String, value:
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
 
+## Fades out the background with a [method change_background_instant] using a shader.
+## Useful for custom transitions that lead to a background change.
+## [br]
+## [br]
+## [param index] is the index the [member background_sprites] will go to.
+## [br]
+## [param group] is the group the [member background_sprites] will go to.
+## [br]
+## [param shader_name] is the shader file path.
+## [br]
+## [param property] is the property that will be changed during transition.
+## [br]
+## [param value] is the value the [param property] will go to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration of the function.
+## [br]
+## [br]
+## Parameters for [config_arg].
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method background_effect_in_instant] instead.
+## [br]
+## [param hold] is how long before [signal overlay_effect_finished] gets emitted.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed. Keep in mind that
+## [param hold] occurs before [param hold_in]!
+## [br]
+## [param hold_out] is how long before [method background_effect_out_instant] gets executed.
+## [br]
+## [param quick_direction] is the angle where the overlay effect will be on.
+## Acceptable values are "up" (default), "down", "left" and "right".
+## [param tween_type] is the type of the fade out will start on.
+## Acceptable values are "auto" (uses the [param value] as negative value) and "manual"
+## (uses [param tween_from] value.)
+## [br]
+## [param tween_from] is where the tween will start from.
+## Only gets used if [param tween_type] is "manual".
+## [br]
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed.
+## [br]
+## [param show_character] is an array of which characters will be show.
+## [br]
+## [param hide_character] is an array of which characters will be hidden.
+func background_effect_out_change(index: int, group: String, shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold": 0,
+		"hold_in": 0,
+		"hold_out": 0,
+		"quick_direction": "up",
+		"tween_type": "auto",
+		"tween_from": -1,
+		"active_overlay_visible": {},
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
+	}
+	
+	var config: Dictionary = _create_config_dict(default_config, config_arg)
+	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		show_background()
+		change_background_instant(index, group)
+		
+		if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+		if config["show_character"]:
+			for k in config["show_character"]:
+				main_scene.show_character.call(k)
+		
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
+		
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
+	
+	background_effect_out_change_instant(index, group, shader_name, property, value, duration, config_instant)
+	await overlay_effect_finished
+	if config["hold_in"] > 0:
+		await get_tree().create_timer(config["hold_in"]).timeout
+	
+	main_scene.dialogue_fade_in()
+
+## Instant version [method background_effect_out_change].
 func background_effect_out_change_instant(index: int, group: String, shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
 	# types:
 	# rotation: float
@@ -1017,91 +1051,64 @@ func background_effect_out_change_instant(index: int, group: String, shader_name
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished")).set_delay(config["hold"])
 	else:
 		tween.tween_callback(emit_signal.bind("overlay_effect_finished"))
-	
 
-func background_effect_out(shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
+## Fades in the background.
+## [br]
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration argument.
+## [br]
+## [br]
+## Parameters for [param config_arg].
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running 
+## [method background_fade_in_instant] instead.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## [param hold] is how long before [signal fade_in_finished] gets emitted.
+## [br]
+## [param hold_out] is how long before [method background_fade_in_instant] gets executed.
+## [br]
+## If [param hide_characters] is true, executes [method hide_characters] when fade in is finished.
+## [br]
+## If [param hide_background] is true, executes [method hide_background] when fade in is finished.
+## [br]
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed once fade in
+## is finished.
+func background_fade_in(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold_out: float
+	# hide_character: bool
+	# hide_background: bool
 	var default_config: Dictionary = {
 		"fast_skipable": true,
-		"hold": 0,
 		"hold_in": 0,
+		"hold": 0,
 		"hold_out": 0,
-		"color": Color.WHITE,
-		"modulate": Color8(255, 255, 255, 255),
-		"quick_direction": "up",
-		"tween_type": "auto",
-		"tween_from": -1,
+		"hide_characters": true,
+		"hide_background": true,
 		"active_overlay_visible": {},
-		"remove_active_overlay": [],
-		"show_character": [],
-		"hide_character": []
+		"remove_active_overlay": []
 	}
 	
-	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	var config = _create_config_dict(default_config, config_arg)
+	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
 	
 	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		show_background()
+		if config["hide_characters"]:
+			hide_characters()
 		
-		if config["hide_character"]:
-			for k in config["hide_character"]:
-				main_scene.hide_character.call(k)
-		
-		if config["show_character"]:
-			for k in config["show_character"]:
-				main_scene.show_character.call(k)
-				
-		if config["active_overlay_visible"]:
-			for k in config["active_overlay_visible"]:
-				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
-		
-		if config["remove_active_overlay"]:
-			for k in config ["remove_active_overlay"]:
-				remove_overlay_normal_id_instant(k)
-		
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	
-	if config["hold_out"] > 0:
-		await get_tree().create_timer(config["hold_out"]).timeout
-	
-	background_effect_out_instant(shader_name, property, value, duration, config_instant)
-	await overlay_effect_finished
-	if config["hold_in"] > 0:
-		await get_tree().create_timer(config["hold_in"]).timeout
-	
-	main_scene.dialogue_fade_in()
-
-func background_effect_out_change(index: int, group: String, shader_name: String, property: String, value: float, duration: float, config_arg: Dictionary = {}) -> void:
-	var default_config: Dictionary = {
-		"fast_skipable": true,
-		"hold": 0,
-		"hold_in": 0,
-		"hold_out": 0,
-		"quick_direction": "up",
-		"tween_type": "auto",
-		"tween_from": -1,
-		"active_overlay_visible": {},
-		"remove_active_overlay": [],
-		"show_character": [],
-		"hide_character": []
-	}
-	
-	var config: Dictionary = _create_config_dict(default_config, config_arg)
-	var config_instant: Dictionary = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
-	
-	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
-		show_background()
-		change_background_instant(index, group)
-		
-		if config["hide_character"]:
-			for k in config["hide_character"]:
-				main_scene.hide_character.call(k)
-		
-		if config["show_character"]:
-			for k in config["show_character"]:
-				main_scene.show_character.call(k)
+		if config["hide_background"]:
+			hide_background()
 		
 		if config["active_overlay_visible"]:
 			for k in config["active_overlay_visible"]:
@@ -1119,13 +1126,304 @@ func background_effect_out_change(index: int, group: String, shader_name: String
 	if config["hold_out"] > 0:
 		await get_tree().create_timer(config["hold_out"]).timeout
 	
-	background_effect_out_change_instant(index, group, shader_name, property, value, duration, config_instant)
-	await overlay_effect_finished
+	background_fade_in_instant(duration, config_instant)
+	
+	if config["hold_in"] < 0:
+		return
+	
+	await fade_in_finished
+	main_scene.dialogue_fade_in()
+
+## Instant version of [method background_fade_in].
+func background_fade_in_instant(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# hold: float
+	# hide_background: bool
+	# hide_characters: bool
+	var default_config: Dictionary = {
+		"hold": 0,
+		"hide_characters": true,
+		"hide_background": true,
+		"active_overlay_visible": {},
+		"remove_active_overlay": []
+	}
+	
+	var config = _create_config_dict(default_config, config_arg)
+	
+	var persistant_overlays = _check_persistant_amount_overlays()
+	var color_overlay = ColorRect.new()
+	color_overlay.size = background_color.size
+	color_overlay.color = background_color.color
+	color_overlay.modulate = Color(background_color.modulate, 0)
+	
+	if use_overlay_exclusive_node:
+		overlay_node.add_child(color_overlay)
+	else:
+		characters_node.add_child(color_overlay)
+	
+	if persistant_overlays > 0:
+		if use_overlay_exclusive_node:
+			overlay_node.move_child(color_overlay, -persistant_overlays - 1)
+		else:
+			characters_node.move_child(color_overlay, -persistant_overlays - 1)
+		
+	var tween = get_tree().create_tween()
+	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 1), duration)
+	if config["hide_background"]:
+		tween.tween_callback(hide_background)
+	if config["hide_characters"]:
+		tween.tween_callback(hide_characters)
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible_instant.bind(k, config["active_overlay_visible"][k]))
+	tween.tween_callback(color_overlay.queue_free)
+	if config["hold"] > 0:
+		tween.tween_callback(emit_signal.bind("fade_in_finished")).set_delay(config["hold"])
+	else:
+		tween.tween_callback(emit_signal.bind("fade_in_finished"))
+
+## Fades out the background.
+## [br]
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration argument.
+## [br]
+## [br]
+## Parameters for [param config_arg].
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running 
+## [method background_fade_out_instant] instead.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_out] gets executed.
+## [br]
+## [param hold] is how long before [signal fade_out_finished] gets emitted.
+## [br]
+## [param hold_out] is how long before [method background_fade_in_instant] gets executed.
+## [br]
+## [param active_overlay_visible] sets visibility of overlay.
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param remove_active_overlay] is an array of which active overlays will be removed once fade out
+## is finished.
+## [br]
+## [param show_character] is an array of which characters will be show.
+## [br]
+## [param hide_character] is an array of which characters will be hidden.
+func background_fade_out(duration: float, config_arg: Dictionary = {}) -> void:
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"fast_skipable": true,
+		"hold_in": 0,
+		"hold": 0,
+		"hold_out": 0,
+		"active_overlay_visible": {},
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
+	}
+	
+	var config = _create_config_dict(default_config, config_arg)
+	var config_instant = _remove_config_keys(config, ["fast_skipable", "hold_in", "hold_out"])
+	
+	if config["fast_skipable"] and Input.is_action_pressed("fast_skip"):
+		show_background()
+		
+		if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+		if config["show_character"]:
+			for k in config["show_character"]:
+				main_scene.show_character.call(k)
+		
+		if config["active_overlay_visible"]:
+			for k in config["active_overlay_visible"]:
+				set_active_overlay_visible_instant(k, config["active_overlay_visible"][k])
+		
+		if config["remove_active_overlay"]:
+			for k in config ["remove_active_overlay"]:
+				remove_overlay_normal_id_instant(k)
+		return
+		
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	
+	if config["hold_out"] > 0:
+		await get_tree().create_timer(config["hold_out"]).timeout
+	
+	background_fade_out_instant(duration, config_instant)
+	
+	await fade_out_finished
 	if config["hold_in"] > 0:
 		await get_tree().create_timer(config["hold_in"]).timeout
 	
 	main_scene.dialogue_fade_in()
 
+## Instant version [method background_fade_out].
+func background_fade_out_instant(duration: float, config_arg: Dictionary = {}) -> void:
+	# BUG: Somehow, the fadeout tween doesnt work
+	# types:
+	# fast_skipable: bool
+	# hold_in: float
+	# hold: float
+	# hold_out: float
+	var default_config: Dictionary = {
+		"hold": 0,
+		"active_overlay_visible": {},
+		"remove_active_overlay": [],
+		"show_character": [],
+		"hide_character": []
+	}
+	
+	var config = _create_config_dict(default_config, config_arg)
+	
+	var persistant_overlays = _check_persistant_amount_overlays()
+	
+	var color_overlay = ColorRect.new()
+	color_overlay.size = background_color.size
+	color_overlay.color = background_color.color
+	color_overlay.modulate = Color(background_color.modulate)
+	
+	if use_overlay_exclusive_node:
+		overlay_node.add_child(color_overlay)
+	else:
+		characters_node.add_child(color_overlay)
+	
+	if persistant_overlays > 0:
+		if use_overlay_exclusive_node:
+			overlay_node.move_child(color_overlay, -persistant_overlays - 1)
+		else:
+			characters_node.move_child(color_overlay, -persistant_overlays - 1)
+	
+	if config["hide_character"]:
+			for k in config["hide_character"]:
+				main_scene.hide_character.call(k)
+		
+	if config["show_character"]:
+		for k in config["show_character"]:
+			main_scene.show_character.call(k)
+	
+	var tween = get_tree().create_tween()
+	if config["remove_active_overlay"]:
+		for k in config["remove_active_overlay"]:
+			tween.tween_callback(remove_overlay_normal_id_instant.bind(k))
+	if config["active_overlay_visible"]:
+		for k in config["active_overlay_visible"].keys():
+			tween.tween_callback(set_active_overlay_visible_instant.bind(k, config["active_overlay_visible"][k]))
+	tween.tween_callback(show_background)
+	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate, 0), duration)
+	tween.tween_callback(color_overlay.queue_free)
+	if config["hold"] > 0:
+		tween.tween_callback(emit_signal.bind("fade_out_finished")).set_delay(config["hold"])
+	else:
+		tween.tween_callback(emit_signal.bind("fade_out_finished"))
+
+## Changes background using a shader transition effect.
+## Useful for custom transitions that lead to a background change.
+## [br]
+## [br]
+## [param index] is the index the [member background_sprites] will go to.
+## [br]
+## [param group] is the group the [member background_sprites] will go to.
+## [br]
+## [param shader_name] is the shader file path.
+## [br]
+## [param property] is the property that will be changed during transition.
+## [br]
+## [param value_in] is the value the [param background_effect_in] will go to.
+## [br]
+## [param value_out] is the value the [param background_effect_out] will go to.
+## [br]
+## [param duration_in] is how long the [param background_effect_in] will last.
+## [br]
+## [param duration_out] is how long the [param background_effect_out] will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration of the function.
+## [br]
+## [br]
+## Parameters for [config_arg].
+## [br]
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method change_background_instant] with duration 0 instead.
+## [br]
+## If [param hide_characters_in] is true, executes [method hide_characters] during
+## [method background_effect_in].
+## [br]
+## If [param hide_background_in] is true, executes [method hide_background] during
+## [method background_effect_in].
+## [br]
+## [param show_character_out] is an array of which characters will show during
+## [method background_effect_out].
+## [br]
+## [param hide_character_out] is an array of which characters will hide during
+## [method background_effect_out].
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## [param hold_middle] is how long before [method background_effect_out_instant] gets executed.
+## [br]
+## [param hold_out] is how long before [method background_effect_in_instant] gets executed.
+## [br]
+## [param hold_fadein] is the hold fade in duration for [method background_effect_in_instant].
+## [br]
+## [param hold_fadeout] is the hold fade out duration for [method background_effect_out_instant].
+## [br]
+## [param quick_direction_fadein] is the angle for [method background_effect_in_instant] will be on.
+## Acceptable values are "up" (default), "down", "left" and "right".
+## [br]
+## [param quick_direction_fadeout] is the angle for [method background_effect_out_instant] will be on.
+## Acceptable values are "up" (default), "down", "left" and "right".
+## [br]
+## [param color_fadein] is the color for [method background_effect_in_instant].
+## [br]
+## [param color_fadeout] is the color for [method background_effect_out_instant].
+## [br]
+## [param modulate_fadein] is the modulate for [method background_effect_in_instant].
+## [br]
+## [param modulate_fadeout] is the modulate for [method background_effect_out_instant].
+## [br]
+## [param tween_type_fadein] is the type of tween [background_effect_in_instant] will use.
+## Acceptable values are "auto" (uses the [param value] as negative value) and "manual"
+## (uses [param tween_from_fadein] value.)
+## [br]
+## [param tween_type_fadeout] is the type of tween [background_effect_out_instant] will use.
+## Acceptable values are "auto" (uses the [param value] as negative value) and "manual"
+## (uses [param tween_from_fadeout] value.)
+## [br]
+## [param tween_from_fadein] is where the [method background_effect_in_instant]'s tween will start 
+## from. Only gets used if [param tween_type_fadein] is "manual".
+## [br]
+## [param tween_from_fadeout] is where the [method background_effect_out_instant]'s tween will start 
+## from. Only gets used if [param tween_type_fadeout] is "manual".
+## [br]
+## [param remove_active_overlay_fadein] is an array of which active overlays will be removed during
+## [method background_effect_in_instant].
+## [br]
+## [param remove_active_overlay_fadeout] is an array of which active overlays will be removed during
+## [method background_effect_out_instant].
+## [br]
+## [param active_overlay_visible_fadein] sets visibility of overlay during 
+## [method background_effect_in_instant].
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param active_overlay_visible_fadeout] sets visibility of overlay during 
+## [method background_effect_out_instant].
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## @experimental: I feel like the hold_out, hold_in names should be changed since it seems confusing? I'll probably do that in v1.0.0.
 func change_background_effect(index: int, group: String, shader_name: String, property: String, value_in: float, value_out: float, duration_in: float, duration_out: float, config_arg: Dictionary = {}) -> void:
 	# types:
 	# fast_skipable: bool
@@ -1140,7 +1438,6 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 		"hide_background_in": true,
 		"show_character_out": [],
 		"hide_character_out": [],
-		"hold": 0,
 		"hold_in": 0,
 		"hold_middle": 0,
 		"hold_out": 0,
@@ -1225,7 +1522,25 @@ func change_background_effect(index: int, group: String, shader_name: String, pr
 	
 	main_scene.dialogue_fade_in()
 
-func change_background_fade_new(index: int, group, fadeout: float, hold_out: float, fadein: float, hold_in: float, fast_skipable: bool = true) -> void:
+## Changes background using a fade transition.
+## [br]
+## [br]
+## [param index] is the index [member background_sprites] will go to.
+## [br]
+## [param group] is the group [member background_sprites] will go to.
+## [br]
+## [param fadeout] is how long the fade out will last.
+## [br]
+## [param hold_out] is how long before fade in starts.
+## [br]
+## [param fadein] is how long the fade in will last.
+## [br]
+## [param hold_in] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, executing
+## [method change_background_instant] instead.
+func change_background_fade_new(index: int, group: String, fadeout: float, hold_out: float, fadein: float, hold_in: float, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		change_background_instant(index, group)
 		return
@@ -1253,6 +1568,61 @@ func change_background_fade_new(index: int, group, fadeout: float, hold_out: flo
 	tween.tween_property(color_overlay, "modulate", Color(color_overlay.modulate.r, color_overlay.modulate.g, color_overlay.modulate.b, 0), fadein)
 	tween.tween_callback(main_scene.dialogue_fade_in).set_delay(hold_in)
 
+## Causes a background fade in and fade out at the same time.
+## [br]
+## [br]
+## [param fadein] is how long the fade in will last.
+## [br]
+## [param fadeout] is how long the fade out will last.
+## [br]
+## [param config_arg] is the [Dictionary] configuration for the function.
+## [br]
+## [br]
+## Parameters for [param config_arg].
+## [br]
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method change_background_instant] with duration 0 instead.
+## [br]
+## If [param hide_characters_in] is true, executes [method hide_characters] during
+## [method background_effect_in].
+## [br]
+## If [param hide_background_in] is true, executes [method hide_background] during
+## [method background_effect_in].
+## [br]
+## [param show_character_out] is an array of which characters will show during
+## [method background_effect_out].
+## [br]
+## [param hide_character_out] is an array of which characters will hide during
+## [method background_effect_out].
+## [param hold_in] is how long before [member main_scene]'s
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## [param hold_middle] is how long before [method background_effect_out_instant] gets executed.
+## [br]
+## [param hold_out] is how long before [method background_effect_in_instant] gets executed.
+## [br]
+## [param hold_fadein] is the hold fade in duration for [method background_effect_in_instant].
+## [br]
+## [param hold_fadeout] is the hold fade out duration for [method background_effect_out_instant].
+## [br]
+## [param rect_color] is the color the blink will have.
+## [br]
+## [param remove_active_overlay_fadein] is an array of which active overlays will be removed during
+## [method background_fade_in_instant].
+## [br]
+## [param remove_active_overlay_fadeout] is an array of which active overlays will be removed during
+## [method background_fade_out_instant].
+## [br]
+## [param active_overlay_visible_fadein] sets visibility of overlay during 
+## [method background_fade_in_instant].
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
+## [br]
+## [param active_overlay_visible_fadeout] sets visibility of overlay during 
+## [method background_fade_out_instant].
+## The key is the overlay id from [member _active_overlays] and the value is the visibility.
+## (true = visible, false = invisible)
 func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> void:
 	# types:
 	# fast_skipable: bool
@@ -1272,10 +1642,10 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 		"hide_background_in": true,
 		"hide_characters_in": false,
 		"rect_color": background_color.modulate,
-		"active_overlay_visible_fadein": {},
-		"active_overlay_visible_fadeout": {},
 		"remove_active_overlay_fadein": [],
-		"remove_active_overlay_fadeout": []
+		"remove_active_overlay_fadeout": [],
+		"active_overlay_visible_fadein": {},
+		"active_overlay_visible_fadeout": {}
 	}
 	
 	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
