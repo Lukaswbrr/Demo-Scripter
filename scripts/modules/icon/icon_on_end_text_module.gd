@@ -1,17 +1,17 @@
 class_name DemoScripter_IconEndText_IconModule
 extends DemoScripter_IconModule
+## A [DemoScripter_IconModule] for putting the icon to a end of a dialogue text line.
 
+## A [TextParagraph] object used for getting the text's letter position.
 var paragraph = TextParagraph.new()
 
-@export var legacy_icon_pos = false ## If true, icon will not update position on text end
+## If true, icon will not update position on text end.
+@export var legacy_icon_pos = false 
 
+## The normal font from [member _dialogue_node].
 var font
+## The normal font size from [member _dialogue_node].
 var font_size
-
-func _ready() -> void:
-	# Add the text to the paragraph with the loaded font and with font size 32
-	# Set the max width to 300
-	pass
 
 func _hide_icon() -> void:
 	icon_node.set_visible(false)
@@ -20,17 +20,18 @@ func _show_icon() -> void:
 	icon_node.set_visible(true)
 	update_dialogue_icon()
 
+## Connects the module.
 func _connect_module(node: DemoScripter_VisualNovelScene) -> void:
 	font = _dialogue_node.get_theme_font("normal_font")
 	font_size = _dialogue_node.get_theme_font_size("normal_font_size")
 	paragraph.width = _dialogue_node.size.x
 	
-	
 	await _main_visualnovel_scene.load_dialogue_finished
 	update_icon_text_pos()
 	update_dialogue_icon()
 
-
+## Updates the icon text position.
+## @experimental: Doesn't seem to work in BBCode position effects. Will be reworked in v1.0.0.
 func update_icon_text_pos():
 	# Get the primary text server
 	var text_server = TextServerManager.get_primary_interface()
@@ -67,11 +68,14 @@ func update_icon_text_pos():
 	#print(x, y)
 	icon_node.position = Vector2(x, y)
 
+## Updates the dialogue by clearing [member paragraph] and adding
+## the visible dialogue text from [method get_visible_dialogue_text].
 func update_dialogue_icon():
 	paragraph.clear()
 	paragraph.add_string(get_visible_dialogue_text(), font, font_size)
 	update_icon_text_pos()
 
+## Returns the amount of visible dialogue text.
 func get_visible_dialogue_text():
 	var _dialogue_text = _dialogue_node.text
 	var dialogue_visible_characters = _dialogue_node.visible_characters
