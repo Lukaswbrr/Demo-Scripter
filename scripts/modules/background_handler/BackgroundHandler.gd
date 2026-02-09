@@ -315,6 +315,26 @@ func show_characters() -> void:
 
 #region BACKGROUND FUNCS
 
+## Changes background.
+## [br]
+## [br]
+## [param index] 
+func change_background(index: int, group = null, hold: float = 0, fast_skipable: bool = true) -> void:
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		change_background_instant(index, group)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	change_background_instant(index, group)
+	if hold > 0:
+		await get_tree().create_timer(hold).timeout
+		main_scene.dialogue_fade_in()
+	elif hold < 0:
+		return
+	else:
+		main_scene.dialogue_fade_in()
+
 ## Changes [member background_sprites] frame.
 ## [br]
 ## [br]
@@ -327,6 +347,21 @@ func change_background_instant(index: int, group: String = "") -> void:
 		background_sprites.animation = group
 	
 	background_sprites.frame = index
+
+## Changes background using a fade transition.
+func change_background_fade(index: int, group, fadeout: float, hold_out: float, fadein: float, hold_in: float, fast_skipable: bool = true) -> void:
+	if fast_skipable and Input.is_action_pressed("fast_skip"):
+		change_background_instant(index, group)
+		return
+	
+	main_scene.dialogue_fade_out()
+	await main_scene._animation_player.animation_finished
+	background_fadeout_instant(fadeout)
+	await get_tree().create_timer(fadeout + hold_out).timeout
+	change_background_instant(index, group)
+	background_fadein_instant(fadein)
+	await get_tree().create_timer(fadein + hold_in).timeout
+	main_scene.dialogue_fade_in()
 
 ## Hides [member background_sprites].
 func hide_background() -> void:
@@ -1720,9 +1755,18 @@ func rect_blink(fadein: float, fadeout: float, config_arg: Dictionary = {}) -> v
 	else:
 		main_scene.dialogue_fade_in()
 
-func set_rect_color_instant(newColor: Color) -> void:
-	background_color.color = newColor
-
+## Sets the color of [member background_color].
+## [br]
+## [br]
+## [param newColor] is the color [member background_color] will use.
+## [br]
+## If [param fast_skipable] is true, the player can fast skip this function, running
+## [method set_rect_color_instant] instead.
+## [br]
+## [param hold_in] is how long before [method set_rect_color_instant] gets executed.
+## [br]
+## [param hold_out] is how long before fade in starts.
+## @experimental: The hold in and out names seems wrong? May be reworked in v1.0.0
 func set_rect_color(newColor: Color, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_color_instant(newColor)
@@ -1743,6 +1787,24 @@ func set_rect_color(newColor: Color, fast_skipable: bool = true, hold_in: float 
 	else:
 		main_scene.dialogue_fade_in()
 
+## Instant version of [method set_rect_color].
+func set_rect_color_instant(newColor: Color) -> void:
+	background_color.color = newColor
+
+## Sets the color of [member background_color].
+## [br]
+## [br]
+## [param newColor] is the color [member background_color] will use.
+## [br]
+## [param duration] is how much the transition will last.
+## [br]
+## If [param fast_skipable] is true, the player can fast skip this function, running
+## [method set_rect_color_instant] instead.
+## [br]
+## [param hold_in] is how long before transition starts.
+## [br]
+## [param hold_out] is how long before fade in starts.
+## @experimental: The hold in and out names seems wrong? May be reworked in v1.0.0
 func set_rect_color_transition(newColor: Color, duration: float, fast_skipable: bool = true, hold_in: float = 0, hold_out: float = 0 ) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_color_instant(newColor)
@@ -1765,10 +1827,15 @@ func set_rect_color_transition(newColor: Color, duration: float, fast_skipable: 
 	else:
 		main_scene.dialogue_fade_in()
 
+## Sets [member background_sprites]'s modulate property.
+func set_background_modulate_instant(newColor: Color) -> void:
+	background_sprites.set_modulate(newColor)
+
 #endregion
 
 #region UNDERSCORE
 
+## Checks how much overlays in [member _active_overlays] is persistant.
 func _check_persistant_amount_overlays() -> int:
 	var amount: int = 0  
 	
@@ -1781,15 +1848,20 @@ func _check_persistant_amount_overlays() -> int:
 	
 	return amount
 
+## Adds a active overlay to [member _active_overlays].
 func _add_active_overlay(node: Node) -> void:
 	_active_overlays.append(node)
 
+## Removes a active overlay to [member _active_overlays].
 func _remove_active_overlay(node: Node) -> void:
 	_active_overlays.erase(node)
 
+## Adds a active overlay to [member _active_overlays] using ID.
 func _remove_active_overlay_id(id: int) -> void:
 	_active_overlays.remove_at(id)
 
+## Checks if [param dict2] has the same keys in [param dict1].
+## Used for [method _create_config_dict].
 func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
 	if dict2.is_empty():
 		return true
@@ -1805,6 +1877,13 @@ func _check_same_keys_dict(dict1: Dictionary, dict2: Dictionary) -> bool:
 	
 	return true
 
+## Creates a config dictionary.
+## Used for Object Options pattern. (where a function accepts a config dictionary as argument)
+## [br]
+## [br]
+## [param default_config] is the default configuration.
+## [br]
+## [param config_arg] is the configurartion that will overwrite values from default configuration.
 func _create_config_dict(default_config: Dictionary, config_arg: Dictionary) -> Dictionary:
 	assert(_check_same_keys_dict(default_config, config_arg), "Invalid key in config argument!")
 	
@@ -1814,6 +1893,12 @@ func _create_config_dict(default_config: Dictionary, config_arg: Dictionary) -> 
 	
 	return config
 
+## Returns a configuration with [param keys] removed from [param config_arg].
+## [br]
+## [br]
+## [param config_arg] is the configuration argument.
+## [br]
+## [param keys] is the keys that will be removed.
 func _remove_config_keys(config_arg: Dictionary, keys: Array) -> Dictionary:
 	var config = config_arg.duplicate()
 	
@@ -1829,37 +1914,21 @@ func _remove_config_keys(config_arg: Dictionary, keys: Array) -> Dictionary:
 
 # OLD STUFF BELOW
 
-func change_background(index: int, group = null, hold: float = 0, fast_skipable: bool = true) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		change_background_instant(index, group)
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	change_background_instant(index, group)
-	if hold > 0:
-		await get_tree().create_timer(hold).timeout
-		main_scene.dialogue_fade_in()
-	elif hold < 0:
-		return
-	else:
-		main_scene.dialogue_fade_in()
-
-func change_background_fade(index: int, group, fadeout: float, hold_out: float, fadein: float, hold_in: float, fast_skipable: bool = true) -> void:
-	if fast_skipable and Input.is_action_pressed("fast_skip"):
-		change_background_instant(index, group)
-		return
-	
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	background_fadeout_instant(fadeout)
-	await get_tree().create_timer(fadeout + hold_out).timeout
-	change_background_instant(index, group)
-	background_fadein_instant(fadein)
-	await get_tree().create_timer(fadein + hold_in).timeout
-	main_scene.dialogue_fade_in()
-
-func change_background_transition_old(index: int, group, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
+## Changes background using transition.
+## [br]
+## [br]
+## [param index] sets the background sprite frame.
+## [br]
+## [param group] sets the background's animation, in this case, the group of sprites.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param hold] is how long before dialogue fades in.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method change_background_instant] instead.
+## @deprecated: Old method of changing background transitions. This doesn't support handling characters. Use [member change_background_transition] instead. May be removed in v1.0.0.
+func change_background_transition_old(index: int, group: String, duration: float, hold: float = 0.15, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		change_background_instant(index, group)
 		return
@@ -1869,8 +1938,7 @@ func change_background_transition_old(index: int, group, duration: float, hold: 
 	old_background.set_name("OldSprites")
 	new_background.set_name("Sprites")
 	new_background.sprite_frames = old_background.sprite_frames
-	if group is String:
-		new_background.animation = group
+	new_background.animation = group
 	
 	new_background.frame = index
 	new_background.position = old_background.position
@@ -1888,26 +1956,11 @@ func change_background_transition_old(index: int, group, duration: float, hold: 
 	
 	await tween.finished
 	old_background.queue_free()
-	await get_tree().create_timer(0.15).timeout
+	await get_tree().create_timer(hold).timeout
 	main_scene.dialogue_fade_in()
 
-func set_background_modulate_instant(newColor: Color) -> void:
-	background_sprites.set_modulate(newColor)
-
-func resize_rect_to_fullscreen(node: Control, rotation: float = 0) -> void:
-	var viewport_size = get_viewport().get_visible_rect().size
-	var original_size = node.size
-	
-	# Calculate the scaling factor needed
-	var max_dimension = max(viewport_size.x, viewport_size.y)
-	var scale_factor = (max_dimension * sqrt(2)) / min(original_size.x, original_size.y)
-	
-	node.scale = Vector2.ONE * scale_factor
-	node.pivot_offset = original_size / 2
-	node.set_anchors_preset(Control.PRESET_CENTER)
-	node.position = viewport_size / 2
-	#node.position = (viewport_size - original_size * scale_factor) / 2
-
+## Sets background modulate, including all characters's modulate.
+## @experimental: Uses a old method of applying modulate to characters. May be reworked v1.0.0.
 func set_background_modulate_instant_all(newColor: Color) -> void:
 	var characters = []
 	for k in main_scene.get_child_count():
@@ -1918,6 +1971,19 @@ func set_background_modulate_instant_all(newColor: Color) -> void:
 	for k in characters:
 		k.set_modulate(newColor)
 
+## Sets background modulate using a transition.
+## [br]
+## [br]
+## [param newColor] is what color it will set to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param hold] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] executes.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method set_background_modulate_instant] instead.
+## @experimental: May be reworked in v1.0.0.
 func set_background_modulate_transition(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_background_modulate_instant(newColor)
@@ -1939,10 +2005,19 @@ func set_background_modulate_transition(newColor: Color, duration: float, hold: 
 	else:
 		main_scene.dialogue_fade_in()
 
-# NOTE: one way to do this is creating a ColorRect and adding a CanvasItemMaterial
-# with blend mode set to multiply.
-# however, if you add this on the characters node, the node stops working.
-# maybe use overlay node?
+## Sets background's modulate, including all characters' modulate using a transition.
+## [br]
+## [br]
+## [param newColor] is the color the background's modulate will go to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param hold] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in]. 
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running
+## [method set_background_modulate_instant_all] instead.
+## @experimental: May be reworked in v1.0.0.
 func set_background_modulate_transition_all(newColor: Color, duration: float, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_background_modulate_instant_all(newColor)
@@ -1971,6 +2046,15 @@ func set_background_modulate_transition_all(newColor: Color, duration: float, ho
 	else:
 		main_scene.dialogue_fade_in()
 
+## Sets the background's modulate.
+## [br]
+## [br]
+## [param newColor] is the color the background will be set to.
+## [br]
+## [param hold] is how long before dialogue fades in.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this function, running 
+## [method set_background_modulate_instant] instead.
 func set_background_modulate(newColor: Color, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_background_modulate_instant(newColor)
@@ -1987,41 +2071,52 @@ func set_background_modulate(newColor: Color, hold: float = 0, fast_skipable: bo
 	else:
 		main_scene.dialogue_fade_in()
 
+
+## Fades the background in.
+## @deprecated: Use [method background_fade_in] instead.
+func background_fadein_old(duration: float, hold: float = 0) -> void:
+	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
+
+## Fades the background, affecting characters.
+## @deprecated: Use [method background_fade_in] instead.
+func background_fadein_all(duration: float, hold: float = 0) -> void: 
+	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
+
+## Instant version of [method background_fadein_old].
+## @deprecated: Use [method background_fade_in_instant] instead.
 func background_fadein_instant(duration: float) -> void:
 	var tween = get_tree().create_tween()
 	tween.tween_property(background_sprites, "modulate", Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration)
 
-func background_fadein_old(duration: float, hold: float = 0) -> void:
-	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
+## Fades the background out.
+## @deprecated: Use [method background_fade_out] instead.
+func background_fadeout_old(duration: float, hold: float = 0) -> void:
+	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
 
-func background_fadein_all(duration: float, hold: float = 0) -> void: 
-	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), duration, hold)
+## Fades the background out, affecting the characters.
+## @deprecated: Use [method background_fade_out] instead.
+func background_fadeout_all(duration: float, hold: float = 0) -> void:
+	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
 
+## Instant version of [method background_fadeout_old].
+## @deprecated: Use [method background_fade_out_instant] instead.
 func background_fadeout_instant(duration: float) -> void:
 	var tween = get_tree().create_tween()
 	tween.tween_property(background_sprites, "modulate", Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration)
 
-func background_fadeout_old(duration: float, hold: float = 0) -> void:
-	set_background_modulate_transition(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
-
-func background_fadeout_all(duration: float, hold: float = 0) -> void:
-	set_background_modulate_transition_all(Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 0), duration, hold)
-
-func rect_blink_old(fadein: float, hold_in: float, fadeout: float, hold_out: float) -> void:
-	main_scene.dialogue_fade_out()
-	await main_scene._animation_player.animation_finished
-	var tween = get_tree().create_tween()
-	tween.tween_property(background_color, "modulate", Color(background_sprites.modulate.r, background_sprites.modulate.g, background_sprites.modulate.b, 1), fadein)
-	await tween.finished
-	
-	if hold_out > 0:
-		await get_tree().create_timer(hold_out).timeout
-		main_scene.dialogue_fade_in()
-	elif hold_out < 0:
-		return
-	else:
-		main_scene.dialogue_fade_in()
-
+## Sets a [param rect] object's modulate.
+## [br]
+## [br]
+## [param newColor] is the color the [param rect] object will be set to.
+## [br]
+## [param hold] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## [param rect] is the rect object target.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this, 
+## running [method set_rect_modulate_instant] instead.
+## @experimental: May be renamed in v1.0.0.
 func set_rect_modulate(newColor: Color, hold: float, rect, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
@@ -2038,6 +2133,21 @@ func set_rect_modulate(newColor: Color, hold: float, rect, fast_skipable: bool =
 	else:
 		main_scene.dialogue_fade_in()
 
+## Sets a [param rect] object's modulate using a transition.
+## [br]
+## [br]
+## [param newColor] is the color the [param rect] object will be set to.
+## [br]
+## [param duration] is how long the transition will last.
+## [br]
+## [param rect] is the rect object target.
+## [br]
+## [param hold] is how long before [member main_scene]'s 
+## [method DemoScripter_VisualNovelScene.dialogue_fade_in] gets executed.
+## [br]
+## If [param fast_skipable] is true, players can fast skip this, 
+## running [method set_rect_modulate_instant] instead.
+## @experimental: May be renamed in v1.0.0.
 func set_rect_modulate_transition(newColor: Color, duration: float, rect, hold: float = 0, fast_skipable: bool = true) -> void:
 	if fast_skipable and Input.is_action_pressed("fast_skip"):
 		set_rect_modulate_instant(newColor, rect)
@@ -2057,6 +2167,14 @@ func set_rect_modulate_transition(newColor: Color, duration: float, rect, hold: 
 	else:
 		main_scene.dialogue_fade_in()
 
+## Instant version of [method set_rect_modulate].
+## [br]
+## [br]
+## [param newColor] is the color the [param rect] object will be set to.
+## [br]
+## [param rect] is the rect object target.
+## [br]
+## @experimental: May be renamed in v1.0.0.
 func set_rect_modulate_instant(newColor: Color, rect) -> void:
 	rect.set_modulate(newColor)
 
