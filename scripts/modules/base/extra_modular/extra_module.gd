@@ -1,9 +1,9 @@
-class_name DemoScripter_ExtraModular
+class_name DemoScripter_ExtraModule
 extends Node
 ## A general purpose module to be used for [DemoScripter_VisualNovelScene].
 
 ## The main [DemoScripter_VisualNovelScene] node.
-var _main_visualnovel_scene
+var _main_visualnovel_scene: DemoScripter_VisualNovelScene
 ## The main dialogue node from [member _main_visualnovel_scene].
 var _dialogue_node
 
