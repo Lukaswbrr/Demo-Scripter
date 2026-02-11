@@ -166,10 +166,19 @@ var about_to_pause: bool
 @export_group("Modulars")
 ## If true, this uses default behavior and does not use custom icon funcionality.
 var _use_default_icon_behavior: bool = true
+
 ## The custom icons created using [DemoScripter_IconModule] class.
-@export var icon_modular: Array[Node]
+## Must use [method load_icon_modules] to load.
+@export var icon_modular: Array[DemoScripter_IconModule]
 ## The extra modules created using [DemoScripter_ExtraModule] class.
-@export var extra_modular: Array[Node]
+## Must use [method load_extra_modules] to load.
+@export var extra_modular: Array[DemoScripter_ExtraModule]
+## The menu modules created using [DemoScripter_MenuModule] class.
+## Must use [method load_menu_modules] to load.
+@export var menu_modular: Array[DemoScripter_MenuModule]
+## If the [member menu_modular] has been loaded via [method load_menu_modules].
+## Used to replace the menu behavior on [method dialogue_system].
+var _loaded_menu_modules: bool
 
 #region REGEX
 
@@ -625,7 +634,8 @@ func dialogue_system() -> void: # Checks if space button is pressed, right click
 	if !dialogue_started:
 		return
 	
-	hide_darkbackground()
+	if not _loaded_menu_modules:
+		hide_darkbackground()
 	
 	if disabled: # above: functions that works even if dialogue system is disabled, below: functions that only works if dialogue system is not disabled
 		return
@@ -1160,6 +1170,32 @@ func hide_icon_modular() -> void:
 func load_extra_modules() -> void:
 	for k in extra_modular:
 		k.connect_module(self)
+
+## Loads all the [DemoScripter_MenuModule] stored in [member menu_modular].
+## Must be executed after [method load_dialogue_start] is executed.
+## [codeblock]
+## func _ready():
+##    add_dialogue_start("Hello world!")
+##    add_dialogue("Dialogue 2")
+##    add_dialogue("Dialogue 3")
+##
+##    load_dialogue_start()
+##    load_menu_modules()
+## [/codeblock]
+func load_menu_modules() -> void:
+	_loaded_menu_modules = true
+	for k in menu_modular:
+		k.connect_module(self)
+
+## Shows all the [DemoScripter_MenuModule] stored in [member menu_modular].
+func show_menu_modular() -> void:
+	for k in icon_modular:
+		k.show_icon()
+
+## Hides all the [DemoScripter_IconModule] stored in [member menu_modular].
+func hide_menu_modular() -> void:
+	for k in icon_modular:
+		k.hide_icon()
 
 #endregion
 

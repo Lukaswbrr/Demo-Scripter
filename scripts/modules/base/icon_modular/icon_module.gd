@@ -36,12 +36,12 @@ func connect_module(node: DemoScripter_VisualNovelScene) -> void:
 	_dialogue_node = node.dialogue_node
 	_connect_module(node)
 
-## Virtual method of [method _show_icon].
+## Virtual method of [method show_icon].
 ## Overwrite this function for what should happen when the icon shows.
 func _show_icon() -> void:
 	pass
 
-## Virtual method of [method _hide_icon].
+## Virtual method of [method hide_icon].
 ## Overwrite this function for what should happen when the icon hides.
 func _hide_icon() -> void:
 	pass

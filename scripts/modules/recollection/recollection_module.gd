@@ -99,7 +99,7 @@ func _connect_module(node: DemoScripter_VisualNovelScene) -> void:
 	_main_visualnovel_scene.connect("dialogue_next_page", _on_main_scene_load_dialogue_finished)
 
 ## Appends the current readed dialogue to [member recollection_readed_ids].
-func recollection_append():
+func recollection_append() -> void:
 	if use_global_recollection:
 		globals.recollection_readed_ids.append(_dialogue_node.text)
 		
@@ -118,7 +118,7 @@ func recollection_append():
 ## Deletes the oldest item in [member recollection_readed_ids].
 ## Used when [member recollection_readed_ids]'s size is equal or higher than
 ## [member max_recollection_items].
-func recollection_delete_oldest():
+func recollection_delete_oldest() -> void:
 	if max_recollecion_items == -1:
 		return
 	
@@ -135,7 +135,7 @@ func _on_main_scene_load_dialogue_finished(id: int) -> void:
 	recollection_append()
 
 ## Loads a recollection page via id.
-func recollection_load_id(id: int):
+func recollection_load_id(id: int) -> void:
 	if use_global_recollection:
 		if globals.recollection_readed_ids.is_empty():
 			return
@@ -153,11 +153,11 @@ func recollection_load_id(id: int):
 	show()
 
 ## Shows [member recollection_dialogue] and hides [member _dialogue_node].
-func show():
+func show() -> void:
 	recollection_dialogue.set_visible(true)
 	_dialogue_node.set_visible(false)
 
 ## Hides [member recollection_dialogue] and shows [member _dialogue_node].
-func hide():
+func hide() -> void:
 	recollection_dialogue.set_visible(false)
 	_dialogue_node.set_visible(true)
