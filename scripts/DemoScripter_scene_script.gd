@@ -522,6 +522,8 @@ func play_dialogue(ignore_textanimation: bool = false) -> void: # This will star
 			maxvisible = maxvisible + dialogue_dictionary[dialogue_index][1]
 		
 		paused = false
+		# BUG: when using [method SceneTree.reload_current_scene] via [method add_dialogue_special]
+		# it gives a error saying SceneTree is null. Find a workaround for this in v1.0.0.
 		tweenthing = get_tree().create_tween()
 		tweenthing.connect("finished", Callable(self, "_on_text_tween_completed"))
 		tweenthing.tween_property(dialogue_node, "visible_characters", maxvisible, dialogue_dictionary[dialogue_index][1] * default_text_speed).from(maxvisible - dialogue_dictionary[dialogue_index][1]) # old method of speed:  / 50 + 1
