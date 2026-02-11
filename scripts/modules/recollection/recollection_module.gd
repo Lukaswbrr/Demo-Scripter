@@ -1,5 +1,6 @@
 class_name DemoScripter_RecollectionModule
 extends DemoScripter_ExtraModule
+## A [DemoScripter_ExtraModule] used for reading previous readed dialogue.
 
 ## If true, hides the recollection's dialogue node.
 ## Disable this in case you're using a [DemoScripter_MenuModule].
@@ -9,7 +10,7 @@ extends DemoScripter_ExtraModule
 @export var use_global_recollection: bool
 ## Once the [member recollection_readed_ids]'s size overpasses this value, it deletes
 ## the oldest item for freeing up space in memory.
-## Set to -1 if you don't have a maximum limit.
+## Set to -1 if you don't want a maximum limit.
 @export var max_recollecion_items: int = -1
 
 ## The [RichTextLabel] dialogue node that will be used to display previous dialogue.
