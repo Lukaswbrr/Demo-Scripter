@@ -1,3 +1,4 @@
+@abstract
 class_name DemoScripter_MenuModule
 extends Node
 ## A menu module base used for when the player presses right click on [DemoScripter_VisualNovelScene].
@@ -19,10 +20,12 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	_menu_process()
 
+## Shows the menu.
 func show_menu() -> void:
 	emit_signal("show_menu_signal")
 	_show_menu()
 
+## Hides the menu.
 func hide_menu() -> void:
 	emit_signal("hide_menu_signal")
 	_hide_menu()
@@ -34,7 +37,8 @@ func _menu_process() -> void:
 func connect_module(node: DemoScripter_VisualNovelScene) -> void:
 	_main_visualnovel_scene = node
 	_dialogue_node = node.dialogue_node
-	process_mode = PROCESS_MODE_ALWAYS
+	# NOTE: maybe change to always? not sure
+	process_mode = Node.PROCESS_MODE_INHERIT
 	_connect_module(node)
 
 ## Virtual method of [method show_menu].

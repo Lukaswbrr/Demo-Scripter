@@ -1,3 +1,4 @@
+@abstract
 class_name DemoScripter_ExtraModule
 extends Node
 ## A general purpose module to be used for [DemoScripter_VisualNovelScene].

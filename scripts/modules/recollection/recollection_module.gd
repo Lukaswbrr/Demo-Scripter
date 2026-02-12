@@ -42,6 +42,9 @@ func _process(delta: float) -> void:
 	if disabled:
 		return   
 	
+	if _main_visualnovel_scene == null:
+		return
+	
 	if default_right_click_menu and !_main_visualnovel_scene.hud_node.visible:
 		return
 	
@@ -135,13 +138,14 @@ func _on_main_scene_load_dialogue_finished(id: int) -> void:
 	recollection_append()
 
 ## Loads a recollection page via id.
-func recollection_load_id(id: int) -> void:
+## Returns true if successfully loaded.
+func recollection_load_id(id: int) -> bool:
 	if use_global_recollection:
 		if globals.recollection_readed_ids.is_empty():
-			return
+			return false
 	else:
 		if recollection_readed_ids.is_empty():
-			return
+			return false
 	
 	on_recollection = true
 	_main_visualnovel_scene.pause_dialogue(true)
@@ -151,6 +155,8 @@ func recollection_load_id(id: int) -> void:
 	else:	
 		recollection_dialogue.text = recollection_readed_ids[id]
 	show()
+	
+	return true
 
 ## Shows [member recollection_dialogue] and hides [member _dialogue_node].
 func show() -> void:
