@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://t3oiau0q1wvh"]
+
+[ext_resource type="Script" uid="uid://cej7qn3a10npc" path="res://Demo-Scripter/scripts/modules/menu/tsukihime_menu/tsukihime_menu.gd" id="1_lx7da"]
+[ext_resource type="Theme" uid="uid://bs6uqv7sxrl1c" path="res://Demo-Scripter/scenes/hud styles/nscripter/menu/NScripterButton.tres" id="2_3f061"]
+
+[node name="TsukihimeMenu" type="Control" unique_id=221848299]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_lx7da")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=2010947741]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -104.0
+offset_top = -157.0
+offset_right = 104.0
+offset_bottom = 157.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="DisplayImage" type="Button" parent="VBoxContainer" unique_id=828244067]
+layout_mode = 2
+theme = ExtResource("2_3f061")
+text = "Display Image"
+
+[node name="Recollection" type="Button" parent="VBoxContainer" unique_id=587477179]
+layout_mode = 2
+theme = ExtResource("2_3f061")
+text = "Recollection"
+
+[connection signal="pressed" from="VBoxContainer/DisplayImage" to="." method="_on_display_image_pressed"]
+[connection signal="pressed" from="VBoxContainer/Recollection" to="." method="_on_recollection_pressed"]

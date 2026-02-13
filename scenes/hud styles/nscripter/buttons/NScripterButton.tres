@@ -1,10 +1,8 @@
-[gd_resource type="Theme" load_steps=9 format=3 uid="uid://hofg2r7qn1n0"]
+[gd_resource type="Theme" format=3 uid="uid://hofg2r7qn1n0"]
 
-[ext_resource type="FontFile" uid="uid://d18tkgg1nxyvk" path="res://dev/fonts/default.ttf" id="1_jr457"]
-[ext_resource type="FontFile" uid="uid://bpv4uqqbrkroq" path="res://Demo-Scripter/scenes/hud styles/nscripter/fonts/default.ttf" id="2_fq1ro"]
+[ext_resource type="FontFile" uid="uid://u2p6epuimwy4" path="res://Demo-Scripter/scenes/hud styles/nscripter/fonts/default.ttf" id="2_fq1ro"]
 
 [sub_resource type="FontVariation" id="FontVariation_pri5o"]
-base_font = ExtResource("1_jr457")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bxv3u"]
 

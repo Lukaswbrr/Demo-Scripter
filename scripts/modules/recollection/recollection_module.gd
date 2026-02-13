@@ -40,7 +40,7 @@ func _process(delta: float) -> void:
 		recollection_dialogue.set_visible(!recollection_dialogue.visible)
 	
 	if disabled:
-		return   
+		return
 	
 	if _main_visualnovel_scene == null:
 		return
@@ -50,48 +50,11 @@ func _process(delta: float) -> void:
 	
 	# If it's on recollection and player presses left or scrolls down, it goes to the previous page
 	if Input.is_action_just_pressed("ui_left") or Input.is_action_just_pressed("mouse_scroll_down"):
-		if use_global_recollection:
-			if ( globals.recollection_current_id - 1) >= 0 and on_recollection:
-				globals.recollection_current_id -= 1
-		else:
-			if ( recollection_current_id - 1) >= 0 and on_recollection:
-				recollection_current_id -= 1
-		
-		on_recollection = true
-		
-		if not recollection_dialogue.visible:
-			show()
-		
-		if use_global_recollection:
-			recollection_load_id(globals.recollection_current_id)
-		else:
-			recollection_load_id(recollection_current_id)
+		previous()
 	
 	# If it's on recollection and player presses next or scroll up, it goes to the next page
 	if Input.is_action_just_pressed("ui_right") or Input.is_action_just_pressed("mouse_scroll_up"):
-		if not on_recollection:
-			return
-		
-		if use_global_recollection:
-			if ( globals.recollection_current_id + 1 ) > globals.recollection_readed_ids.size() - 1:
-				on_recollection = false
-				_main_visualnovel_scene.pause_dialogue(false)
-				hide()
-				return
-		else:
-			if ( recollection_current_id + 1 ) > recollection_readed_ids.size() - 1:
-				on_recollection = false
-				_main_visualnovel_scene.pause_dialogue(false)
-				hide()
-				return
-		
-		if use_global_recollection:
-			globals.recollection_current_id += 1
-			recollection_load_id(globals.recollection_current_id)
-			
-		else:
-			recollection_current_id += 1
-			recollection_load_id(recollection_current_id)
+		next()
 
 ## Connects the module.
 ## It awaits for [signal DemoScripter_VisualNovelScene.load_dialogue_finished] to be emitted and
@@ -140,12 +103,8 @@ func _on_main_scene_load_dialogue_finished(id: int) -> void:
 ## Loads a recollection page via id.
 ## Returns true if successfully loaded.
 func recollection_load_id(id: int) -> bool:
-	if use_global_recollection:
-		if globals.recollection_readed_ids.is_empty():
-			return false
-	else:
-		if recollection_readed_ids.is_empty():
-			return false
+	if is_empty():
+		return false
 	
 	on_recollection = true
 	_main_visualnovel_scene.pause_dialogue(true)
@@ -154,9 +113,59 @@ func recollection_load_id(id: int) -> bool:
 		recollection_dialogue.text = globals.recollection_readed_ids[id]
 	else:	
 		recollection_dialogue.text = recollection_readed_ids[id]
+	
 	show()
 	
 	return true
+
+func is_empty() -> bool:
+	if use_global_recollection:
+		return globals.recollection_readed_ids.is_empty()
+	
+	return recollection_readed_ids.is_empty()
+
+func previous() -> void:	
+	if use_global_recollection:
+		if ( globals.recollection_current_id - 1) >= 0 and on_recollection:
+			globals.recollection_current_id -= 1
+	else:
+		if ( recollection_current_id - 1) >= 0 and on_recollection:
+			recollection_current_id -= 1
+	
+	on_recollection = true
+	
+	if not recollection_dialogue.visible:
+		show()
+	
+	if use_global_recollection:
+		recollection_load_id(globals.recollection_current_id)
+	else:
+		recollection_load_id(recollection_current_id)
+
+func next() -> void:
+	if not on_recollection:
+		return
+	
+	if use_global_recollection:
+		if ( globals.recollection_current_id + 1 ) > globals.recollection_readed_ids.size() - 1:
+			on_recollection = false
+			_main_visualnovel_scene.pause_dialogue(false)
+			hide()
+			return
+	else:
+		if ( recollection_current_id + 1 ) > recollection_readed_ids.size() - 1:
+			on_recollection = false
+			_main_visualnovel_scene.pause_dialogue(false)
+			hide()
+			return
+	
+	if use_global_recollection:
+		globals.recollection_current_id += 1
+		recollection_load_id(globals.recollection_current_id)
+		
+	else:
+		recollection_current_id += 1
+		recollection_load_id(recollection_current_id)
 
 ## Shows [member recollection_dialogue] and hides [member _dialogue_node].
 func show() -> void:
