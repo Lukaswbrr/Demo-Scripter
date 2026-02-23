@@ -53,12 +53,6 @@ In the example above shows a very basic way of adding dialogue to a visual novel
 
 However, there are more functions related to dialogue, for example, creating dialogue on a different page, a different set, running functions, etc.
 
->[!NOTE] 
->Sets are like different groups of dialogue.
->By default, "start" is the main set of the dialogue.
->Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
->Like "start" > "choice1" or "start" > "choice2".
-
 >[!NOTE]
 >Always remember to connect the end dialogue signal scene to the script!
 >Otherwise, the dialogue wouldn't end!
@@ -173,7 +167,6 @@ Once you have a character done, in this case Arcueid, create a Node2D named Char
 
 >[!NOTE]
 >You can add a control named Background with a ColorRect on it, if you want. It's just for a simple color background. (which is not used in the example)
-
 
 Then, instantiate arcueid scene on Characters node.
 
@@ -676,6 +669,163 @@ func _ready() -> void:
 ![overlay_example_10](./images/overlay_example_10.png)
 ![overlay_example_11](./images/overlay_example_11.png)
 ![overlay_example_12](./images/overlay_example_12.png)
+
+## Multiple Sets
+
+>[!NOTE] 
+>Sets are like different groups of dialogue.
+>By default, "start" is the main set of the dialogue.
+>Sets can go to different sets, for example, you can use a button handler which shows different options that goes to a different set!
+>Like "start" > "choice1" or "start" > "choice2".
+
+To add a different set other than start by default, you specify the second argument in add_dialogue_start. By default, the value of second argument is "start".
+
+```gdscript
+add_dialogue_start("Dialogue test", "NAME OF SET")
+```
+
+For example:
+
+This script has three sets: "start", "middle" and "end".
+
+```gdscript
+add_dialogue_start("first dialogue of start")
+add_dialogue("second dialogue of start")
+add_dialogue("third dialogue of start")
+
+add_dialogue_start("first dialogue of middle")
+add_dialogue("second dialogue of middle")
+add_dialogue("second dialogue of middle")
+
+
+add_dialogue_start("first dialogue of end")
+add_dialogue("second dialogue of end")
+add_dialogue("second dialogue of end")
+```
+
+Keep in mind that "start", once finished, cannot reach "middle" and "middle" cannot reach "end".
+
+The reason why is because there is nothing allowing any of theses dialogues sets to go to another. (like buttons, auto condition, etc)
+
+### Simple Goto Buttons
+
+This example uses DemoScripter_ButtonHandler, a module for creating buttons to be used alongside DemoScripter. It's a way to deal with choices in a Visual Novel scene!
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+@onready var buttons: DemoScripter_ButtonHandler = $Text/DemoScripter_ButtonHandler
+
+func _ready() -> void:
+	add_dialogue_start("button handler example!")
+	add_dialogue("this will include a few different dialogue sets, like choice1, choice2 and choice3")
+	add_dialogue("by default, start is the default dialogue set. (and its currently on start, too.)")
+	add_dialogue("choose your option")
+	add_dialogue_special(buttons.create_button_goto_set, ["Choice 1", "choice1", "choices"])
+	add_dialogue_special(buttons.create_button_goto_set, ["Choice 2", "choice2"])
+	add_dialogue_special(buttons.create_button_goto_set, ["Choice 3", "choice3"])
+	add_dialogue_special(buttons.button_set_appear)
+	
+	add_dialogue_start("you selected choice 1!", "choice1")
+	add_dialogue("this is a different set, named choice1!")
+	add_dialogue("keep in mind that the dialogue for choice2 and choice3 are not the same as this one.")
+	add_dialogue("cool...")
+	add_dialogue("now, reload the scene manually")
+	
+	add_dialogue_start("you selected choice 2!", "choice2")
+	add_dialogue("this is a different set, named choice2!")
+	add_dialogue("keep in mind that the dialogue for choice1 and choice3 are not the same as this one.")
+	add_dialogue("tsukihime 2 will be released tomorrow")
+	add_dialogue("hopefully...")
+	add_dialogue("............please....")
+	add_dialogue("anyways, reload the scene manually")
+	
+	add_dialogue_start("you selected choice 3!", "choice3")
+	add_dialogue("this is a different set, named choice3")
+	add_dialogue("keep in mind that the dialogue for choice1 and choice2 are not the same as this one.")
+	add_dialogue("uh....")
+	add_dialogue("cheese burger pineapple pie?????")
+	add_dialogue("im not sure what to say now")
+	add_dialogue("alright, reload the sce---- surprise!")
+	add_dialogue("you can also have choices in different sets, too!")
+	add_dialogue_special(buttons.create_button_goto_set, ["Is that so?", "extra1", "extras"])
+	add_dialogue_special(buttons.create_button_goto_set, ["Wow!", "extra2", "extras"])
+	add_dialogue_special(buttons.create_button_goto_set, ["That's... obvious?", "extra3", "extras"])
+	add_dialogue_special(buttons.create_button_goto_set, ["It doesn't matter.", "extra4", "extras"])
+	add_dialogue_special(buttons.button_set_appear)
+	
+	add_dialogue_start("yep!", "extra1")
+	add_dialogue_continue("it's something very cool, right?")
+	add_dialogue("it does allow you to make some complex branching depending on choices!")
+	add_dialogue("but, that's about it for this set!")
+	add_dialogue("reset the scene manually")
+	
+	add_dialogue_start("you surprised, right?", "extra2")
+	add_dialogue("yea, i'd be surprised, too!")
+	add_dialogue("...but hey, since you liked the surprise, want me to talk about something?")
+	add_dialogue_special(buttons.create_button_goto_set, ["Sure!", "end1", "end"])
+	add_dialogue_special(buttons.create_button_goto_set, ["No, thanks.", "end2", "end"])
+	add_dialogue_special(buttons.create_button_goto_set, ["Unlimited Blade Works.", "end3", "end"])
+	add_dialogue_special(buttons.button_set_appear)
+	
+	add_dialogue_start("alright, then!", "end1")
+	add_dialogue("i'll tell you about something!")
+	add_dialogue("it's for a visual novel that i'm currently making for DemoScripter!")
+	add_dialogue("the name is ■■■■'■ ■■■■■■■■■")
+	add_dialogue("...wow, i did not get it at all")
+	add_dialogue("that's what you're thinking, right?")
+	add_dialogue("well, it's currently private for now")
+	add_dialogue("to be more precise, it's a private alpha that only people who get invited can access")
+	
+	add_dialogue_next("i apologize for not publicly saying the name of the project")
+	add_dialogue("but one of the reasons that i dont want to public announce it yet is to prevent early exceptations and stress")
+	add_dialogue("you might think that i'm exaggerating that people will already be fans of the visual novel")
+	add_dialogue("but well, it's not a visual novel from a original IP.")
+	add_dialogue("which means, it's a fanfiction!")
+	add_dialogue("and well, i hate how currently DemoScripter is.")
+	add_dialogue("only after I started working on the project with a scale of 10 chapters per route (5 routes), i realized how time consuming just using DemoScripter is right now.")
+	add_dialogue("the project also uses CSV for translations for portuguese (br) and english and boy, it did show how flawed this current design is")
+	add_dialogue("and i cant really blame myself much, the foundations of DemoScripter is from september 2023, where I was still learning Godot Engine in January 2023.")
+	add_dialogue("once the public alpha chapter 1 of the visual novel project is released, I will take a week break, see how people thought of the visual novel, study software architecture and Refactoring.Guru to refactor DemoScripter for v1.0.0")
+	
+	add_dialogue_next("and damn, im not really sure how would i deal in case theres like, tons of fans and people interested to help me on the visual novel during this refactor phase")
+	add_dialogue("its also my first time ever doing something like this, so i'd like help on how can i manage it in the future, like how to handle the project while refactoring DemoScripter, etc")
+	add_dialogue("by the way, sorry for the long talk")
+	add_dialogue("it was meant to show a example using buttons, right?")
+	add_dialogue("yeah, it got way out of the original path")
+	add_dialogue("but anyways, that's about it")
+	add_dialogue("and in case you do know how i can handle a project like that, please contact me")
+	add_dialogue("so now, reset the scene manually")
+	
+	add_dialogue_start("you really don't want to?", "end2")
+	add_dialogue("thats a shame then")
+	add_dialogue("if a person refuses, that means the person refused")
+	add_dialogue("...sorry, i just think tautologies are funny")
+	add_dialogue("anyways, reset the scene manually")
+	
+	add_dialogue_start("I am the bone of my sword.", "end3")
+	add_dialogue("Steel is my body and fire is my blood.")
+	add_dialogue("I have created over a thousand blades.")
+	add_dialogue("Unknown to Death,")
+	add_dialogue("Nor known to Life.")
+	add_dialogue("Have withstood pain to create many weapons.")
+	add_dialogue("Yet, those hands will never hold anything.")
+	add_dialogue("So as I pray...")
+	add_dialogue("\n\n\n[center]---Unlimited Blade Works[/center]")
+	
+	add_dialogue_start("yeah, that's something you'd expect by now", "extra3")
+	add_dialogue("sorry, i thought you'd be surprised")
+	add_dialogue("but since that didn't surprise you, it means you're a smart person!")
+	add_dialogue("now, thats about it for this set")
+	add_dialogue("reset the scene manually")
+	
+	add_dialogue_start("It doesn't matter.", "extra4")
+	for k in 125:
+		add_dialogue_continue("It doesn't matter.")
+	
+	load_dialogue_start()
+```
 
 # Adding backgrounds for the framework
 
