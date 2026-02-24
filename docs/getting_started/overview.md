@@ -711,13 +711,15 @@ The reason why is because there is nothing allowing any of theses dialogues sets
 
 This example uses DemoScripter_ButtonHandler, a module for creating buttons to be used alongside DemoScripter. It's a way to deal with choices in a Visual Novel scene!
 
+In the story script example, it has some extra information about DemoScripter from me!
+
 ![alt text](./images/simplegotobuttons_example_step_1.png)
 
 ![alt text](./images/simplegotobuttons_example_step_2.png)
 
 ![alt text](./images/simplegotobuttons_example_step_3.png)
 
-Before running this script, add DemoScripter_ButtonHandler in your HUD node.
+Before running this script, add DemoScripter_ButtonHandler in your HUD node. (which in this case it's named Text but feel free to name it anything you like. Keep in mind to update the DemoScripter_ButtonHandler export variable from this script to correctly point to the DemoScripter_ButtonHandler node)
 
 ![alt text](./images/simplegotobuttons_example_step_4.png)
 
@@ -836,6 +838,17 @@ func _ready() -> void:
 	
 	load_dialogue_start()
 ```
+
+- create_button_goto_set - creates a button that goes to a different set.
+- - First argument: The name of the button
+- - Second argument: What dialogue it will goto once clicked
+- - Third argument: The set of where this button belongs.
+- - - A button set is the list of buttons that will be displayed when button_set_appear is executed. If the third argument is not specified, it uses the last time the third argument was executed to create set by default. The same goes to button_set_appear, too.
+- button_set_appear - makes a set of button appears.
+- - First argument: The name of the button set. If not specified, uses the last time third argument was specified in create_button_goto_set
+
+
+
 
 # Adding backgrounds for the framework
 
