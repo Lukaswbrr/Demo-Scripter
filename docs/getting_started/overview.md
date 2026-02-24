@@ -711,6 +711,16 @@ The reason why is because there is nothing allowing any of theses dialogues sets
 
 This example uses DemoScripter_ButtonHandler, a module for creating buttons to be used alongside DemoScripter. It's a way to deal with choices in a Visual Novel scene!
 
+![alt text](./images/simplegotobuttons_example_step_1.png)
+
+![alt text](./images/simplegotobuttons_example_step_2.png)
+
+![alt text](./images/simplegotobuttons_example_step_3.png)
+
+Before running this script, add DemoScripter_ButtonHandler in your HUD node.
+
+![alt text](./images/simplegotobuttons_example_step_4.png)
+
 ```gdscript
 extends DemoScripter_VisualNovelScene
 
