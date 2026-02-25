@@ -723,6 +723,10 @@ Before running this script, add DemoScripter_ButtonHandler in your HUD node. (wh
 
 ![alt text](./images/simplegotobuttons_example_step_4.png)
 
+>[!note]
+>When creating the buttons, don't use add_dialogue_special! Just use buttons.create_button_goto_set.
+>If you use add_dialogue_special, it prevents you to get the button using buttons.get_button()! (which prevents to connect pressed signal)
+
 ```gdscript
 extends DemoScripter_VisualNovelScene
 
@@ -734,10 +738,10 @@ func _ready() -> void:
 	add_dialogue("this will include a few different dialogue sets, like choice1, choice2 and choice3")
 	add_dialogue("by default, start is the default dialogue set. (and its currently on start, too.)")
 	add_dialogue("choose your option")
-	add_dialogue_special(buttons.create_button_goto_set, ["Choice 1", "choice1", "choices"])
-	add_dialogue_special(buttons.create_button_goto_set, ["Choice 2", "choice2"])
-	add_dialogue_special(buttons.create_button_goto_set, ["Choice 3", "choice3"])
-	add_dialogue_special(buttons.button_set_appear)
+	buttons.create_button_goto_set("Choice 1", "choice1", "choices")
+	buttons.create_button_goto_set("Choice 2", "choice2")
+	buttons.create_button_goto_set("Choice 3", "choice3")
+	add_dialogue_special(buttons.button_set_appear, ["choices"])
 	
 	add_dialogue_start("you selected choice 1!", "choice1")
 	add_dialogue("this is a different set, named choice1!")
@@ -761,11 +765,11 @@ func _ready() -> void:
 	add_dialogue("im not sure what to say now")
 	add_dialogue("alright, reload the sce---- surprise!")
 	add_dialogue("you can also have choices in different sets, too!")
-	add_dialogue_special(buttons.create_button_goto_set, ["Is that so?", "extra1", "extras"])
-	add_dialogue_special(buttons.create_button_goto_set, ["Wow!", "extra2", "extras"])
-	add_dialogue_special(buttons.create_button_goto_set, ["That's... obvious?", "extra3", "extras"])
-	add_dialogue_special(buttons.create_button_goto_set, ["It doesn't matter.", "extra4", "extras"])
-	add_dialogue_special(buttons.button_set_appear)
+	buttons.create_button_goto_set("Is that so?", "extra1", "extras")
+	buttons.create_button_goto_set("Wow!", "extra2", "extras")
+	buttons.create_button_goto_set("That's... obvious?", "extra3", "extras")
+	buttons.create_button_goto_set("It doesn't matter.", "extra4", "extras")
+	add_dialogue_special(buttons.button_set_appear, ["extras"])
 	
 	add_dialogue_start("yep!", "extra1")
 	add_dialogue_continue("it's something very cool, right?")
@@ -776,10 +780,10 @@ func _ready() -> void:
 	add_dialogue_start("you surprised, right?", "extra2")
 	add_dialogue("yea, i'd be surprised, too!")
 	add_dialogue("...but hey, since you liked the surprise, want me to talk about something?")
-	add_dialogue_special(buttons.create_button_goto_set, ["Sure!", "end1", "end"])
-	add_dialogue_special(buttons.create_button_goto_set, ["No, thanks.", "end2", "end"])
-	add_dialogue_special(buttons.create_button_goto_set, ["Unlimited Blade Works.", "end3", "end"])
-	add_dialogue_special(buttons.button_set_appear)
+	buttons.create_button_goto_set("Sure!", "end1", "end")
+	buttons.create_button_goto_set("No, thanks.", "end2", "end")
+	buttons.create_button_goto_set("Unlimited Blade Works.", "end3", "end")
+	add_dialogue_special(buttons.button_set_appear, ["end"])
 	
 	add_dialogue_start("alright, then!", "end1")
 	add_dialogue("i'll tell you about something!")
@@ -847,8 +851,219 @@ func _ready() -> void:
 - button_set_appear - makes a set of button appears.
 - - First argument: The name of the button set. If not specified, uses the last time third argument was specified in create_button_goto_set
 
+### Conditional Buttons
+
+>[!NOTE]
+>Check Simple Goto buttons section for setting up DemoScripteR_ButtonHandler on your visual novel scene
+
+This is a example using DemoScripter_ButtonHandler for conditional buttons. You can also refer this as conditional choices, too.
+
+This also contains a example of end_dialogue, where you can go to a different set once a dialogue set is finished! (includes conditional, too)
+
+Also includes a export variable named can_choice3_show where an third choice only appears if this variable is true.
+
+![alt text](./images/conditionalbutton_example_1.png)
+![alt text](./images/conditionalbutton_example_2.png)
+![alt text](./images/conditionalbutton_example_3.png)
+![alt text](./images/conditionalbutton_example_4.png)
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+@onready var buttons: DemoScripter_ButtonHandler = $Text/DemoScripter_ButtonHandler
+
+@export var can_choice3_show: bool
+
+var choice1_pressed: bool
+var choice2_pressed: bool
+var choice3_pressed: bool
+
+func _ready() -> void:
+	add_dialogue_start("button handler with conditional buttons example!")
+	add_dialogue("conditions buttons are good when you want for buttons only to appear if, for example, a variable has reachd a certain value")
+	add_dialogue("for example, if you finish a route's true ending, you may want to make a button appear in the last choice to unlock the good ending!")
+	add_dialogue("so heres a example")
+	add_dialogue("choice 3 only appears if can_choice3_show is true")
+	buttons.create_button_goto_set("Choice 1", "choice1", "choices")
+	buttons.create_button_goto_set("Choice 2", "choice2")
+	buttons.create_button_goto_set_condition("Choice 3", 
+		func():
+			return can_choice3_show, 
+		"choice3")
+	add_dialogue_special(buttons.button_set_appear)
+	
+	buttons.get_button("Choice 1", "choices").pressed.connect(func(): choice1_pressed = true)
+	buttons.get_button("Choice 2", "choices").pressed.connect(func(): choice2_pressed = true)
+	buttons.get_button("Choice 3", "choices").pressed.connect(func(): choice3_pressed = true)
+	
+	add_dialogue_start("you selected choice 1!", "choice1")
+	add_dialogue("uh... not surprising since like, theres already a example of this in the simple goto button thing")
+	add_dialogue("and as you noticed the code line above (assuming you're on the script editor), you can get the buttons created and even connect signals to it, too!")
+	add_dialogue("sigh.... i really hope to refactor this so its possible to do it via the addon menu.....")
+	
+	add_dialogue_start("you selected choice 2!", "choice2")
+	add_dialogue("yeah uhh, you selected choice 2")
+	add_dialogue("not sure what else to say")
+	
+	add_dialogue_start("you selected the secret choice 3!", "choice3")
+	add_dialogue("which is only possible if you set can_choice3_appear to true!")
+	add_dialogue("its useful if you want certain buttons to appear only if a condition is true, like meeting a character before, etc")
+	add_dialogue("moving on...")
+	
+	add_dialogue_start("you can also use the end dialogue signal to make it go to a different set, too!", "middle")
+	add_dialogue("right now, it's curretly on a set named middle!")
+	add_dialogue("cool, right....?")
+	add_dialogue("....man, i really need to refactor this system.....")
+	
+	add_dialogue_next("anyways")
+	add_dialogue("you can also use the conditional function to alter variables, too!")
+	add_dialogue("keep in mind that you're still on middle dialogue set")
+	add_dialogue("this is just the second page")
+	
+	add_dialogue_start("before the middle set, you selected Choice 1!", "end1")
+	add_dialogue("hhhhhh")
+	add_dialogue("pretty cool, I suppose")
+	add_dialogue("and right now, you're on set end1!")
+	add_dialogue("literally ending 1")
+	add_dialogue("anyways, reset the scene manually")
+	
+	add_dialogue_start("before the middle set, you selected Choice 2!", "end2")
+	add_dialogue("uh")
+	add_dialogue("btw, you're on set end2!")
+	add_dialogue("literally ending 2")
+	add_dialogue("probably could refer ending 1 as normal and ending 2 as good ending???")
+	add_dialogue("not sure")
+	add_dialogue("anyways, reset the scene manually")
+	
+	add_dialogue_start("before the middle set, you selected the secret Choice 3!", "end3")
+	add_dialogue("well, the reason why i refered to it as secret is because it only shows if you set the can_choice3_show to true")
+	add_dialogue("nice, i guess...????")
+	add_dialogue("you could refer this as the secret ending!")
+	add_dialogue("or uh, alternative ending that appears once you finish a route or something idk")
+	
+	
+	load_dialogue_start()
 
 
+func _on_end_dialogue_signal() -> void:
+	match dialogue_current_set:
+		"choice1":
+			load_dialogue_start(1, "middle", false, true, true)
+		"choice2":
+			load_dialogue_start(1, "middle", false, true, true)
+		"choice3":
+			load_dialogue_start(1, "middle", false, true, true)
+		"middle":
+			if choice1_pressed:
+				load_dialogue_start(1, "end1", false, true, true)
+			
+			if choice2_pressed:
+				load_dialogue_start(1, "end2", false, true, true)
+			
+			if choice3_pressed:
+				load_dialogue_start(1, "end3", false, true, true)
+		_:
+			end_dialogue()
+```
+
+- buttons.create_button_goto_set_condition() - creates a goto set button that only shows up if the lambda function of second argument returns true
+- - First argument: name of the button
+- - Second argument: the lambda function
+- - Third argument: the dialogue set the button goes to
+- buttons.get_button() - returns the button node.
+- - First argument: name of the button
+- - by using this function, you can connect signals to the button, like pressed! (and use lambda functions, too)
+- - - buttons.get_button("Choice 1", "choices").pressed.connect(func(): choice1_pressed = true)
+
+### Custom Button Functions
+
+This example uses DemoScripter_ButtonHandler, showcasing custom button functionality when pressed.
+
+![alt text](./images/custombuttons_example_1.png)
+![alt text](./images/custombuttons_example_2.png)
+
+```gdscript
+extends DemoScripter_VisualNovelScene
+
+@onready var background: DemoScripter_BackgroundHandler = $Background
+@onready var buttons: DemoScripter_ButtonHandler = $Text/DemoScripter_ButtonHandler
+
+@export var conditional_goto_press: bool
+
+var toggle_choice2: bool
+
+func _ready() -> void:
+	add_dialogue_start("buttons with custom functionality test!")
+	add_dialogue("when creating buttons, you can pass lambda functions when the button has been pressed!")
+	add_dialogue("you can still make the buttons go to a different set, too!")
+	add_dialogue("heres a few examples")
+	buttons.create_button("Print \"Hello World!\" to the console", func():
+		print("Hello World!")
+	, "group1")
+	buttons.create_button("Toggle dialogue node between blue and green", func():
+		if not toggle_choice2:
+			dialogue_node.set_modulate(Color.BLUE)
+		else:
+			dialogue_node.set_modulate(Color.GREEN)
+		
+		toggle_choice2 = !toggle_choice2 
+	)
+	buttons.create_button("Goto set choice1, change Dialogue's color to red", func():
+		buttons.goto_set("choice1", "group1")
+		dialogue_node.set_modulate(Color.RED)
+	)
+	buttons.create_button("Goto set choice2", func():
+		buttons.goto_set("choice2", "group1")
+	)
+	buttons.create_button("Conditional goto press button", func():
+		if conditional_goto_press:
+			buttons.goto_set("conditional1", "group1")
+		else:
+			buttons.goto_set("conditional2", "group1")
+	)
+	buttons.create_button("Restart scene", func():
+		get_tree().reload_current_scene())
+	add_dialogue_special(buttons.button_set_appear)
+	
+	add_dialogue_start("choice1 has been selected!", "choice1")
+	add_dialogue("as you can see, the dialogue's node color has been changed to red!")
+	add_dialogue("uh, cool i suppose")
+	add_dialogue("reload the scene manually................")
+	
+	add_dialogue_start("choice2 has been selected!", "choice2")
+	add_dialogue("as you can (not) see, it just acted as a normal create_button_goto_set")
+	add_dialogue("uh, seems not useful in this case tbh")
+	add_dialogue("restart scene manually.......")
+	
+	add_dialogue_start("you selected condition1 set!", "conditional1")
+	add_dialogue("the reason why it's condition1 is because conditional_goto_press was set to true!")
+	add_dialogue("this allows you to create buttons that can go to multiple sets depending on conditions")
+	add_dialogue("yeah, cool!")
+	add_dialogue("i suppose")
+	add_dialogue("hmm...")
+	add_dialogue("did you know dante from devil may cry series will appear in yumizuka route in tsukihime remake?")
+	add_dialogue("how to i know about that, you may be asking?")
+	add_dialogue("it was stated in cyfow")
+	add_dialogue("trust")
+	add_dialogue("anyways, reload scene manually")
+	
+	add_dialogue_start("you selected condition2 set!", "conditional2")
+	add_dialogue("the reason why it's condition2 is because conditional_goto_press was set to false!")
+	add_dialogue("hmm.........")
+	add_dialogue("alright, i'm not really sure what else to day, tbh")
+	add_dialogue("scene reload manual")
+	
+	load_dialogue_start()
+
+
+func _on_end_dialogue_signal() -> void:
+	end_dialogue()
+```
+
+- buttons.create_button()
+- - First argument: name of the button
+- - Second argument: the lambda function for the button
 
 # Adding backgrounds for the framework
 
