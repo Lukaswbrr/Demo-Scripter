@@ -50,7 +50,7 @@ func button_set_appear(set_id: String = current_create_set_id, wait_signal = tru
 		main_scene.pause_dialogue(true)
 		container.set_visible(true)
 
-func create_button(buttonname, function = null, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button(buttonname: String, function: Callable = func(): return, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -95,7 +95,8 @@ func create_button_condition(buttonname, condition: Callable, function = null, s
 	
 	#print(current_set)
 	#print(buttonname)
-
+## TODO: add verification if a set actually exists.
+## work on this feature in v1.0.0.
 func create_button_goto_set(buttonname: String, set: String, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
