@@ -1,5 +1,5 @@
-extends Node
 class_name DemoScripter_BackgroundHandler
+extends Node
 ## Module for handling backgrounds.
 ##
 ## Module for handling backgrounds to be used with [DemoScripter_VisualNovelScene].
