@@ -1,5 +1,8 @@
 class_name DemoScripter_ButtonHandler
 extends Control
+## Module for handling buttons.
+##
+## Module for handling buttons to be used with [DemoScripter_VisualNovelScene].
 
 signal button_set_appeared(set:int)
 
