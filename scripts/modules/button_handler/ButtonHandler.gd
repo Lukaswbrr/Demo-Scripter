@@ -4,31 +4,53 @@ extends Control
 ##
 ## Module for handling buttons to be used with [DemoScripter_VisualNovelScene].
 
-signal button_set_appeared(set:int)
+## Emits when [method button_set_appear] has been triggered.
+signal button_set_appeared(set_id: int)
 
-@export var main_scene: Node
+## The main [DemoScripter_VisualNovelScene] node.
+## Must be set, otherwise will throw a assert error.
+@export var main_scene: DemoScripter_VisualNovelScene
 
-## Custom Theme skin to all buttons created by this button handler by default
+## Custom theme skin to all buttons created by this button handler by default.
 @export var buttons_skin: Theme
 
+## How much X position offset will the buttons have inside a button group.
 @export var button_container_position_x_offset: int = 10
+## How much Y position offset will the buttons have inside a button group.
 @export var button_container_position_y_offset: int = 25
 
+## The current set ID used for [method button_container_create]
 var current_create_set_id: String
 
 func _ready() -> void:
 	assert(type_string(typeof(main_scene)) == "Object", "The main scene variable hasn't been defined!")
 
-func button_container_create(set_id: String, custom_position = null) -> void:
+
+# TODO: custom position parameter is not used.
+# Rework on v1.0.0.
+## Creates a button group.
+## [br]
+## [br]
+## [param set_id] is the name of the button group. By default, uses the 
+## [member current_create_set_id] target.
+func button_container_create(set_id: String, _custom_position = null) -> void:
 	var container = VBoxContainer.new()
 	var dialogue_text_node = get_node("../Dialogue")
 	container.name = set_id
 	container.set_position(Vector2(dialogue_text_node.position.x + button_container_position_x_offset, dialogue_text_node.position.y + dialogue_text_node.size.y + button_container_position_y_offset))
 	container.visible = false
 	add_child(container)
-	#print("created set")
 
-func button_set_appear(set_id: String = current_create_set_id, wait_signal = true) -> void:
+## Makes a button group appear.
+## [br]
+## [br]
+## [param set_id] is the button group created by [method button_container_create] that will appear.
+## By default, it uses the [member current_create_set_id] target.
+## [br]
+## If [param wait_signal] is true, it awaits for 
+## [signal DemoScripter_VisualNovelScene.text_animation_finished] from [member main_scene] to be 
+## emitted.
+func button_set_appear(set_id: String = current_create_set_id, wait_signal: bool = true) -> void:
 	emit_signal("button_set_appeared", set_id)
 	main_scene.fastskip_pause()
 	update_container_pos(set_id)
@@ -53,7 +75,18 @@ func button_set_appear(set_id: String = current_create_set_id, wait_signal = tru
 		main_scene.pause_dialogue(true)
 		container.set_visible(true)
 
-func create_button(buttonname: String, function: Callable = func(): return, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+## Creates a button.
+## [br]
+## [br]
+## [param buttonname] is the name of the button.
+## [br]
+## Once the button has been clicked, [param function] will execute.
+## [br]
+## [param set_id] is what button group this button belongs. By default, uses the 
+## [member current_create_set_id] target.
+## [br]
+## The [Theme] this button will have. By default, uses the [member buttons_skin] theme.
+func create_button(buttonname: String, function: Callable = func(): return, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -64,7 +97,7 @@ func create_button(buttonname: String, function: Callable = func(): return, set_
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -74,11 +107,23 @@ func create_button(buttonname: String, function: Callable = func(): return, set_
 	#print(current_set)
 	#print(buttonname)
 
-func create_button_condition(buttonname, condition: Callable, function = null, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+## Creates a button that only appears if [param condition] returns true.
+## [br]
+## [br]
+## [param buttonname] is the name of the button.
+## [br]
+## If [param condition] returns true, the button appears.
+## [br]
+## Once the button has been clicked, [param function] will execute.
+## [br]
+## [param set_id] is what button group this button belongs. By default, uses the 
+## [member current_create_set_id] target.
+## [br]
+## [param button_theme] sets the [Theme] this button will have. By default, uses the [member buttons_skin] theme.
+func create_button_condition(buttonname: String, condition: Callable, function: Callable = func(): return, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
-		
 	
 	var current_set = get_container(set_id)
 	
@@ -86,7 +131,7 @@ func create_button_condition(buttonname, condition: Callable, function = null, s
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -100,7 +145,7 @@ func create_button_condition(buttonname, condition: Callable, function = null, s
 	#print(buttonname)
 ## TODO: add verification if a set actually exists.
 ## work on this feature in v1.0.0.
-func create_button_goto_set(buttonname: String, set: String, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_set(buttonname: String, set: String, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -112,7 +157,7 @@ func create_button_goto_set(buttonname: String, set: String, set_id: String = cu
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -120,7 +165,7 @@ func create_button_goto_set(buttonname: String, set: String, set_id: String = cu
 		goto_set(set, set_id)
 		)
 
-func create_button_goto_set_condition(buttonname: String, condition: Callable, set: String, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_set_condition(buttonname: String, condition: Callable, set: String, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 	
@@ -130,7 +175,7 @@ func create_button_goto_set_condition(buttonname: String, condition: Callable, s
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -141,7 +186,7 @@ func create_button_goto_set_condition(buttonname: String, condition: Callable, s
 		goto_set(set, set_id)
 		)
 
-func create_button_goto_id(buttonname: String, id: int = 1, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_id(buttonname: String, id: int = 1, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -153,7 +198,7 @@ func create_button_goto_id(buttonname: String, id: int = 1, set_id: String = cur
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -161,7 +206,7 @@ func create_button_goto_id(buttonname: String, id: int = 1, set_id: String = cur
 		goto_id(id, set_id)
 		)
 
-func create_button_goto_id_condition(buttonname: String, condition: Callable, id: int = 1, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_id_condition(buttonname: String, condition: Callable, id: int = 1, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -173,7 +218,7 @@ func create_button_goto_id_condition(buttonname: String, condition: Callable, id
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -184,7 +229,7 @@ func create_button_goto_id_condition(buttonname: String, condition: Callable, id
 		goto_id(id, set_id)
 		)
 
-func create_button_goto_scene_condition(buttonname: String, condition: Callable, scene, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_scene_condition(buttonname: String, condition: Callable, scene, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -196,7 +241,7 @@ func create_button_goto_scene_condition(buttonname: String, condition: Callable,
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -207,7 +252,7 @@ func create_button_goto_scene_condition(buttonname: String, condition: Callable,
 		get_tree().change_scene_to_file(scene)
 		)
 
-func create_button_goto_scene(buttonname: String, scene, set_id: String = current_create_set_id, theme: Theme = buttons_skin) -> void:
+func create_button_goto_scene(buttonname: String, scene, set_id: String = current_create_set_id, button_theme: Theme = buttons_skin) -> void:
 	if !get_container(set_id): # create container if it doesnt exist
 		button_container_create(set_id)
 		_set_current_set_id(set_id)
@@ -218,7 +263,7 @@ func create_button_goto_scene(buttonname: String, scene, set_id: String = curren
 	var button = Button.new()
 	button.name = buttonname
 	button.text = buttonname
-	button.theme = theme
+	button.theme = button_theme
 	button.alignment = 0
 	current_set.add_child(button)
 	
@@ -226,17 +271,18 @@ func create_button_goto_scene(buttonname: String, scene, set_id: String = curren
 		get_tree().change_scene_to_file(scene)
 		)
 
-func goto_set(set: String, set_button: String) -> void:
+func goto_set(dialogue_set: String, set_button: String) -> void:
 	var set_button_found = get_container(set_button)
 	main_scene.fastskip_unpause()
-	main_scene.load_dialogue_set(set, false)
+	main_scene.load_dialogue_set(dialogue_set, false)
 	main_scene.pause_dialogue(!main_scene.forced_paused)
 	set_button_found.visible = !set_button_found.visible
 
-func goto_id(id: int, set_button: String) -> void:
+## @deprecated: Doesn't seem useful. Will be reworked in v1.0.0.
+func goto_id(dialogue_id: int, set_button: String) -> void:
 	var set_button_found = get_container(set_button)
 	main_scene.fastskip_unpause()
-	main_scene.load_dialogue_start(id, 1, false, false, true)
+	main_scene.load_dialogue_start(dialogue_id, "start", false, false, true)
 	main_scene.pause_dialogue(!main_scene.forced_paused)
 	set_button_found.visible = !set_button_found.visible
 
